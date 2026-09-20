@@ -1,0 +1,16 @@
+[project]
+name = "pegwatch"
+version = "0.1.0"
+description = "Premium/discount monitor for tokenized real-world assets, built on the CoinMarketCap RWA API"
+requires-python = ">=3.12"
+dependencies = ["requests>=2.31", "duckdb>=1.1", "python-dotenv>=1.0", "pyyaml>=6"]
+
+[project.optional-dependencies]
+dev = ["pytest>=8"]
+agent = ["mcp>=2"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.setuptools]
+packages = ["pegwatch"]

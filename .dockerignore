@@ -1,0 +1,13 @@
+.git
+.venv
+.env
+.env.example
+data
+dorahacks
+tests
+.pytest_cache
+__pycache__
+*.egg-info
+*.md
+!FEEDBACK.md
+deploy.sh

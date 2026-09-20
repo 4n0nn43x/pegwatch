@@ -1,0 +1,62 @@
+# Country -> local fiat, capital coordinates (globe hubs), and the mobile-money / bank rails people use.
+# rails is optional: when absent, every rail seen in the P2P fixing for that fiat is used. Rail names = pegwatch.fixing.RAILS labels.
+# FR and US have no P2P layer: the dollar is bought at the official rate, layer 1 premium is 0.
+BJ: {name: Bénin, fiat: XOF, lat: 6.37, lon: 2.39, rails: [MTN MoMo, Moov Money]}
+TG: {name: Togo, fiat: XOF, lat: 6.13, lon: 1.22, rails: [T-Money, Moov Money]}
+SN: {name: Sénégal, fiat: XOF, lat: 14.69, lon: -17.44, rails: [Wave, Orange Money]}
+CI: {name: Côte d'Ivoire, fiat: XOF, lat: 5.35, lon: -4.02, rails: [Wave, Orange Money, MTN MoMo, Moov Money]}
+ML: {name: Mali, fiat: XOF, lat: 12.64, lon: -8.0, rails: [Orange Money, Moov Money]}
+BF: {name: Burkina Faso, fiat: XOF, lat: 12.37, lon: -1.52, rails: [Orange Money, Moov Money]}
+NE: {name: Niger, fiat: XOF, lat: 13.51, lon: 2.11}
+CM: {name: Cameroun, fiat: XAF, lat: 3.87, lon: 11.52, rails: [MTN MoMo, Orange Money]}
+GA: {name: Gabon, fiat: XAF, lat: 0.39, lon: 9.45, rails: [Airtel Money, Moov Money]}
+CG: {name: Congo, fiat: XAF, lat: -4.27, lon: 15.28, rails: [MTN MoMo, Airtel Money]}
+TD: {name: Tchad, fiat: XAF, lat: 12.13, lon: 15.05}
+NG: {name: Nigeria, fiat: NGN, lat: 6.52, lon: 3.38, rails: [Bank, OPay, PalmPay, Kuda, Moniepoint]}
+GH: {name: Ghana, fiat: GHS, lat: 5.6, lon: -0.19, rails: [MTN MoMo, Telecel Cash, Airtel Money]}
+KE: {name: Kenya, fiat: KES, lat: -1.29, lon: 36.82, rails: [M-Pesa, Airtel Money]}
+EG: {name: Égypte, fiat: EGP, lat: 30.04, lon: 31.24, rails: [InstaPay, Telecel Cash, Bank]}
+MA: {name: Maroc, fiat: MAD, lat: 33.57, lon: -7.59}
+TN: {name: Tunisie, fiat: TND, lat: 36.81, lon: 10.17}
+DZ: {name: Algérie, fiat: DZD, lat: 36.75, lon: 3.06}
+UG: {name: Ouganda, fiat: UGX, lat: 0.35, lon: 32.58}
+TZ: {name: Tanzanie, fiat: TZS, lat: -6.79, lon: 39.28}
+RW: {name: Rwanda, fiat: RWF, lat: -1.94, lon: 30.06}
+ZM: {name: Zambie, fiat: ZMW, lat: -15.39, lon: 28.32}
+ZA: {name: Afrique du Sud, fiat: ZAR, lat: -26.2, lon: 28.05}
+SD: {name: Soudan, fiat: SDG, lat: 15.5, lon: 32.56}
+MZ: {name: Mozambique, fiat: MZN, lat: -25.97, lon: 32.57}
+AO: {name: Angola, fiat: AOA, lat: -8.84, lon: 13.23}
+CD: {name: RD Congo, fiat: CDF, lat: -4.33, lon: 15.31}
+AR: {name: Argentine, fiat: ARS, lat: -34.6, lon: -58.38}
+VE: {name: Venezuela, fiat: VES, lat: 10.48, lon: -66.9}
+BR: {name: Brésil, fiat: BRL, lat: -23.55, lon: -46.63}
+CO: {name: Colombie, fiat: COP, lat: 4.71, lon: -74.07}
+PE: {name: Pérou, fiat: PEN, lat: -12.05, lon: -77.04}
+MX: {name: Mexique, fiat: MXN, lat: 19.43, lon: -99.13}
+CL: {name: Chili, fiat: CLP, lat: -33.45, lon: -70.67}
+BO: {name: Bolivie, fiat: BOB, lat: -16.5, lon: -68.15}
+PY: {name: Paraguay, fiat: PYG, lat: -25.26, lon: -57.58}
+UY: {name: Uruguay, fiat: UYU, lat: -34.9, lon: -56.16}
+DO: {name: Rép. dominicaine, fiat: DOP, lat: 18.49, lon: -69.93}
+GT: {name: Guatemala, fiat: GTQ, lat: 14.63, lon: -90.51}
+HN: {name: Honduras, fiat: HNL, lat: 14.07, lon: -87.19}
+NI: {name: Nicaragua, fiat: NIO, lat: 12.11, lon: -86.24}
+HT: {name: Haïti, fiat: HTG, lat: 18.54, lon: -72.34}
+TR: {name: Turquie, fiat: TRY, lat: 41.01, lon: 28.98}
+UA: {name: Ukraine, fiat: UAH, lat: 50.45, lon: 30.52}
+KZ: {name: Kazakhstan, fiat: KZT, lat: 43.24, lon: 76.95}
+GE: {name: Géorgie, fiat: GEL, lat: 41.72, lon: 44.83}
+AZ: {name: Azerbaïdjan, fiat: AZN, lat: 40.41, lon: 49.87}
+LB: {name: Liban, fiat: LBP, lat: 33.89, lon: 35.5}
+IQ: {name: Irak, fiat: IQD, lat: 33.31, lon: 44.37}
+PK: {name: Pakistan, fiat: PKR, lat: 24.86, lon: 67.01}
+BD: {name: Bangladesh, fiat: BDT, lat: 23.81, lon: 90.41}
+LK: {name: Sri Lanka, fiat: LKR, lat: 6.93, lon: 79.85}
+NP: {name: Népal, fiat: NPR, lat: 27.72, lon: 85.32}
+IN: {name: Inde, fiat: INR, lat: 19.08, lon: 72.88}
+VN: {name: Viêt Nam, fiat: VND, lat: 10.82, lon: 106.63}
+ID: {name: Indonésie, fiat: IDR, lat: -6.21, lon: 106.85}
+PH: {name: Philippines, fiat: PHP, lat: 14.6, lon: 120.98}
+FR: {name: France, fiat: EUR, lat: 48.86, lon: 2.35, rails: []}
+US: {name: États-Unis, fiat: USD, lat: 40.71, lon: -74.01, rails: []}

@@ -1,0 +1,4 @@
+pegwatch.fyra.fun {
+	import secure
+	reverse_proxy pegwatch-web:8080
+}
