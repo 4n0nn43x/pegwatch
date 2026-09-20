@@ -1,0 +1,54 @@
+{
+  "id": 2363,
+  "uname": "coinmarketcap-api-202609",
+  "title": "Build with CMC: API Hackathon",
+  "description": "# Build with CMC: API Hackathon\n\nCoinMarketCap tracks prices, market caps, exchange volumes, DEX pairs, derivatives and on-chain data across every major chain. All of it is available through the CMC API, and most developers have never made a single call against it.\n\nThis hackathon is three weeks to change that. Build something that runs on CMC data. A bot, a dashboard, an agent tool, a screener, a research assistant. Anything a real person would use.\n\nEvery participant gets a FREE Startup tier plan for the duration of the event. Higher call credits than the free tier.\n\nThe top three keep going: a free year of CMC API access starting the day the hackathon closes, at Professional, Growth, and Startup. Long enough to turn a hackathon project into something that actually runs.\n\nNo card, no approval queue.\n\n# What You can Build\n\nFour tracks, covering the ways developers actually use market data. Pick one when you submit.\n\n- **Markets and Trading Tools**: screeners, alert bots, scanners, portfolio and PnL trackers\n- **AI Agents and Automation**: agent tools, MCP integrations, workflow automations, anything that puts live market data in front of an LLM\n- **Data and Visualisation**: dashboards, research tools, comparative analysis, anything that makes the data legible\n- **Real World Assets**: tokenised equities, commodities, treasuries and funds, issuer explorers, anything built on the new RWA endpoints\n\nThe tracks are chain-neutral on purpose. CoinMarketCap lists every chain, and we are not asking you to pick one.\n\n# What Counts as a Submission\n\nSomething that runs. A public repo, a working demo or a short screen recording, the endpoints you used named explicitly, and visible evidence of a real API call.\n\nA description of what the API can do is not a submission. Show it working.\n\n**Required in Every Submission:**\n\n- A public repository\n- A working demo, a deployed link, or a screen recording of it running\n- Make a X/Twitter post, with a link to your Dorahacks submission, demo video, and the hashtag #BuildwithCMC\n- The CMC API endpoints you used, named explicitly\n- Visible evidence of a real API call: code and response\n- A short note on what the API made possible and where it got in the way\n- One track selected\n\n# Prize Pool\n\n**$10K USD worth of Prizes**\n\n- Free Startup tier plan for every participant.\n- Full year of CMC API access: Professional, Growth, and Startup (Top 3)\n- Exclusive CMC Swag Box: Keyboard, Stickers, Pins, Towel, etc (Top 30)\n\nThe three winner grants run for 12 months from the close of the hackathon. The free event-window access does not count against them, so the top-three winners get a free year of Pro-API on top of the three weeks everyone gets.\n\nAll participants will be granted Startup-Tier CMC API, after they start the register to participate in the CMC API Hackathon. The free Startup-Tier API will persist until the end of the Hackathon period; coinciding with their final project BUIDL submission.\n\nNotable projects will have their Tweets retweeted by the official CoinMarketCap X/Twitter account with +7.1M followers.\n\n# Timeline\n\n- **Submissions open:** Wed 9 Sep 2026, 00:00 UTC\n- **Submissions close:** Wed 30 Sep 2026, 23:59 UTC (21 Days)\n- **Judging:** Thu 1 Oct to Fri 16 Oct 2026\n- **Results and closing ceremony:** Mon 19 Oct 2026\n\n# Judging Criteria\n\nEach track is scored out of 100. Weightings are published per track on the Tracks tab.\n\n- Does it work: 30\n- Usefulness to a real person: 25\n- Interesting use of the API: 20\n- Code quality and documentation: 15\n- Presentation: 10\n\n# Rules\n\n**Eligibility**\n\n- Open worldwide, subject to the shipping exclusions below\n- You must be 18 or over\n- Solo or team entries, teams up to 4\n\n**Originality**\n\n- Work must be original and built for this hackathon\n- Pre-existing projects are eligible only if the CMC integration is new and clearly identified\n- Open-source dependencies and AI coding assistants are fine, and you do not need to declare them\n- Submitting someone else's work will get you disqualified\n\n**API Keys and Access**\n\n- Every participant receives a free Startup tier plan for the duration of the event\n- Event access ends when submissions close and reverts to the free Basic tier\n- The three winner grants are separate: 12 months of free access starting the day the hackathon closes, so the event weeks do not count against your year\n- Top 3 and Top 30 is decided by judged rank. If more than 30 valid submissions are received, boxes go to the 30 highest scoring\n- Use your own key, issued through the campaign signup\n- Do not share, publish or resell keys\n- Do not commit keys to your public repo. We will ask you to rotate it and it will count against code quality\n\n**How to get Free Startup-tier API (during the Hackathon)**\n\n1. Create a free CoinMarketCap API account at coinmarketcap.com/api if you do not have one.\n2. Register for the hackathon on DoraHacks. The registration form asks for the email address on your CoinMarketCap account.\n3. Submit that CoinMarketCap account email. It must match the email on your CoinMarketCap account, not necessarily the one you use for DoraHacks.\n4. Your account is upgraded to the free Startup tier for the hackathon period, on your own existing API key.\n\n**Shipping and prizes**\n\n- Swag ships worldwide except to excluded jurisdictions: Afghanistan, Belarus, Bolivia, Crimea (Ukraine), Cuba, Donetsk (Ukraine), Iran, Iraq, Libya, Luhansk (Ukraine), Myanmar, Nepal, North Korea, Russia, Somalia, South Sudan, Sudan, Syria, Venezuela, and Yemen.\n- Winners are screened against applicable sanctions lists before results are announced\n- If we cannot legally ship to you, the API access portion of your prize still stands\n- Winners must supply a shipping address within 14 days of the announcement\n- Prizes cannot be exchanged for cash\n- We collect names and shipping addresses solely to send prizes, and delete them after shipping.\n\n**Judging and rights**\n\n- Judging decisions are final\n- CMC may feature, repost and showcase submitted work with credit\n- You keep all ownership of what you build\n- Multiple submissions are allowed and encouraged, but one prize per person or team\n\n**Conduct**\n\n- Be decent to other participants\n- Vote manipulation, spam or misrepresenting your submission means disqualification\n\n# API Feedback\n\nTell us where the API got in the way. Missing fields, confusing docs, rate limits that made no sense. That feedback goes straight to the product team and it is worth more to us than any single submission. We will publish what we heard and what we are doing about it.\n\n# Reference Material\n\n- **Get your free CMC API Key:** [https://coinmarketcap.com/api](https://coinmarketcap.com/api)\n- **CMC API Docs:** [https://coinmarketcap.com/api/documentation/v1](https://coinmarketcap.com/api/documentation/v1)\n- **CMC API Pricing:** [https://coinmarketcap.com/api/pricing](https://coinmarketcap.com/api/pricing)\n- **CMC RWA API Reference:** [https://coinmarketcap.com/api/documentation/pro-api-reference/real-world-assets](https://coinmarketcap.com/api/documentation/pro-api-reference/real-world-assets)\n- **RWAs on the CMC Pro API:** [https://coinmarketcap.com/academy/article/real-world-assets-rwas-arrive-coinmarketcap-pro-api](https://coinmarketcap.com/academy/article/real-world-assets-rwas-arrive-coinmarketcap-pro-api)\n- **CMC API Hackathon Questions:** [https://dorahacks.io/hackathon/coinmarketcap-api-202609/qa](https://dorahacks.io/hackathon/coinmarketcap-api-202609/qa)\n\nUse the Ask Questions tab for anything technical. A public answer serves everyone who reads it later.\n\n#BuildwithCMC",
+  "start_time": "",
+  "end_time": "",
+  "bonus_price": 0.0,
+  "token": "",
+  "ecosystem": "CoinMarketCap API,API,CMC API,CMC Pro API",
+  "field_tag": "",
+  "status": "",
+  "buidls_count": 28,
+  "hackers_count": 169,
+  "winner_announced": false,
+  "participation_form": "",
+  "organization": null,
+  "tracks": [
+    {
+      "id": 4620,
+      "name": "Markets and Trading Tools",
+      "description": "Tools for people who watch markets. Screeners, alert bots, scanners, portfolio and PnL trackers, backtesting utilities, anything that turns raw market data into a decision.\n\nUseful endpoints: listings, quotes, OHLCV historical, derivatives, liquidations, exchange data.\n\nJudging criteria: Does it work (30), Usefulness to a real trader or investor (25), Interesting use of the API (20), Code quality and documentation (15), Presentation (10).",
+      "bonus_price": 0.0,
+      "token": "",
+      "buidls_count": 0
+    },
+    {
+      "id": 4621,
+      "name": "AI Agents and Automation",
+      "description": "Market data in front of a model. MCP integrations, agent tools, research assistants, workflow automations, chatbots that answer questions with live data instead of stale training data.\n\nUseful endpoints: quotes, global metrics, trending, categories, plus anything the agent needs to answer a real question.\n\nJudging criteria: Does it work (30), Does the agent do something a plain API call could not (25), Interesting use of the API (20), Code quality and documentation (15), Presentation (10).",
+      "bonus_price": 0.0,
+      "token": "",
+      "buidls_count": 0
+    },
+    {
+      "id": 4622,
+      "name": "Data and Visualisation",
+      "description": "Making the data legible. Dashboards, comparative analysis, research tools, visualisations, anything that shows something in the data that was not obvious before.\n\nUseful endpoints: historical quotes, OHLCV, global metrics, categories, DEX pairs, exchange listings.\n\nJudging criteria: Does it work (30), Does it reveal something genuinely non-obvious (25), Interesting use of the API (20), Craft and clarity of the output (15), Presentation (10).",
+      "bonus_price": 0.0,
+      "token": "",
+      "buidls_count": 0
+    },
+    {
+      "id": 4633,
+      "name": "Real World Assets",
+      "description": "Tokenised equities, gold, treasuries, funds and real estate, plus the issuers behind them. RWA screeners, issuer explorers, tools that compare a tokenised asset against its underlying, portfolio trackers that hold crypto and tokenised TradFi in the same view.\n\nUseful endpoints: RWA ID map, RWA info, RWA list, RWA quotes latest, RWA market pairs, issuers list, single issuer.\n\nJudging criteria: Does it work (30), Usefulness to someone tracking tokenised assets (25), Interesting use of the API (20), Code quality and documentation (15), Presentation (10).",
+      "bonus_price": 0.0,
+      "token": "",
+      "buidls_count": 0
+    }
+  ],
+  "tabs": [],
+  "sponsors": []
+}

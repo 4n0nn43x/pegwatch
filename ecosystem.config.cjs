@@ -14,6 +14,7 @@ module.exports = {
     py("ladder", "pegwatch.ladder", "3-59/5 * * * *"),
     py("fixing", "pegwatch.fixing", "1-59/5 * * * *"),
     { ...py("fixing-daily", "pegwatch.fixing", "0 12 * * *"), args: "-m pegwatch.fixing --daily" },
+    py("monday", "pegwatch.monday", "0 14 * * *"),   // after the 13:30 UTC NYSE open; rebuilds every weekend on disk
     { name: "web", script: "serve", env: { PM2_SERVE_PATH: "data", PM2_SERVE_PORT: 8080 } },
   ],
 };
