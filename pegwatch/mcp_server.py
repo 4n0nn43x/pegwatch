@@ -1,12 +1,15 @@
 """MCP server: the ladder as a tool for agents. Reads the public JSON of the site, so no key of any kind is needed.
 
-    uv run --with 'mcp>=2' python -m pegwatch.mcp_server              # stdio, for Claude Desktop / Cursor / Claude Code
+    python -m pegwatch.mcp_server           # stdio, for a local Claude Desktop / Cursor / Claude Code
+    python -m pegwatch.mcp_server --http    # Streamable HTTP on :8081/mcp, stateless, what pegwatch.fyra.fun/mcp serves
     PEGWATCH_URL=http://127.0.0.1:8080 python -m pegwatch.mcp_server   # against a local instance
 
-Claude Code:  claude mcp add pegwatch -- uv run --with 'mcp>=2' --with pyyaml --with requests python -m pegwatch.mcp_server
+Claude Code:  claude mcp add --transport http pegwatch https://pegwatch.fyra.fun/mcp
+Local stdio:  claude mcp add pegwatch -- uv run --with 'mcp>=2' --with pyyaml --with requests python -m pegwatch.mcp_server
 """
 
 import os
+import sys
 
 import requests
 from mcp.server.mcpserver import MCPServer
@@ -57,4 +60,12 @@ def premiums() -> dict:
 
 
 if __name__ == "__main__":
-    mcp.run()
+    if "--http" in sys.argv:
+        from mcp.server.transport_security import TransportSecuritySettings
+        # Public read-only server behind Caddy: the Host header is the public domain, not localhost, so the
+        # DNS-rebinding guard (meant for servers bound to 127.0.0.1) would reject every request.
+        mcp.run(transport="streamable-http", host="0.0.0.0", port=int(os.getenv("MCP_PORT", "8081")),
+                stateless_http=True, json_response=True,
+                transport_security=TransportSecuritySettings(enable_dns_rebinding_protection=False))
+    else:
+        mcp.run()

@@ -13,7 +13,7 @@ RUN ln -s /usr/local/lib/node_modules/pm2/bin/pm2-runtime /usr/local/bin/pm2-run
 
 COPY pyproject.toml ./
 COPY pegwatch ./pegwatch
-RUN pip install --no-cache-dir . && rm -rf build
+RUN pip install --no-cache-dir ".[agent]" && rm -rf build
 
 COPY ecosystem.config.cjs wrappers.yaml countries.yaml ./
 COPY web ./web
@@ -23,6 +23,6 @@ COPY FEEDBACK.md ./web/
 RUN useradd -r -u 1000 -d /app pegwatch && mkdir -p data && chown -R pegwatch:pegwatch /app
 USER pegwatch
 ENV PYTHONUNBUFFERED=1 PM2_HOME=/tmp/.pm2
-EXPOSE 8080
+EXPOSE 8080 8081
 # data/ est un volume : la page statique y est recopiée à chaque démarrage, à côté des JSON générés.
 CMD ["sh", "-c", "cp -r web/. data/ && exec pm2-runtime ecosystem.config.cjs"]

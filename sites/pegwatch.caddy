@@ -1,4 +1,7 @@
 pegwatch.fyra.fun {
 	import secure
+	handle /mcp* {
+		reverse_proxy pegwatch-web:8081
+	}
 	reverse_proxy pegwatch-web:8080
 }
