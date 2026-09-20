@@ -44,6 +44,13 @@ def true_price(country: str, asset: str = "NVDA", amount: float = 1000.0) -> dic
 
 
 @mcp.tool()
+def monday_scoreboard() -> dict:
+    """Who priced the weekend right: for every weekend collected, each wrapper's Sunday price vs the real Monday open,
+    the perp oracle as a competitor, holding Friday's close as the baseline. Mean absolute error and wins per issuer."""
+    return _get("monday/latest.json")
+
+
+@mcp.tool()
 def premiums() -> dict:
     """Premium of every tokenized wrapper vs its real asset (55 assets), with the trading regime and the perp oracle proxy."""
     return _get("premiums/latest.json")
