@@ -1,0 +1,333 @@
+# pegwatch wrapper access matrix. Verified 2026-09-15 against official pages.
+# Rule used: "allowed" = not on any published exclusion list of the issuer or its
+# retail venue; "unclear" = list unpublished or issuer/venue conflict. Re-verify monthly.
+# Codes: BJ TG SN CI CM NG GH KE EG FR US
+
+- issuer_name: "Backed Assets"
+  product: "xStocks (Solana SPL / ERC-20), via Kraken, Bybit, Bitget Wallet, Solana DEXs"
+  legal: "Bearer tracker certificate (debt) issued by Backed Assets (JE) Ltd, Jersey SPV, Swiss law, FMA-approved EU prospectus"
+  redemption: "Direct with issuer to USDC/USDG/USDT, issuer KYC + whitelisted wallet, min $5,000, ~30s settlement up to $200k, 24/5; otherwise sell on venue/DEX"
+  fees: "Issuer mint/redeem currently 0; Kraken Instant Buy 1% spread, Pro -0.02%/0.10%; Bybit spot 0.20%; Bitget Wallet 0.5%"
+  minimum: "$1 on Kraken; no issuer minimum on secondary; $5,000 primary"
+  kyc: "Venue KYC on Kraken/Bybit; DEX purchase permissionless (no transfer restrictions on token)"
+  affiliate: "None xStocks-specific; venue programs: https://www.kraken.com/affiliates https://www.bybit.com/en/affiliates https://www.bitget.com/affiliate"
+  allowed: [BJ, TG, SN, CI, CM, GH, KE, EG, FR]
+  excluded: [US]
+  unclear: [NG]
+  notes: "NG: Backed lists Nigeria as non-serviceable, but Kraken serves NG and DEX is permissionless. EG: excluded on Bybit, ok on Kraken. FR: Kraken EEA fiat-only after questionnaire; excluded on Bybit (EEA) and Bitget."
+  sources:
+    - https://assets.backed.fi/legal-documentation/restricted-countries
+    - https://docs.xstocks.fi/docs/product-legal-overview
+    - https://docs.xstocks.fi/docs/frequently-asked-questions
+    - https://docs.xstocks.fi/docs/issuance-and-redemption/market-flow
+    - https://support.kraken.com/articles/xstocks-availability
+    - https://support.kraken.com/articles/xstocks-faq
+    - https://support.kraken.com/articles/futures-incentive-promotion-official-rules
+    - https://www.bybit.com/en/help-center/article/FAQ-xStocks-on-Bybit
+    - https://www.bitget.com/support/articles/360014944032-terms-of-use
+
+- issuer_name: "Ondo Assets"
+  product: "Ondo Global Markets / Ondo Stocks (Ethereum, BNB Chain, Solana, HyperEVM)"
+  legal: "Structured note (debt) from Ondo Global Markets (BVI) Ltd, bankruptcy-remote SPV, Swiss-law terms, Reg S, Ankura Trust security agent"
+  redemption: "1:1 to USDon (instant) or USDC via swapper if liquidity, KYC required, min $1; primary onboarding institutional-only, retail waitlist"
+  fees: "No fixed fee published; price may differ from NAV with difference retained by Ondo; 30% US dividend withholding"
+  minimum: "$1"
+  kyc: "KYC + allowlist for primary; secondary ERC-20 transferable outside US, DEX purchase possible (1inch, CoW, Bitget Wallet)"
+  affiliate: "No public program (Affiliate Manager job posting only)"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: [FR, US]
+  unclear: []
+  notes: "FR/EEA: professional clients only under MiFID II. Canada also prohibited. Retail from Africa reaches it via DEX only until retail onboarding opens."
+  sources:
+    - https://docs.ondo.finance/ondo-stocks/eligibility
+    - https://docs.ondo.finance/ondo-stocks/legal-and-regulatory
+    - https://docs.ondo.finance/ondo-stocks/investing-and-redeeming
+    - https://docs.ondo.finance/ondo-stocks/onboarding-and-kyc
+    - https://docs.ondo.finance/ondo-stocks/fees-and-taxes
+    - https://docs.ondo.finance/ondo-stocks/transferability
+
+- issuer_name: "bStocks"
+  product: "Binance bStocks (BEP-20 on BNB Smart Chain), launched 2026-06-11"
+  legal: "Certificates over financial instruments issued by BTech Holdings Ltd under ADGM FSRA-approved prospectus; traded via Nest Exchange/Clearing (ADGM)"
+  redemption: "1:1 instant conversion stock<->bStock inside Binance, no conversion fee; cash-out by selling on Binance spot; on-chain tokens re-entering CSD subject to conditions; T+N unpublished"
+  fees: "Conversion 0; spot zero maker fee promo (to 2026-09-30); standard taker; Convert zero fee"
+  minimum: "$5"
+  kyc: "Binance account verification required; withdrawable to BSC wallet, DEX tradable; contract transfer restrictions unverified"
+  affiliate: "https://www.binance.com/en/activity/affiliate and https://www.binance.com/en/activity/referral (not bStocks-specific)"
+  allowed: []
+  excluded: [US]
+  unclear: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, FR]
+  notes: "Launch notice says 'list of restricted countries provided below' but no list rendered; ADGM prospectus 'not offered in any other jurisdiction'. NG: NGN services discontinued Mar 2024, no reversal found, SEC/CBN case ongoing. KE: Binance applying under VASP Regulations 2026."
+  sources:
+    - https://www.binance.com/en/support/announcement/detail/5646e3f9ea6b4c989cb76aa18bd99245
+    - https://www.binance.com/en/support/announcement/detail/2c0c92ed15ac42d1b14bb1eac00d22bb
+    - https://techcabal.com/2026/08/07/firms-lining-up-for-crypto-licences-in-kenya/
+
+- issuer_name: "Robinhood"
+  default: "unclear"   # EEA-only app; outside the 11 verified countries assume nothing
+  product: "Onchain Stock Tokens (Robinhood Chain/Arbitrum, ERC-20) + Classic Stock Tokens (EU app derivatives)"
+  legal: "Onchain: tokenised debt securities by Robinhood Assets (Jersey) Ltd. EU app: MiFID II derivative contracts with Robinhood Europe UAB"
+  redemption: "Onchain: sell on DEX or redeem with issuer after issuer KYC (timing undisclosed). EU app: sell to Robinhood for EUR, T+1 withdrawal hold"
+  fees: "Onchain: issuance 0%, redemption 0% first 90 days then 0.05%. EU app: 0.1% FX fee only"
+  minimum: "EU app 1 EUR; onchain unpublished"
+  kyc: "EU app full brokerage KYC, tokens not withdrawable. Onchain tokens tradable on Uniswap/1inch via Robinhood Wallet (whitelist status unverified)"
+  affiliate: "EU app referral, 10 EUR crypto, select jurisdictions: https://robinhood.com/eu/en/support/articles/rewards"
+  allowed: [FR]
+  excluded: [US]
+  unclear: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  notes: "African countries are not on the Jersey issuer's prohibited list ('120+ countries' via Wallet) but no positive list is published. EU app is EEA-only."
+  sources:
+    - https://docs.robinhood.com/rhj/restricted-jurisdictions
+    - https://docs.robinhood.com/rhj/product
+    - https://robinhood.com/rhj/stocktokens/
+    - https://robinhood.com/eu/en/support/articles/stock-tokens-faq/
+    - https://robinhood.com/eu/en/support/articles/about-stock-tokens/
+    - https://robinhood.com/us/en/newsroom/robinhood-accelerates-global-expansion-robinhood-chain-mainnet-stock-tokens-agentic-trading/
+
+- issuer_name: "Dinari Assets"
+  product: "dShares (Ethereum, Arbitrum, Base, others; wrapped on HyperEVM)"
+  legal: "Token backed 1:1 by security held via Dinari Securities LLC (broker-dealer CRD 329672) / Alpaca; Reg S outside US"
+  redemption: "Sell order burns dShares, stablecoin released to wallet on fill; regular/extended/overnight sessions; min unpublished"
+  fees: "No Dinari transaction fee; ~$0.20 network fee per order; USDT conversion +3 bps; OTC 10 bps min $25k"
+  minimum: "Fractional, no published floor"
+  kyc: "Mandatory KYC, wallets must clear KYC before interacting; hard-coded jurisdiction blocks; no permissionless DEX purchase"
+  affiliate: "No retail referral; B2B partner portal https://partners.dinari.com/"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, FR, US]
+  excluded: []
+  unclear: []
+  notes: "US allowed only via broker-dealer channel with non-transferable tokens (no DeFi). CI was restricted in 2024, absent from the 2026-07-09 list."
+  sources:
+    - https://docs.dinari.com/docs/restrictions
+    - https://docs.dinari.com/docs/us
+    - https://docs.dinari.com/docs/fees
+    - https://docs.dinari.com/docs/managing-kyc
+    - https://docs.dinari.com/docs/placing-orders
+    - https://dinari.com/dshares
+
+- issuer_name: "Reality"
+  product: "rTokens (rAAPL etc.) on Arbitrum One / Morph, Bitget ecosystem"
+  legal: "Contractual beneficial interest in securities held by broker-dealer (Alpaca) in segregated account; issuer says licensed in South Africa (entity name unverified)"
+  redemption: "Sold back to Reality for stablecoins, 24/5, real-time or deferred; primary requires issuer KYB/KYC (B2B); $5 min settlement"
+  fees: "Settlement price, no platform fee, gas only; Bitget spot fees by tier"
+  minimum: "1 or 10 USDT on Bitget depending on asset"
+  kyc: "Bitget KYC on venue; on-chain tokens carry no transfer restrictions, withdrawable and DEX tradable"
+  affiliate: "Reality none; Bitget affiliate up to 50%: https://www.bitget.com/affiliates"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: [FR, US]
+  unclear: []
+  notes: "Bitget ToS (2026-09-15) prohibits France. Reality's own restricted list is 'dynamic', shown only at account opening."
+  sources:
+    - https://realityfinance.xyz/info/docs/rtokens/eligibility
+    - https://realityfinance.xyz/info/docs/rtokens/irf
+    - https://www.bitget.com/academy/bitget-rtoken-faq
+    - https://www.bitget.com/support/articles/360014944032-terms-of-use
+
+- issuer_name: "Hyperliquid Assets"
+  product: "HIP-3 stock perpetuals (deployer trade[XYZ]) on Hyperliquid"
+  legal: "Synthetic USDC-margined perpetual, no underlying, no ownership/dividend/redemption rights"
+  redemption: "None; close position, PnL in USDC, withdraw to Arbitrum instantly"
+  fees: "HIP-3 tier 0 taker 0.090% / maker 0.030% (growth mode 0.009%/0.003%)"
+  minimum: "$10 order value"
+  kyc: "None; wallet or email login; API permissionless"
+  affiliate: "Yes, referrer earns 10% of fees, referee 4% discount: https://hyperliquid.gitbook.io/hyperliquid-docs/referrals (app.hyperliquid.xyz/join/CODE)"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, FR]
+  excluded: [US]
+  unclear: []
+  notes: "Terms restrict US and Ontario only plus sanctioned territories. Actual IP geofence beyond US unverified."
+  sources:
+    - https://app.hyperliquid.xyz/terms
+    - https://docs.trade.xyz/legal-and-disclaimers/general-disclaimer
+    - https://docs.trade.xyz/perpetuals/mechanics/fees
+    - https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/error-responses
+
+- issuer_name: "PreStocks"
+  product: "Tokenized pre-IPO exposure (preSPACEX, preOPENAI) on Solana"
+  legal: "Bearer tokens backed by undisclosed holding entities/SPVs; no issuer legal entity named"
+  redemption: "Primary exit on-chain via Jupiter; processed redemption 'subject to eligibility, minimum size, notice'; at IPO convert to tokenized public stock within 9 months; M&A cash pro-rata USDC 6-month window"
+  fees: "No management fee; variable DEX/LP fees; transfer-hook fees allowed by ToS; exact % unpublished"
+  minimum: "None"
+  kyc: "No KYC for on-chain buy/sell; token has freeze/burn authority"
+  affiliate: "None found"
+  allowed: [BJ, TG, SN, CM, NG, GH, KE, EG, FR]
+  excluded: [CI, US]
+  unclear: []
+  notes: "Côte d'Ivoire explicitly named in prohibited jurisdictions (ToS 2026-09-08). IP geofencing stated."
+  sources:
+    - https://prestocks.notion.site/terms-of-service
+    - https://prestocks.com/faq
+
+- issuer_name: "Backpack"
+  product: "Backpack Securities tokenized US stocks on Solana"
+  legal: "Real shares as NY UCC Art. 8 security entitlements via Backpack Securities Global Ltd (NZ), Atomic Vault Securities, RQD Clearing; 1:1 tokenized claim"
+  redemption: "Deposit token to Backpack converts to entitlement, sell for USD, or withdraw as token; timing 'like a stablecoin', T+N unpublished"
+  fees: "Stock spot no commission; tokenization withdrawal ~$0.50; perps standard futures fees"
+  minimum: "0.01 share regular hours, 1 share extended; $1 min order"
+  kyc: "Exchange KYC required; tokens self-custodied, DEX compatible, no allowlist stated"
+  affiliate: "Yes, 10% of fees: https://backpack.exchange/referrals (stock perps not eligible, stock spot fee is zero)"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: [US]
+  unclear: [FR]
+  notes: "Not available in US, UK, UAE, Japan and 'not offered on Backpack EU'; whether FR residents are forced onto Backpack EU is unverified."
+  sources:
+    - https://support.backpack.exchange/backpack-securities/eligibility-and-access
+    - https://support.backpack.exchange/exchange/exchange-account/identity-verification/supported-regions
+    - https://support.backpack.exchange/backpack-securities/real-ownership-and-legal-framework
+    - https://support.backpack.exchange/backpack-securities/stock-trading-hours-and-fees
+    - https://support.backpack.exchange/backpack-securities/faqs
+    - https://support.backpack.exchange/exchange/programs/referrals
+
+# Tokenized gold and silver. Verified 2026-09-16. Unit per token is stated in `product`
+# because CMC quotes gold per troy ounce while several tokens are per gram.
+
+- issuer_name: "Paxos"
+  product: "PAXG (ERC-20 on Ethereum, SPL on Solana). Unit: 1 token = 1 fine troy ounce of a London Good Delivery bar"
+  legal: "Fractional ownership of allocated LBMA bars held segregated by Paxos Trust Company N.A. (OCC-chartered) in LBMA-approved London vaults; monthly attestation reports; allocation lookup by wallet address"
+  redemption: "Via a verified Paxos account only: USD at spot, unallocated Loco London (institutions), or physical bars from 430 PAXG; retail Wallet UI retired 2026-05-29 so individuals now need the enterprise Dashboard/API; everyone else sells on Kraken/Binance/Bybit/DEX"
+  fees: "Paxos creation/destruction fee tiered in PAXG (historically 0.02 PAXG flat below 2 PAXG then 1% down to 0.125%); on-chain transfer fee now 0 (Kraken page still lists a 0.02% Paxos fee); 0 storage; USD 2/month dormancy after 12 months inactivity; Dashboard custody 0.30%/yr for non-Paxos assets"
+  minimum: "0.01 PAXG (about USD 43); 430 PAXG for physical bar"
+  kyc: "Issuer KYC only for primary create/redeem; token has no transfer restrictions, listed on Kraken, Binance (non-EEA), Bybit, Coinbase, Uniswap"
+  affiliate: "None from Paxos; venue programs: https://www.kraken.com/affiliates https://www.binance.com/en/activity/affiliate https://www.bybit.com/en/affiliates"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, US]
+  excluded: [FR]
+  unclear: []
+  notes: "Paxos page states 'PAXG is currently unavailable in the EU' (no MiCA ART authorisation); Binance delisted PAXG for EEA users 2025-03-31. US is the only place issuer redemption works, and only via enterprise Dashboard since May 2026. Africa reaches PAXG via Kraken/Binance/Bybit spot."
+  sources:
+    - https://www.paxos.com/paxgold
+    - https://www.paxos.com/terms-and-conditions/pax-gold-terms-conditions
+    - https://support.paxos.com/articles/2863700786-wallet-ui-deprecation-frequently-asked-questions
+    - https://support.kraken.com/articles/360000767986-cryptocurrency-withdrawal-fees-and-minimums
+    - https://www.theblock.co/post/344182/binance-delist-tether-other-non-mica-compliant-stablecoins
+    - https://crypto.news/tokenized-gold-is-a-4-4b-market-with-no-eu-rulebook/
+
+- issuer_name: "Tether Holdings"
+  product: "XAUt (ERC-20 on Ethereum) and XAUT0 (LayerZero OFT omnichain version: TON, Conflux and other chains). Unit: 1 token = 1 fine troy ounce"
+  legal: "Undivided interest in a specific LBMA bar held by a custodian in Switzerland for token holders; issuer TG Commodities S.A. de C.V. (redomiciled BVI to El Salvador 2025-01-27, CNAD-registered); quarterly ISAE 3000R attestations (latest 2026-06-30)"
+  redemption: "Verified Tether Gold account: physical bars in increments of 430 XAUt delivered within Switzerland, or issuer-brokered sale in the Swiss market (cash); otherwise sell on Bybit/OKX/Bitget/Binance (non-EEA)/DEX"
+  fees: "Issuer purchase 0.25%; redemption 0.25% plus delivery or brokerage costs; verification fee USD 150 in USDT (non-refundable); no storage fee; no issuer fee on on-chain transfers (gas only)"
+  minimum: "50 XAUt to buy from issuer (about USD 214k); 430 XAUt to redeem; no minimum on exchanges"
+  kyc: "Issuer KYC for primary only; token freely transferable on CEX/DEX"
+  affiliate: "None from Tether; venue programs: https://www.bybit.com/en/affiliates https://www.bitget.com/affiliates https://www.okx.com/affiliate"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: [US]
+  unclear: [FR]
+  notes: "Terms 3.4: U.S. Persons (except approved Eligible Contract Participants) are prohibited from holding a Gold Token Wallet or using any site service; Canada, Singapore and Venezuela government also prohibited. FR: issuer publishes no EU restriction, but XAUt is an unauthorised ART under MiCA and Binance delisted it for EEA users 2025-03-31; Kraken/Bybit EU status unverified. Physical delivery only inside Switzerland."
+  sources:
+    - https://gold.tether.to/legal/terms
+    - https://gold.tether.to/faq
+    - https://gold.tether.to/
+    - https://www.theblock.co/post/344182/binance-delist-tether-other-non-mica-compliant-stablecoins
+    - https://chainwire.org/2026/04/09/xaut0-launches-on-conflux-bringing-omnichain-tokenized-gold-to-asias-blockchain-hub/
+
+- issuer_name: "Matrixdock"
+  product: "XAUm (ERC-20 Ethereum, BEP-20 BNB Chain, Solana, Sui, Stellar, Plume; Polygon/HashKey/Tron support discontinued) plus Matrixdock Gold NFT for fixed bar allocation. Unit: 1 token = 1 troy ounce of 99.99% LBMA gold"
+  legal: "Issued under a special purpose trust (Appleby trustee, Hamilton enforcer) separate from Matrixport; gold in Brink's vaults in Singapore and Hong Kong, insured to USD 50M; quarterly Bureau Veritas audits, monthly vault statements, on-chain PoR and mint budget"
+  redemption: "KYC account: USDC/USDT redemption at live quote, settled within T+3, trading hours 6pm to 5pm+1 New York on working days; physical 1 kg bar from 32.148 XAUm by pickup or secured delivery in Singapore/Hong Kong"
+  fees: "Minting fee waived until TVL reaches USD 100M; redemption 0.25%; no management fee (30 days notice if introduced); no transfer fees; secondary venue fees apply"
+  minimum: "No issuer minimum for stablecoin mint/redeem published; 32.148 XAUm for physical; USD 10 via BIT App swap"
+  kyc: "Issuer KYC (no accredited investor test) for mint/redeem; token freely transferable, listed on KuCoin, BitKan, BIT App, PancakeSwap, Uniswap"
+  affiliate: "None from Matrixdock; KuCoin affiliate https://www.kucoin.com/affiliate"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: [FR]
+  unclear: [US]
+  notes: "Prohibited list: North Korea, Iran, Syria, Myanmar, Cuba, Crimea, Sevastopol, Russia and all EU member states. US is not on the list but KuCoin/BIT App exclude US residents and the ToU carries a non-solicitation declaration, so US access is DEX-only. 2026-05-27 notice: avoid on-chain interactions with HTX addresses (sanctions)."
+  sources:
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/legal/prohibited-countries-regions
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/gold-token-xaum/minting-and-redeeming
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/gold-token-xaum/faq
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/gold-token-xaum/physical-gold-custody
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/gold-token-xaum/multi-chain-networks
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/gold-token-xaum/secondary-markets
+    - https://matrixdock.gitbook.io/matrixdock-docs/english/get-started/onboard-with-matrixdock
+    - https://www.matrixdock.com/xaum
+
+- issuer_name: "Kinesis Assets"
+  product: "KAU and KAG on the Kinesis blockchain (Stellar fork) plus ERC-20 wrappers issued by KMS Labs on Ethereum (listed MEXC, Mercado Bitcoin). Unit: 1 KAU = 1 gram of gold, 1 KAG = 1 troy ounce of silver"
+  legal: "Allocated bullion held in insured third-party vaults of the Kinesis/ABX vault network, title with holders; operators Kinesis Cayman (CIMA VASP conditional approval) and Kinesis AG (Liechtenstein), platform via UAB Kinesis Money Lithuania; independent audits by Inspectorate (Bureau Veritas), last 2025-10-17"
+  redemption: "Kinesis Mint redemption form after KYC: physical bullion in increments of 100 KAU (100 g) or 200 KAG (200 oz) delivered via Brink's/Loomis to an approved location, or sell for fiat/stablecoin on the Kinesis Exchange with bank withdrawal"
+  fees: "Exchange trade 0.22%; transfer 0.45%; storage 0; physical redemption 0.45% + USD 100 + delivery; card/bank purchase via Banxa 1.99%; over half of fees redistributed as yields"
+  minimum: "No published minimum on exchange; 100 KAU / 200 KAG for physical"
+  kyc: "Full KYC on Kinesis platform (closed-loop chain); ERC-20 KAU/KAG tradable on MEXC/Mercado Bitcoin without issuer KYC"
+  affiliate: "Yes: Referrer's Yield 7.5% of referees' transaction fees for life plus 0.5 oz silver per referral: https://kinesis.money/referrers-yield/ https://kinesis.money/referral-silver-rewards/"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, US]
+  excluded: []
+  unclear: [FR]
+  notes: "No country exclusion list beyond sanctions; card purchase widget excludes only UK, Afghanistan, Belarus, Cuba, Iran, Iraq, Myanmar, North Korea, Russia, Somalia, South Sudan, Sudan, Syria, and 13 US states (NY, WA, etc.). Yellow Card on-ramp live for Nigeria, Kenya planned. FR: EU served through Lithuanian VASP but MiCA CASP/ART status unverified."
+  sources:
+    - https://kinesis.money/resources/Kinesis-Terms-and-Conditions.pdf
+    - https://kinesis.money/about-us/fees/
+    - https://support.kinesis.money/hc/en-gb/articles/19760694859805-In-which-countries-is-the-asset-purchase-feature-available
+    - https://support.kinesis.money/hc/en-gb/articles/12439302237085-How-to-redeem-physical-gold-and-silver-bullion
+    - https://kinesis.money/company-news/q4-2025-q1-2026-quarterly-update/
+    - https://kinesis.money/company-news/kag-listed-on-mexc-exchange/
+    - https://support.kinesis.money/hc/en-gb/articles/12329392783133-Referrer-s-Yield-Everything-You-Need-to-Know
+
+- issuer_name: "VNX"
+  product: "VNXAU (ERC-20 on Ethereum, Polygon, Base; also Solana, Stellar, Tezos/Etherlink). Unit: 1 token = 1 gram of LBMA-grade gold"
+  legal: "Issued by VNX Commodities AG, Vaduz, registered with Liechtenstein FMA under TVTG; allocated bars with serial numbers in a Liechtenstein vault (Philoro); AREVA agreed-upon-procedures report at 2025-12-31 (13,100 tokens vs 13,100 g); exchange venue is VNX Global Ltd (Bermuda, BMA Class M licence)"
+  redemption: "Verified users sell back to VNX Global for fiat/stablecoin at the platform rate (institutional onboarding 1 to 3 days) or request physical delivery from 1 kg bars (about 1,000 VNXAU) collected in Liechtenstein or shipped at own cost; old vnx.li platform offline ('under construction')"
+  fees: "VNX Global conversion fee 2% built into the rate; crypto withdrawal = network fee x3; SWIFT withdrawal GBP/CHF 30; 3% penalty on unused fiat above USD 100k; no storage fee"
+  minimum: "No published minimum on platform; 1 kg for physical"
+  kyc: "Platform KYC/KYB with proof of wallet ownership; token freely transferable, DEX liquidity on Uniswap, Aerodrome, Jupiter (thin, about USD 20k/day)"
+  affiliate: "None found"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: []
+  unclear: [FR, US]
+  notes: "VNX Global says it serves 'retail customers located outside the EEA and not in prohibited or sanctioned jurisdictions' with the list shown only at signup. FR: issuer is EEA-based but the only live venue excludes EEA and the token lacks MiCA ART authorisation. US: not named anywhere; Bermuda platform eligibility 'depends on country of residence'."
+  sources:
+    - https://vnx.io/about
+    - https://vnx.io/gold
+    - https://vnx.io/precious-metals-access
+    - https://prod-global-terms.s3.sa-east-1.amazonaws.com/VNX-Global-Terms.pdf
+    - https://vnx.li/
+    - https://pharos.watch/stablecoin/vnxau-vnx/
+
+- issuer_name: "Comtech Gold"
+  product: "CGO (XRC-20 on XDC Network). Unit: 1 token = 1 gram of 999.9 gold (CMC gold reference is per troy ounce, so CGO price is about 1/31.1 of it)"
+  legal: "Comtech Gold DMCC, Dubai; gold in 1 kg bars from recognised refineries held segregated and insured with a DMCC-approved vaulting partner (Emirates Group company), each bar carrying a DMCC Tradeflow warrant; Shariah fatwa by Amanie Advisors; periodic third-party audits, no public attestation schedule"
+  redemption: "In the ComTech Gold app after KYC: sell for cash, or physical delivery from 10 g in 1 g steps (coins/bars with making charges) to the door within UAE or to the nearest airport abroad with the holder clearing customs; 1,000 CGO for a 1 kg bar"
+  fees: "0 custody fee for the first 24 months then a 'nominal' storage fee with notice; making and delivery charges on physical; app spread unpublished; CEX fees on Bitrue/LBank/BitMart"
+  minimum: "0.5 g in the app; 10 g for delivery"
+  kyc: "App KYC for buy/sell/redeem; token freely transferable on XDC, tradable on XSwap DEX and Bitrue/LBank/BitMart without issuer KYC"
+  affiliate: "None found"
+  allowed: [BJ, TG, SN, CI, CM, NG, GH, KE, EG]
+  excluded: []
+  unclear: [FR, US]
+  notes: "No country list published; the app collects location and residence at KYC. US: Bitrue/LBank/BitMart exclude US residents, DEX only. FR: no MiCA ART authorisation and listing venues are not EEA-licensed. Physical redemption is effectively UAE-only. Both comtechgold.com and cgold.ae are JS single-page apps; terms not retrievable as a document."
+  sources:
+    - https://cgold.ae/
+    - https://comtechgold.com/
+    - https://www.theblock.co/post/189073/dubais-dmcc-partners-with-comtech-for-blockchain-based-gold-trading
+    - https://www.newsfilecorp.com/release/133981/The-Fully-Gold-Backed-Token-ComTech-Gold-CGO-Is-Now-Available-for-Trading-on-LBank-Exchange
+    - https://bitmart.zendesk.com/hc/en-us/articles/10198493731995-Comtech-Gold-CGO
+
+- issuer_name: "XAGx"
+  product: "XAGX Silver Token (ERC-20 on Avalanche C-Chain). Unit: 1 token = 1 troy ounce of silver (Bloomberg-indexed)"
+  legal: "NEOMO Technologies & Trading LLC (Georgia); claims physical silver 'stored in banks and safes'; no custodian, audit or attestation published"
+  redemption: "None documented; CMC shows zero market cap and zero volume"
+  fees: "Unpublished"
+  minimum: "Unpublished"
+  kyc: "Unpublished"
+  affiliate: "None found"
+  allowed: []
+  excluded: []
+  unclear: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, FR, US]
+  notes: "Appears dormant: xagx.org resolves to a Namecheap parking page ('recently registered') as of 2026-09-16. Kept only because CMC still lists it under issuer 'XAGx'. Do not route users here."
+  sources:
+    - https://coinmarketcap.com/currencies/silver-token-xagx/
+    - http://xagx.org
+
+- issuer_name: "Token"
+  product: "GRAMS Gram Silver (Avalanche C-Chain, Polygon, Ethereum). Unit: 1 token = 1 gram of 0.999 silver"
+  legal: "Token Teknoloji A.S. (Turkey, est. 2021); silver 'in the company's vaults' matched 1:1 by mint/burn; reserve evidence link on site, no third-party audit named; Turkish AML/KYC policy"
+  redemption: "Only route published is selling for Turkish lira on Bitlo (Turkish exchange); no physical redemption process described"
+  fees: "No storage/custody fee; Bitlo trading fees; TL-only fiat"
+  minimum: "1 TL on Bitlo"
+  kyc: "Bitlo KYC (Turkish residents); token freely transferable on-chain but no liquidity outside Turkey (CMC market cap and volume 0)"
+  affiliate: "None found"
+  allowed: []
+  excluded: []
+  unclear: [BJ, TG, SN, CI, CM, NG, GH, KE, EG, FR, US]
+  notes: "Turkey-only distribution (Bitlo, TL pairs); the English page even mislabels the peg as platinum. Sister tokens GRAMG (gold), GRAMP (platinum), TRYT. Not usable for the 11 target markets."
+  sources:
+    - https://www.token.com.tr/en/reserve-tokens/gram-silver-grams/
+    - https://coinmarketcap.com/currencies/silver-grams/

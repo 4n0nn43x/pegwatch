@@ -1,0 +1,142 @@
+[
+  {
+    "submission_id": 54555,
+    "buidl_id": 48601,
+    "name": "OverWatch",
+    "owner": "equationx",
+    "nick": "demi",
+    "github": "https://github.com/Valorian0108/Over-Watch",
+    "demo": "https://overwatch-teal.vercel.app/",
+    "video": "https://youtu.be/opxnlAZvXMo",
+    "vision": "market tools feel dense, number-heavy, and intimidating especially for people who do not enjoy complex metrics or math. OverWatch addresses this by taking real live data from CMC and presenting it in a way that feels alive and human instead of technical.",
+    "tracks": [
+      "Data and Visualisation"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-12T12:20:21",
+    "project_description": "",
+    "team_description": "Team leader: EquationX",
+    "upvotes": 0,
+    "created_at": "2026-09-12T20:20:21"
+  },
+  {
+    "submission_id": 54530,
+    "buidl_id": 48443,
+    "name": "Catalyst Edge",
+    "owner": "U_ed86fe9f8bcb2b",
+    "nick": "nanadaka",
+    "github": "https://github.com/esolver3/catalyst-edge",
+    "demo": "https://catalyst-edge.saptael.chatgpt.site",
+    "video": "https://catalyst-edge.saptael.chatgpt.site/Catalyst_Edge_Demo.mp4",
+    "vision": "Catalyst Edge turns live CoinMarketCap data into ranked, explainable long and short research setups with transparent entry, target, invalidation, and risk levels.",
+    "tracks": [
+      "Markets and Trading Tools"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-11T20:54:43",
+    "project_description": "",
+    "team_description": "Independent builder combining market analysis, explainable scoring, and product development to make live crypto signals easier to inspect and evaluate.",
+    "upvotes": 0,
+    "created_at": "2026-09-11T09:14:07"
+  },
+  {
+    "submission_id": 54528,
+    "buidl_id": 48575,
+    "name": "Will RWA Let Me In",
+    "owner": "robinhill85",
+    "nick": "Robinhill85",
+    "github": "https://github.com/Robinhill85/willrwaletmein",
+    "demo": "https://willrwaletmein.com",
+    "video": "https://youtu.be/OR6Wfplwx4w",
+    "vision": "My vision is to make RWA investing as simple as asking a question: an agent helps you understand the assets, check what you can access, and prepare transactions you review and sign in your own wallet.",
+    "tracks": [
+      "AI Agents and Automation"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-11T20:22:26",
+    "project_description": "",
+    "team_description": "Solo project by Robin, combining RWA research, product design and AI-assisted development. I built Will RWA Let Me In and VaultTerms to help people understand tokenized assets, check access requirements and take action through their own wallets.",
+    "upvotes": 0,
+    "created_at": "2026-09-12T04:22:26"
+  },
+  {
+    "submission_id": 54523,
+    "buidl_id": 48570,
+    "name": "Crypto Derivatives Risk Radar",
+    "owner": "CSquant",
+    "nick": "CSquant",
+    "github": "https://github.com/callumconnel1/crypto-derivatives-risk-radar",
+    "demo": "https://cdrr.duckdns.org/",
+    "video": "https://youtu.be/fex3wMqbCPA",
+    "vision": "Turn fragmented crypto-derivatives data into a live, transparent view of where market stress is building and what is driving it.",
+    "tracks": [
+      "Data and Visualisation"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-11T19:14:14",
+    "project_description": "",
+    "team_description": "olo project by Callum Connell, a Theoretical Physics graduate with a focus on quantitative finance, statistical modelling and software development. I designed and built the full CDRR stack independently, including the CoinMarketCap data collector, derivatives-data processing pipeline, volatility and risk models, forward-validation framework, FastAPI backend, Next.js frontend and production VPS deployment. The project combines quantitative research with practical engineering to turn fragmented crypto-derivatives data into an interpretable live risk-monitoring system.",
+    "upvotes": 0,
+    "created_at": "2026-09-12T03:14:14"
+  },
+  {
+    "submission_id": 54384,
+    "buidl_id": 48422,
+    "name": "TrendLab Market Structure Map",
+    "owner": "U_784801dc0b382e",
+    "nick": "Aleksandr ",
+    "github": "https://github.com/ruiui009-art/trendlab-market-structure-map",
+    "demo": "https://map.trendlab.space/",
+    "video": "https://youtu.be/ktiws7bGvO0?si=fie8H4iMJ56O-Pjf",
+    "vision": " TrendLab helps crypto researchers distinguish broad market participation from moves driven by only large-cap assets or a narrow category, so they can use more precise language before publishing a market narrative.",
+    "tracks": [
+      "Data and Visualisation"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-10T14:56:03",
+    "project_description": "",
+    "team_description": "Solo project by Sasha, a crypto researcher and content creator. Responsibilities: product framing, market-research methodology, data interpretation, demo, and distribution.",
+    "upvotes": 0,
+    "created_at": "2026-09-10T22:56:03"
+  },
+  {
+    "submission_id": 54331,
+    "buidl_id": 48344,
+    "name": "Elephant Tracks",
+    "owner": "edycutjong",
+    "nick": "Edy Cu",
+    "github": "https://github.com/edycutjong/elephant",
+    "demo": "https://elephant.edycu.dev",
+    "video": "https://youtu.be/I1yOhXSutAk",
+    "vision": "Every DEX flow tool reduces the tape to one signed number, and that number cannot tell one desk selling into a crowd from a thousand matched pairs. Elephant Tracks makes the shape of flow readable from data anyone can already fetch.",
+    "tracks": [
+      "Data and Visualisation"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-09T10:02:55",
+    "project_description": "",
+    "team_description": "Solo build by Edy Cu. A keyless CLI and a static page that split DEX flow by maker address: 111 tests at 100% coverage of scripts/, a 6-stage CI whose last stage runs the real API call with no secret configured, and every published number traceable to a committed receipt.",
+    "upvotes": 0,
+    "created_at": "2026-09-08T12:17:05"
+  },
+  {
+    "submission_id": 54326,
+    "buidl_id": 48301,
+    "name": "CMC-Alpha-Terminal",
+    "owner": "U_31eba657a235b6",
+    "nick": "Ishant5436",
+    "github": "https://github.com/Ishant5436/cmc-alpha-terminal",
+    "demo": "https://github.com/Ishant5436/cmc-alpha-terminal",
+    "video": "https://github.com/Ishant5436/cmc-alpha-terminal/raw/main/assets/cmc_terminal_demo.mp4",
+    "vision": "An institutional-grade, zero-heap quantitative screening engine and FastMCP agent gateway powered by the CoinMarketCap Pro API with Power of 10 Deterministic Safety Invariants.",
+    "tracks": [
+      "AI Agents and Automation"
+    ],
+    "status": 4,
+    "submit_time": "2026-09-09T04:04:07",
+    "project_description": "",
+    "team_description": "Solo Quantitative Developer & System Engineer specializing in deterministic C++20 trading architectures, low-latency market data processing, and FastMCP AI agent integrations adhering strictly to Gerard J. Holzmann Power of 10 Safety Invariants.",
+    "upvotes": 0,
+    "created_at": "2026-09-07T00:27:56"
+  }
+]

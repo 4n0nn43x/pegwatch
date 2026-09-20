@@ -1,0 +1,8 @@
+id,uname,title,description,start_time,end_time,bonus_price,token,ecosystem,field_tag,status,buidls_count,hackers_count,winner_announced,participation_form,organization_name,tracks_count,sponsors_count,tabs_count
+2363,coinmarketcap-api-202609,Build with CMC: API Hackathon,"# Build with CMC: API Hackathon
+
+CoinMarketCap tracks prices, market caps, exchange volumes, DEX pairs, derivatives and on-chain data across every major chain. All of it is available through the CMC API, and most developers have never made a single call against it.
+
+This hackathon is three weeks to change that. Build something that runs on CMC data. A bot, a dashboard, an agent tool, a screener, a research assistant. Anything a real person would use.
+
+Every participant gets a FREE Startup tier p",,,0.0,,"CoinMarketCap API,API,CMC API,CMC Pro API",,,23,159,False,,,4,0,0

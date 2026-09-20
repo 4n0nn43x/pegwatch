@@ -1,0 +1,21 @@
+id,name,description,bonus_price,token,buidls_count
+4620,Markets and Trading Tools,"Tools for people who watch markets. Screeners, alert bots, scanners, portfolio and PnL trackers, backtesting utilities, anything that turns raw market data into a decision.
+
+Useful endpoints: listings, quotes, OHLCV historical, derivatives, liquidations, exchange data.
+
+Judging criteria: Does it work (30), Usefulness to a real trader or investor (25), Interesting use of the API (20), Code quality and documentation (15), Presentation (10).",0.0,,0
+4621,AI Agents and Automation,"Market data in front of a model. MCP integrations, agent tools, research assistants, workflow automations, chatbots that answer questions with live data instead of stale training data.
+
+Useful endpoints: quotes, global metrics, trending, categories, plus anything the agent needs to answer a real question.
+
+Judging criteria: Does it work (30), Does the agent do something a plain API call could not (25), Interesting use of the API (20), Code quality and documentation (15), Presentation (10).",0.0,,0
+4622,Data and Visualisation,"Making the data legible. Dashboards, comparative analysis, research tools, visualisations, anything that shows something in the data that was not obvious before.
+
+Useful endpoints: historical quotes, OHLCV, global metrics, categories, DEX pairs, exchange listings.
+
+Judging criteria: Does it work (30), Does it reveal something genuinely non-obvious (25), Interesting use of the API (20), Craft and clarity of the output (15), Presentation (10).",0.0,,0
+4633,Real World Assets,"Tokenised equities, gold, treasuries, funds and real estate, plus the issuers behind them. RWA screeners, issuer explorers, tools that compare a tokenised asset against its underlying, portfolio trackers that hold crypto and tokenised TradFi in the same view.
+
+Useful endpoints: RWA ID map, RWA info, RWA list, RWA quotes latest, RWA market pairs, issuers list, single issuer.
+
+Judging criteria: Does it work (30), Usefulness to someone tracking tokenised assets (25), Interesting use of the API (20), Code quality and documentation (15), Presentation (10).",0.0,,0

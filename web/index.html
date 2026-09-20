@@ -1,0 +1,697 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>pegwatch: the real price</title>
+<meta name="description" content="What a dollar, a share of Nvidia or an ounce of gold really cost from where you are, right now: the P2P dollar premium in 48 currencies by payment rail, tokenized stock and gold premiums by wrapper, and who may buy what from where.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;800&display=block" rel="stylesheet">
+<style>
+:root{
+  --u: min(calc(100vw / 1280), calc(100dvh / 760));
+  --ink:#ffffff; --ink-muted:#ededed; --ink-2:#a9a9a9; --panel:#181818; --panel-2:#111;
+  --white-btn:#fdfdfd; --btn-ink:#050505; --glass-fill:rgba(0,0,0,.78); --glass-line:rgba(255,255,255,.09);
+  --line:rgba(255,255,255,.1); --accent:#a78bfa;
+  --dx:8.5; --dy:13.1;
+  --e-reveal:cubic-bezier(.16,1,.3,1); --e-soft:cubic-bezier(.25,.8,.3,1);
+  /* diverging: blue = discount, red = premium, gray = at par (dark surface steps) */
+  --div-neg:#3b82f6; --div-mid:#383835; --div-pos:#ef4444;
+  --good:#0ca30c; --warn:#fab219; --bad:#ec835a;
+  /* surface ladder on black, +2 to +4 % per step; text scale; accent tints */
+  --s1:rgba(255,255,255,.03); --s2:rgba(255,255,255,.05); --s3:rgba(255,255,255,.08);
+  --line-2:rgba(255,255,255,.14); --t1:#fff; --t2:#d0d6e0; --t3:#8a8f98; --t4:#62666d;
+  --acc-12:rgba(167,139,250,.12); --acc-35:rgba(167,139,250,.35);
+  --r-card:16px; --r-ctl:10px; --ease:cubic-bezier(.2,.7,.2,1);
+  --card-shadow:inset 0 1px 0 rgba(255,255,255,.06),0 0 0 1px var(--line);
+  --hover-ring:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 1px var(--line-2);
+  --hover-shadow:0 8px 24px rgba(0,0,0,.45),0 0 0 1px var(--line-2),inset 0 1px 0 rgba(255,255,255,.1);
+}
+@supports not (height:100dvh){ :root{ --u:min(calc(100vw / 1280), calc(100vh / 760)); } }
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:#000;overflow-x:hidden}
+body{font-family:'Plus Jakarta Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;-webkit-font-smoothing:antialiased;-moz-osx-font-smoothing:grayscale;text-rendering:geometricPrecision;color:var(--ink)}
+a{color:inherit}
+a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:3px;border-radius:99px}
+
+/* ---------- hero ---------- */
+.hero{position:relative;width:100vw;height:100dvh;overflow:hidden;background:#000}
+@supports not (height:100dvh){ .hero{height:100vh} }
+.bg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:max(100vw,calc(100dvh * 1.6));height:max(62.5vw,100dvh);background-color:#000}
+@supports not (height:100dvh){ .bg{width:max(100vw,calc(100vh * 1.6));height:max(62.5vw,100vh)} }
+.bg canvas{position:absolute;inset:0;width:100%;height:100%;display:block;pointer-events:none}
+.bg::after{content:"";position:absolute;inset:0;background:linear-gradient(to bottom,rgba(0,0,0,0) 60%,#000 100%)}
+.hero::before{content:"";position:absolute;left:50%;top:50%;width:min(1100px,110vw);height:min(720px,90vh);transform:translate(-50%,-47%);background:radial-gradient(ellipse at center,rgba(0,0,0,.82) 0%,rgba(0,0,0,.62) 38%,rgba(0,0,0,0) 72%);z-index:1;pointer-events:none}
+
+.nav{position:absolute;top:0;left:0;right:0;height:calc(67 * var(--u));display:flex;align-items:center;padding-left:calc(24.5 * var(--u));padding-right:calc(50.7 * var(--u));z-index:3;transition:background .25s ease,border-color .25s ease,height .25s ease}
+.nav.fixed{position:fixed;height:56px;background:rgba(6,6,8,.72);-webkit-backdrop-filter:blur(18px) saturate(140%);backdrop-filter:blur(18px) saturate(140%);border-bottom:1px solid rgba(255,255,255,.08);z-index:20}
+.nav.fixed .logo{font-size:20px;transform:none}
+.nav.fixed .nav-links{transform:translate(-50%,-50%)}
+.nav-links a.active{color:#fff}
+.nav-links a{position:relative;padding:6px 2px}
+.nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:1.5px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .22s var(--e-soft)}
+.nav-links a.active::after{transform:scaleX(1)}
+/* sections rise into view once */
+.reveal{opacity:0;transform:translateY(18px);transition:opacity .7s var(--e-reveal),transform .7s var(--e-reveal)}
+.reveal.in{opacity:1;transform:none}
+@media (prefers-reduced-motion:reduce){.reveal{opacity:1;transform:none}}
+.logo{font-weight:800;font-size:calc(26 * var(--u));letter-spacing:calc(0.45 * var(--u));transform:translateY(calc(-2.4 * var(--u)));line-height:1;color:var(--ink);text-decoration:none;white-space:nowrap}
+.nav-links{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translateX(calc(-23 * var(--u)));display:flex;align-items:center;gap:calc(24.3 * var(--u));white-space:nowrap}
+.nav-links a{color:var(--ink-muted);text-decoration:none;font-size:calc(11.5 * var(--u));font-weight:500;letter-spacing:calc(-0.15 * var(--u));line-height:1;transition:color .18s ease}
+.nav-links a:hover{color:#fff}
+.nav-actions{margin-left:auto;display:flex;align-items:center;gap:calc(6.8 * var(--u))}
+.btn{display:inline-flex;align-items:center;justify-content:center;font-family:inherit;text-decoration:none;white-space:nowrap;border:0;cursor:pointer}
+.btn-login{height:calc(28 * var(--u));padding:0 calc(12.9 * var(--u));border-radius:calc(14 * var(--u));background:var(--panel);color:#e8e8e8;font-size:calc(11.5 * var(--u));font-weight:500;letter-spacing:calc(-0.15 * var(--u));transition:background .18s ease,color .18s ease}
+.btn-login:hover{background:#232323;color:#fff}
+.btn-nav-start{height:calc(28 * var(--u));padding-left:calc(13.5 * var(--u));padding-right:calc(14.5 * var(--u));border-radius:calc(14 * var(--u));background:var(--white-btn);color:var(--btn-ink);font-size:calc(11.1 * var(--u));font-weight:500;letter-spacing:0;gap:calc(7 * var(--u));transition:background .18s ease}
+.btn-nav-start:hover{background:#fff}
+.btn-nav-start .arw{width:calc(11.5 * var(--u));height:calc(9.6 * var(--u))}
+.burger{display:none;margin-left:auto;width:calc(40 * var(--u));height:calc(28 * var(--u));align-items:center;justify-content:center;background:var(--panel);border-radius:calc(14 * var(--u));border:0;cursor:pointer;padding:0}
+.burger span{display:block;width:16px;height:1.5px;background:#ededed;border-radius:2px;position:relative}
+.burger span::before,.burger span::after{content:"";position:absolute;left:0;width:16px;height:1.5px;background:#ededed;border-radius:2px}
+.burger span::before{top:-5px}.burger span::after{top:5px}
+.arw{flex:0 0 auto;display:block}
+
+.hero-inner{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) translate(calc(var(--dx) * var(--u)),calc(var(--dy) * var(--u)));width:max-content;text-align:center;z-index:2}
+.ln{display:block}.ln-i{display:block}
+h1{margin:0;font-weight:500;font-size:calc(89 * var(--u));line-height:calc(90 * var(--u));letter-spacing:calc(-1 * var(--u));color:var(--ink);text-shadow:0 2px 24px rgba(0,0,0,.8)}
+.sub{margin:calc(16.1 * var(--u)) 0 0;font-weight:300;font-size:calc(17.4 * var(--u));line-height:calc(27 * var(--u));letter-spacing:calc(-0.30 * var(--u));color:#f6f6f6;text-shadow:0 1px 12px rgba(0,0,0,.9),0 0 2px rgba(0,0,0,.9)}
+.ctas{margin-top:calc(21.8 * var(--u));display:flex;align-items:center;justify-content:center;transform:translateX(calc(-0.75 * var(--u)));gap:calc(7 * var(--u))}
+.btn-lg{height:calc(39 * var(--u));border-radius:calc(19.5 * var(--u));font-size:calc(13.3 * var(--u));font-weight:500;letter-spacing:calc(-0.3 * var(--u));gap:calc(9 * var(--u))}
+.btn-primary{background:var(--white-btn);color:var(--btn-ink);padding-left:calc(18.2 * var(--u));padding-right:calc(19.2 * var(--u));transition:background .18s ease,transform .18s ease}
+.btn-primary:hover{background:#fff}
+.btn-ghost{background:var(--glass-fill);color:#d9d9d9;padding:0 calc(17.4 * var(--u));border:1px solid var(--glass-line);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);transition:background .18s ease,border-color .18s ease}
+.btn-ghost:hover{background:rgba(0,0,0,.66);border-color:rgba(255,255,255,.16)}
+.btn-lg .arw{width:calc(13 * var(--u));height:calc(10.8 * var(--u))}
+
+.menu{display:none}
+@keyframes menuIn{from{opacity:0;transform:translateY(-6px) scale(.985)}to{opacity:1;transform:none}}
+
+/* ---------- content ---------- */
+.wrap{max-width:1120px;margin:0 auto;padding:0 24px}
+section.block{padding:104px 0 32px;position:relative}
+section.block+section.block::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent)}
+.kicker{font-size:12px;letter-spacing:.1em;text-transform:uppercase;color:var(--accent);font-weight:600;margin:0 0 12px;display:flex;align-items:center;gap:10px}
+.kicker::before{content:"";width:18px;height:1px;background:var(--accent);opacity:.7}
+h2{font-weight:500;font-size:clamp(28px,3.6vw,44px);letter-spacing:-.022em;line-height:1.08;margin:0 0 16px}
+h2 em{font-style:normal;background:linear-gradient(180deg,#fff 0%,#a78bfa 140%);-webkit-background-clip:text;background-clip:text;color:transparent}
+.lead{color:var(--t3);font-weight:300;font-size:18px;line-height:1.55;max-width:60ch;margin:0 0 40px}
+.lead b{color:var(--t2);font-weight:500}
+.controls{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 24px}
+.controls label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--t3);letter-spacing:.02em}
+select,input[type=number]{font:inherit;font-size:15px;color:var(--t1);background:linear-gradient(180deg,var(--s2),var(--s1));border:0;box-shadow:var(--card-shadow);border-radius:var(--r-ctl);padding:10px 14px;min-width:200px;transition:box-shadow .2s var(--ease)}
+select:hover,input[type=number]:hover{box-shadow:var(--hover-ring)}
+select option{background:#0f1011;color:#fff}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:16px}
+.card{position:relative;background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow);border-radius:var(--r-card);padding:20px 22px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
+.card:hover{transform:translateY(-2px);box-shadow:var(--hover-shadow)}
+.card h3{margin:0 0 10px;font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:var(--t3)}
+.big{font-size:34px;font-weight:500;letter-spacing:-.02em;line-height:1.1;margin:2px 0 8px;font-variant-numeric:tabular-nums;display:flex;align-items:baseline;flex-wrap:wrap;gap:8px}
+.big small{font-size:14px;color:var(--t3);font-weight:400;letter-spacing:0}
+.meta{font-size:13px;color:var(--t3);line-height:1.55}
+.meta b{color:var(--t2);font-weight:500}
+.chip{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:999px;font-variant-numeric:tabular-nums;vertical-align:middle}
+.chip.pos{background:rgba(203,49,49,.14);color:#ff7a7a}
+.chip.neg{background:rgba(61,180,104,.14);color:#59d499}
+.chip.flat{background:var(--s3);color:var(--t2)}
+.total{box-shadow:var(--card-shadow),0 0 0 1px rgba(167,139,250,.35),0 0 48px rgba(167,139,250,.12)}
+.total::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(120% 80% at 100% 0%,rgba(167,139,250,.14),transparent 60%);pointer-events:none}
+.total .big{color:#fff}
+.tbl{overflow:auto;max-height:560px;border-radius:var(--r-card);background:var(--s1);box-shadow:var(--card-shadow)}
+table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
+th,td{padding:0 14px;height:44px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
+th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);font-weight:600;position:sticky;top:0;z-index:2;background:rgba(10,10,12,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+tbody tr{transition:background .15s ease}
+tbody tr:hover td{background:var(--s1)}
+tr:last-child td{border-bottom:0}
+td.num,th.num{text-align:right}
+td .v{display:block;line-height:1.1}
+td .bar{display:block;height:3px;border-radius:2px;background:var(--acc-35);margin:5px 0 0 auto;transition:width .4s var(--ease)}
+td .bar.neg{background:rgba(89,212,153,.45)}
+tr.best td{background:var(--acc-12)}
+tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
+.badge{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:500;padding:3px 9px;border-radius:999px;letter-spacing:.02em}
+.badge::before{content:"";width:6px;height:6px;border-radius:50%;background:currentColor}
+.badge.allowed{background:rgba(61,180,104,.12);color:#59d499}
+.badge.unclear{background:rgba(255,197,51,.12);color:#ffc533}
+.badge.excluded{background:rgba(203,49,49,.12);color:#ff7a7a}
+.badge.likely{background:rgba(96,165,250,.12);color:#8ec2ff}
+.personas{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 18px}
+.persona{font:inherit;font-size:13px;color:var(--t2);background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow);border:0;border-radius:999px;padding:8px 14px;cursor:pointer;transition:box-shadow .2s var(--ease),transform .2s var(--ease)}
+.persona:hover{box-shadow:var(--hover-ring);transform:translateY(-1px)}
+.persona.on{box-shadow:0 0 0 1px rgba(167,139,250,.6),0 0 24px rgba(167,139,250,.15);color:#fff}
+.persona b{font-weight:600;color:#fff}
+.hero{cursor:default}
+.hero-inner,.hero::before{pointer-events:none}
+.hero-inner a{pointer-events:auto}
+.pos{color:#ff7a7a}.neg{color:#59d499}
+.hm{overflow:auto;max-height:640px;border-radius:var(--r-card);background:var(--s1);box-shadow:var(--card-shadow);padding:6px}
+.hm table{font-size:13px;border-spacing:2px}
+.hm th{background:rgba(10,10,12,.9);border-bottom:0;height:40px}
+.hm td{text-align:center;padding:0;border-bottom:0;height:36px}
+.hm td .cell{display:block;padding:9px 6px;min-width:58px;color:var(--t1);border-radius:6px;cursor:default;transition:transform .12s ease}
+.hm td .cell:hover{transform:scale(1.06);outline:1px solid rgba(255,255,255,.25)}
+.hm td.empty .cell{color:var(--t4)}
+.hm th.row{text-align:left;position:sticky;left:0;z-index:3;background:rgba(10,10,12,.92)}
+.hm td.ref,.hm td.spread{color:var(--t2);padding:0 10px;text-align:right}
+.legend{display:flex;align-items:center;gap:10px;font-size:12px;color:var(--t3);margin:14px 0 0;flex-wrap:wrap}
+.legend .bar{width:160px;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--div-neg),var(--div-mid) 50%,var(--div-pos))}
+.tip{position:fixed;pointer-events:none;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.5;color:var(--t1);z-index:30;display:none;max-width:280px}
+.note{font-size:13px;color:var(--t3);margin:16px 0 0;line-height:1.6}
+.note code,.meta code,.method code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--s3);padding:2px 7px;border-radius:6px;color:var(--t2)}
+.method{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.method .card p{margin:0;font-size:14px;line-height:1.6;color:var(--t3)}
+.method .card p b{color:var(--t2);font-weight:500}
+.method .card p a{color:var(--t2)}
+footer{padding:48px 0 56px;color:var(--t3);font-size:13px;line-height:1.7;margin-top:72px;position:relative}
+footer::before{content:"";position:absolute;left:0;right:0;top:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.14),transparent)}
+footer a{color:var(--t2)}
+.reveal{transition-delay:calc(var(--i,0) * 80ms)}
+
+/* ---------- breakpoints (derived from the design) ---------- */
+@media (max-width:1160px){
+  :root{ --u:min(max(0.9px,min(calc(100vw / 1280),calc(100dvh / 760))),calc((100vw - 72px) / 575),calc(100dvh / 620)); }
+  .nav{height:max(58px,calc(67 * var(--u)));padding-left:max(24px,calc(28 * var(--u)));padding-right:max(24px,calc(28 * var(--u)))}
+  .nav-links,.nav-actions{display:none}
+  .burger{display:flex;width:max(46px,calc(48 * var(--u)));height:max(38px,calc(34 * var(--u)));border-radius:999px}
+  .hero-inner{max-width:calc(100vw - 48px)}
+  .sub{font-size:max(16px,calc(17.4 * var(--u)));line-height:max(25px,calc(27 * var(--u)))}
+  .ctas{margin-top:max(26px,calc(21.8 * var(--u)));gap:max(10px,calc(7 * var(--u)))}
+  .btn-lg{height:max(44px,calc(39 * var(--u)));border-radius:max(22px,calc(19.5 * var(--u)));font-size:max(15px,calc(13.3 * var(--u)));gap:max(10px,calc(9 * var(--u)))}
+  .btn-primary{padding-left:max(21px,calc(18.2 * var(--u)));padding-right:max(22px,calc(19.2 * var(--u)))}
+  .btn-ghost{padding-left:max(20px,calc(17.4 * var(--u)));padding-right:max(21px,calc(18.4 * var(--u)))}
+  .btn-lg .arw{width:max(14px,calc(13 * var(--u)));height:max(11.6px,calc(10.8 * var(--u)))}
+  .menu{position:absolute;top:calc(max(58px,calc(67 * var(--u))) - 6px);right:max(24px,calc(28 * var(--u)));width:min(320px,calc(100vw - 48px));background:rgba(10,10,12,.86);-webkit-backdrop-filter:blur(22px);backdrop-filter:blur(22px);border:1px solid rgba(255,255,255,.09);border-radius:20px;padding:10px 8px 12px;flex-direction:column;box-shadow:0 24px 60px rgba(0,0,0,.55);transform-origin:top right;z-index:5}
+  .menu.open{display:flex;animation:menuIn .18s ease both}
+  .menu a{color:var(--ink-muted);text-decoration:none;font-size:15px;font-weight:500;letter-spacing:calc(-0.15 * var(--u));padding:12px 14px;border-radius:12px;transition:background .18s ease,color .18s ease}
+  .menu a:hover{background:rgba(255,255,255,.06);color:#fff}
+  .menu .divider{height:1px;background:rgba(255,255,255,.08);margin:8px 14px}
+  .menu .m-start{display:flex;align-items:center;justify-content:center;gap:9px;background:var(--white-btn);color:var(--btn-ink);margin:6px 8px 0;padding:13px 16px;border-radius:14px;font-weight:600}
+  .menu .m-start:hover{background:#fff;color:var(--btn-ink)}
+  .menu .m-start .arw{width:13px;height:11px}
+}
+@media (max-width:552px){
+  :root{--u:1px}
+  .nav{height:56px;padding:0 20px}
+  .logo{font-size:22px;letter-spacing:-.4px}
+  .burger{width:42px;height:36px}
+  .hero-inner{position:absolute;left:0;right:0;top:50%;width:auto;max-width:none;padding:0 20px;transform:translateY(-47%)}
+  h1{font-size:min(74px,calc((100vw - 44px) / 6.9));line-height:1.04;letter-spacing:-.02em}
+  .sub{margin-top:16px;font-size:clamp(15.5px,4vw,16.5px);line-height:1.6;letter-spacing:0;max-width:42ch;margin-left:auto;margin-right:auto}
+  .sub br{display:none}
+  .ctas{margin-top:24px;gap:10px;transform:none;flex-wrap:wrap}
+  .btn-lg{height:46px;border-radius:23px;font-size:15px;gap:9px}
+  .btn-primary{padding-left:20px;padding-right:21px}
+  .btn-ghost{padding-left:19px;padding-right:20px}
+  .btn-lg .arw{width:13px;height:11px}
+  .menu{top:50px;left:16px;right:16px;width:auto}
+  .menu a{font-size:15.5px;padding:13px 14px}
+  .menu .m-start{padding:14px 16px}
+  .wrap{padding:0 16px}
+  section.block{padding:52px 0 16px}
+  select,input[type=number]{min-width:0;width:100%}
+  .controls label{flex:1 1 140px}
+}
+@media (max-width:353px){ .ctas{flex-direction:column;align-items:center} .btn-lg{width:min(100%,272px)} }
+@media (max-width:552px) and (max-height:460px){
+  h1{font-size:min(44px,calc((100vw - 44px) / 6.9))}
+  .sub{margin-top:12px;font-size:15px;line-height:1.5}
+  .ctas{margin-top:18px}
+  .hero-inner{transform:translateY(-44%)}
+}
+
+/* ---------- entrance ---------- */
+html.anim .ln{overflow:hidden;padding-top:.26em;margin-top:-.26em}
+html.anim .ln-i{transform:translateY(100%)}
+html.anim .logo,html.anim .nav-links a,html.anim .nav-actions .btn,html.anim .burger,html.anim .sub,html.anim .ctas .btn{opacity:0}
+.ln-i,.logo,.nav-links a,.nav-actions .btn,.sub,.ctas .btn{will-change:transform,opacity}
+@keyframes lineRise{from{transform:translateY(100%)}to{transform:translateY(0)}}
+@keyframes subIn{from{opacity:0;transform:translateY(calc(14 * var(--u)));filter:blur(4px)}to{opacity:1;transform:none;filter:blur(0)}}
+@keyframes subInFlat{from{opacity:0;transform:translateY(calc(12 * var(--u)))}to{opacity:1;transform:none}}
+@keyframes pillIn{from{opacity:0;transform:translateY(calc(8 * var(--u))) scale(.972)}to{opacity:1;transform:none}}
+@keyframes liftIn{from{opacity:0;transform:translateY(calc(9 * var(--u)))}to{opacity:1;transform:none}}
+@keyframes logoIn{from{opacity:0;transform:translateY(calc(-2.4 * var(--u))) translateY(calc(9 * var(--u)))}to{opacity:1;transform:translateY(calc(-2.4 * var(--u)))}}
+html.anim.go .ln-i{animation:lineRise 1.05s var(--e-reveal) both}
+html.anim.go .ln:nth-child(1) .ln-i{animation-delay:.12s}
+html.anim.go .ln:nth-child(2) .ln-i{animation-delay:.22s}
+html.anim.go .logo{animation:logoIn .62s var(--e-soft) .46s both}
+html.anim.go .nav-links a{animation:liftIn .55s var(--e-soft) both}
+html.anim.go .nav-links a:nth-child(1){animation-delay:.540s}
+html.anim.go .nav-links a:nth-child(2){animation-delay:.585s}
+html.anim.go .nav-links a:nth-child(3){animation-delay:.630s}
+html.anim.go .nav-links a:nth-child(4){animation-delay:.675s}
+html.anim.go .nav-links a:nth-child(5){animation-delay:.720s}
+html.anim.go .sub{animation:subIn .85s var(--e-reveal) .58s both}
+html.anim.go .btn-login{animation:pillIn .55s var(--e-soft) .68s both}
+html.anim.go .burger{animation:pillIn .55s var(--e-soft) .68s both}
+html.anim.go .btn-nav-start{animation:pillIn .55s var(--e-soft) .73s both}
+html.anim.go .ctas .btn-primary{animation:pillIn .70s var(--e-reveal) .90s both}
+html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
+@media (max-width:552px){
+  html.anim.go .sub{animation-name:subInFlat}
+  html.anim.go .ln-i{animation-duration:.92s}
+  html.anim.go .ctas .btn-primary{animation-delay:.84s}
+  html.anim.go .ctas .btn-ghost{animation-delay:.90s}
+}
+@media (prefers-reduced-motion:reduce){
+  html.anim .ln{overflow:visible;padding-top:0;margin-top:0}
+  html.anim .ln-i{transform:none}
+  html.anim .logo,html.anim .nav-links a,html.anim .nav-actions .btn,html.anim .burger,html.anim .sub,html.anim .ctas .btn{opacity:1}
+  *{transition:none!important;animation:none!important}
+}
+</style>
+<script>
+(function(){
+  if (matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  var d = document.documentElement, started = false, cleaned = false, bootT, safeT;
+  d.classList.add('anim');
+  function clean(){ if (cleaned) return; cleaned = true; clearTimeout(safeT); d.removeEventListener('animationend', onEnd, true); d.classList.remove('anim'); d.classList.remove('go'); }
+  function onEnd(e){ if (e.animationName === 'pillIn' && e.target.classList.contains('btn-ghost')) clean(); }
+  function start(){ if (started) return; started = true; clearTimeout(bootT); d.addEventListener('animationend', onEnd, true); safeT = setTimeout(clean, 2600); d.classList.add('go'); }
+  function boot(){ bootT = setTimeout(start, 900); if (document.fonts && document.fonts.ready) document.fonts.ready.then(start, start); else start(); }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', boot); else boot();
+})();
+</script>
+</head>
+<body>
+<main class="hero">
+  <div class="bg" role="img" aria-label="Stylised globe of Earth rendered as a violet dot matrix against a starfield, slowly rotating"><canvas id="globe-bg"></canvas><canvas id="globe"></canvas><canvas id="globe-fx"></canvas></div>
+  <header class="nav">
+    <a class="logo" href="#">pegwatch</a>
+    <nav class="nav-links" aria-label="Primary">
+      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
+    </nav>
+    <div class="nav-actions">
+      <a class="btn btn-login" href="world.json">JSON</a>
+      <a class="btn btn-nav-start" href="https://github.com/" id="ghTop">GitHub <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span></button>
+  </header>
+  <nav class="menu" id="menu" aria-label="Mobile">
+    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
+    <div class="divider"></div>
+    <a href="world.json">JSON</a>
+    <a class="m-start" href="https://github.com/">GitHub <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+  </nav>
+  <div class="hero-inner">
+    <h1><span class="ln"><span class="ln-i">The real</span></span><span class="ln"><span class="ln-i">price</span></span></h1>
+    <p class="sub">What a dollar, a share of Nvidia or an ounce of gold really cost<br>from where you are, right now: 48 currencies, 17 wrappers,<br>by payment rail and by trading regime. Hover a country.</p>
+    <div class="ctas">
+      <a class="btn btn-lg btn-primary" href="#ladder">Your ladder <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+      <a class="btn btn-lg btn-ghost" href="#dollar">The dollar in 48 currencies <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+  </div>
+</main>
+
+<div class="wrap">
+  <section class="block" id="ladder">
+    <p class="kicker">The ladder</p>
+    <h2 id="ladderTitle">One ladder, <em>any country.</em></h2>
+    <p class="lead" id="ladderLead">Pick a country, an asset and an amount. The ladder stacks every layer: what your dollar costs on your payment rail, which wrappers you may actually buy from where you are, and what each one costs against the real asset.</p>
+    <div class="personas" id="personas"></div>
+    <div class="controls">
+      <label>Country <select id="country"></select></label>
+      <label>Asset <select id="asset"></select></label>
+      <label>Amount (local currency) <input type="number" id="amount" value="300000" min="1" step="1000"></label>
+    </div>
+    <div class="reveal grid" id="ladderCards"></div>
+    <div class="reveal tbl"><table id="ladderTable"><thead><tr><th>Wrapper</th><th>Issuer</th><th>Access</th><th class="num">Token price</th><th class="num">vs real asset</th><th class="num">Total cost</th><th class="num">You get</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" id="ladderNote"></p>
+  </section>
+
+  <section class="block" id="heatmap">
+    <p class="kicker">The premiums</p>
+    <h2>Same stock, <em>five prices.</em></h2>
+    <p class="lead">Premium of each tokenized wrapper against the real asset. Reference: the live session print while the NYSE trades, the Hyperliquid oracle in pre and after-hours, Friday's close at night and on weekends (with the perp oracle shown as a proxy). Blue is a discount, red a premium. Hover a cell.</p>
+    <div class="reveal hm" id="hm"></div>
+    <div class="legend"><span>discount</span><span class="bar" aria-hidden="true"></span><span>premium</span><span id="hmMeta" style="margin-left:auto"></span></div>
+    <p class="note">Perp entries ("Derivatives", Hyperliquid Assets) and tokens with no volume or a unit mismatch are excluded from the wrapper spread but listed in the JSON with a <code>suspect</code> flag.</p>
+  </section>
+
+  <section class="block" id="dollar">
+    <p class="kicker">Layer one</p>
+    <h2>What a dollar <em>costs today,</em> in 48 currencies.</h2>
+    <p class="lead">USDT on Binance, Bybit and OKX P2P against the official rate, by payment rail. Depth-weighted median, ads under 100 $ ignored, one ad capped at 10 k$ of weight. Buying and selling differ: the gap is what the crossed market costs. A daily fixing is archived with its hash at 12:00 UTC.</p>
+    <div class="tbl reveal" style="margin-bottom:28px"><table id="worldTable"><thead><tr><th>Country</th><th>Fiat</th><th class="num">Official</th><th class="num">Buy a $</th><th class="num">Sell a $</th><th>Cheapest rail</th><th class="num">Wrappers</th></tr></thead><tbody></tbody></table></div>
+    <div class="controls"><label>Currency detail <select id="fiat"></select></label></div>
+    <div class="reveal grid" id="fiatCards"></div>
+    <div class="reveal tbl"><table id="fiatTable"><thead><tr><th>Side</th><th>Rail</th><th class="num">Price</th><th class="num">vs official</th><th class="num">Ads</th><th class="num">Depth</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" id="fiatNote"></p>
+  </section>
+
+  <section class="block" id="method">
+    <p class="kicker">Method and data</p>
+    <h2>One engine, three layers, <em>no key needed.</em></h2>
+    <div class="reveal method">
+      <div class="card"><h3>CoinMarketCap RWA API</h3><p><b>GET /v5/real-world-assets/map</b> (top 200 assets with tokens, 0 credits) and <b>GET /v5/real-world-assets/quotes/latest?rwa_id=…</b> (every wrapper's price, issuer, volume, plus the perp pseudo-token; 1 credit per 200 assets). Polled every 5 minutes. Feedback on what the API lacks is in <a href="FEEDBACK.md">FEEDBACK.md</a>.</p></div>
+      <div class="card"><h3>Real-asset reference</h3><p><b>Ostium</b> price feed (session prints, last close, XAU and XAG spot) and the <b>Hyperliquid xyz oracle</b> (moves 24/7). NYSE regime from the New York clock and the holiday calendar.</p></div>
+      <div class="card"><h3>P2P dollar</h3><p>Public P2P order books of <b>Binance, Bybit and OKX</b> for USDT in XOF, XAF, NGN, GHS, KES, EGP, both sides, three pages, payment methods normalised to rails. Official rate: EUR peg for CFA francs, interbank for the rest.</p></div>
+      <div class="card"><h3>Who may buy what</h3><p>A hand-checked matrix of 17 issuers × 11 countries from their terms and restricted-country lists, with redemption terms and KYC path. Elsewhere, <b>likely</b> means the issuer publishes an exclusion list the country is not on; <b>unclear</b> means it publishes nothing. We say so rather than guess.</p></div>
+    </div>
+    <p class="note">Everything on this page is a static JSON you can read directly: <code>world.json</code>, <code>ladder/&lt;CC&gt;.json</code>, <code>premiums/latest.json</code>, <code>fixing/latest.json</code>. Information only, no advice, no execution.</p>
+  </section>
+
+  <footer>pegwatch, built for the CoinMarketCap API hackathon, September 2026. Data refreshed every 5 minutes; if a source is down the page shows the last snapshot with its age. <a href="https://github.com/" id="ghFoot">Source on GitHub</a>.</footer>
+</div>
+<div class="tip" id="tip"></div>
+
+<script>
+(function(){
+  var nav = document.querySelector('.nav'), hero = document.querySelector('.hero'), links = [].slice.call(document.querySelectorAll('.nav-links a[href^="#"]'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function onScroll(){
+    nav.classList.toggle('fixed', scrollY > hero.offsetHeight - 60);
+    var y = scrollY + innerHeight * 0.4, cur = -1;
+    secs.forEach(function(sec, i){ if (sec && sec.offsetTop <= y) cur = i; });
+    links.forEach(function(a, i){ a.classList.toggle('active', i === cur && scrollY > hero.offsetHeight - 60); });
+  }
+  addEventListener('scroll', onScroll, {passive: true}); onScroll();
+  if ('IntersectionObserver' in window) {
+    var ro = new IntersectionObserver(function(es){ es.forEach(function(e){ if (e.isIntersecting) { e.target.classList.add('in'); ro.unobserve(e.target); } }); }, {rootMargin: '0px 0px -8% 0px'});
+    document.querySelectorAll('.reveal').forEach(function(el){ ro.observe(el); });
+  } else document.querySelectorAll('.reveal').forEach(function(el){ el.classList.add('in'); });
+})();
+</script>
+
+<script>
+(function(){
+  var b = document.getElementById('burger'), m = document.getElementById('menu');
+  if (!b || !m) return;
+  function set(open){ m.classList.toggle('open', open); b.setAttribute('aria-expanded', String(open)); b.setAttribute('aria-label', open ? 'Close menu' : 'Open menu'); }
+  b.addEventListener('click', function(e){ e.stopPropagation(); set(!m.classList.contains('open')); });
+  m.addEventListener('click', function(e){ if (e.target.closest('a')) set(false); });
+  document.addEventListener('click', function(e){ if (m.classList.contains('open') && !m.contains(e.target) && !b.contains(e.target)) set(false); });
+  document.addEventListener('keydown', function(e){ if (e.key === 'Escape' && m.classList.contains('open')) { set(false); b.focus(); } });
+})();
+</script>
+
+<script>
+(function(){
+  var COUNTRIES = {}, world = null;
+  var PERSONAS = [
+    {name: 'Aminata', where: 'Cotonou', when: 'Saturday 2 pm', cc: 'BJ', asset: 'NVDA', amount: 300000, story: 'She wants to put <b>300 000 CFA francs</b> into Nvidia. The NYSE is closed, the BCEAO does not sell her dollars, and every tokenized Nvidia has its own price. Her dollar comes through MTN MoMo.'},
+    {name: 'Chidi', where: 'Lagos', when: 'Tuesday night', cc: 'NG', asset: 'TSLA', amount: 800000, story: 'Binance has no naira rails since 2024, so his dollar comes from Bybit and OKX P2P by bank transfer, and the wrapper list is not the same as in Cotonou.'},
+    {name: 'Léa', where: 'Paris', when: 'Sunday evening', cc: 'FR', asset: 'NVDA', amount: 1000, story: 'No parallel dollar in the euro zone, so layer one is zero. The access matrix does the work: Ondo and Backed via Bybit are closed to EEA retail, Robinhood is not.'},
+    {name: 'Mateo', where: 'Buenos Aires', when: 'Friday after close', cc: 'AR', asset: 'GOLD', amount: 2000000, story: 'The peso has an official rate and a market rate; the crypto dollar sits in between. Gold tokens are the cheapest way out, if the issuer takes Argentines.'}
+  ];
+  var $ = function(id){ return document.getElementById(id); };
+  var pct = function(x, d){ return x == null ? '' : (x >= 0 ? '+' : '') + (x * 100).toFixed(d == null ? 2 : d) + '%'; };
+  var num = function(x, d){ return x == null ? '' : Number(x).toLocaleString('en-US', {maximumFractionDigits: d == null ? 2 : d, minimumFractionDigits: d == null ? 2 : d}); };
+  var cls = function(x){ return x > 0.0005 ? 'pos' : x < -0.0005 ? 'neg' : ''; };
+  var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
+  var age = function(ts){ var m = Math.round((Date.now() - Date.parse(ts)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.round(m / 60) + ' h ago'; };
+  var get = function(url){ return fetch(url, {cache: 'no-store'}).then(function(r){ if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); }); };
+
+  var ladder = null, premiums = null, fixing = null;
+
+  /* ---- ladder ---- */
+  var cSel = $('country'), aSel = $('asset'), amt = $('amount'), activePersona = null;
+  function fillCountries(list){
+    list.slice().sort(function(a, b){ return a.name.localeCompare(b.name); }).forEach(function(c){ COUNTRIES[c.cc] = c.name; var o = document.createElement('option'); o.value = c.cc; o.textContent = c.name; cSel.appendChild(o); });
+  }
+  function setPersona(p){
+    activePersona = p;
+    [].forEach.call($('personas').children, function(b){ b.classList.toggle('on', p && b.dataset.cc === p.cc); });
+    if (p) { $('ladderTitle').innerHTML = esc(p.name) + ', ' + esc(p.where) + ', <em>' + esc(p.when) + '.</em>'; $('ladderLead').innerHTML = p.story; }
+    else { $('ladderTitle').innerHTML = 'Your ladder, <em>' + esc(COUNTRIES[cSel.value] || cSel.value) + '.</em>'; $('ladderLead').textContent = 'Pick a country, an asset and an amount. The ladder stacks every layer: what your dollar costs on your payment rail, which wrappers you may actually buy from where you are, and what each one costs against the real asset.'; }
+  }
+  PERSONAS.forEach(function(p){ var b = document.createElement('button'); b.className = 'persona'; b.dataset.cc = p.cc; b.innerHTML = '<b>' + esc(p.name) + '</b> · ' + esc(p.where) + ' · ' + esc(p.asset); b.addEventListener('click', function(){ amt.value = p.amount; cSel.value = p.cc; setPersona(p); loadLadder(p.cc, p.asset); }); $('personas').appendChild(b); });
+  window.pegwatchSelect = function(cc){ if (!COUNTRIES[cc]) return; cSel.value = cc; setPersona(null); loadLadder(cc); document.getElementById('ladder').scrollIntoView({behavior: 'smooth'}); };
+  function loadLadder(cc, wantAsset){
+    get('ladder/' + cc + '.json').then(function(d){
+      ladder = d;
+      var keep = wantAsset || aSel.value;
+      aSel.innerHTML = '';
+      d.assets.forEach(function(a){ var o = document.createElement('option'); o.value = a.symbol; o.textContent = a.symbol + '  ' + a.name; aSel.appendChild(o); });
+      aSel.value = d.assets.some(function(a){ return a.symbol === keep; }) ? keep : (d.assets.some(function(a){ return a.symbol === 'NVDA'; }) ? 'NVDA' : d.assets[0].symbol);
+      renderLadder();
+    }).catch(function(e){ $('ladderNote').textContent = 'Ladder unavailable: ' + e.message; });
+  }
+  function renderLadder(){
+    if (!ladder) return;
+    var a = ladder.assets.filter(function(x){ return x.symbol === aSel.value; })[0]; if (!a) return;
+    var usd = ladder.dollar, amount = Number(amt.value) || 0;
+    var rate = usd.official ? usd.official * (1 + usd.premium_pct) : 1, usdAmt = amount / rate;
+    var cards = [];
+    cards.push('<div class="card"><h3>Your dollar</h3><div class="big">' + (usd.official ? num(usd.official * (1 + usd.premium_pct)) + '<small>' + esc(usd.fiat) + ' per $</small>' : 'official rate') + '</div><div class="meta">' +
+      (usd.official ? 'official <b>' + num(usd.official) + '</b>, premium <span class="chip ' + (cls(usd.premium_pct) || 'flat') + '">' + pct(usd.premium_pct) + '</span> via <b>' + esc(usd.best) + '</b>' + (usd.rails.length > 1 ? '<br>' + usd.rails.map(function(r){ return esc(r.rail) + ' ' + num(r.price) + ' (' + pct(r.premium_pct, 1) + ')'; }).join(', ') : '') : 'no P2P layer: the dollar is bought at the official rate') +
+      '<br>' + num(amount, 0) + ' ' + esc(usd.fiat) + ' = <b>' + num(usdAmt) + ' $</b></div></div>');
+    cards.push('<div class="card"><h3>Real ' + esc(a.symbol) + '</h3><div class="big">' + num(a.ref_price) + '<small>$</small></div><div class="meta">regime <b>' + esc(a.regime) + '</b>, reference <b>' + esc(a.ref_session) + '</b>' + (a.proxy ? '<br>perp oracle <b>' + num(a.proxy) + '</b> (' + pct(a.proxy / a.ref_price - 1) + ' vs reference)' : '') + '</div></div>');
+    var best = a.wrappers.filter(function(w){ return w.symbol === a.best; })[0];
+    cards.push('<div class="card total"><h3>Best route from ' + esc(ladder.name) + '</h3>' + (best ? '<div class="big">' + pct(best.total_pct) + '<small>above the real price</small></div><div class="meta"><b>' + esc(usd.best || 'official') + '</b> then <b>' + esc(best.symbol) + '</b> (' + esc(best.issuer) + '): ' + num(usdAmt / best.price, 4) + ' units for ' + num(amount, 0) + ' ' + esc(usd.fiat) + '</div>' : '<div class="big">none</div><div class="meta">no wrapper with published access from ' + esc(ladder.name) + '</div>') + '</div>');
+    $('ladderCards').innerHTML = cards.join('');
+    [].forEach.call($('ladderCards').children, function(c, i){ c.style.setProperty('--i', i); });
+    var tb = $('ladderTable').tBodies[0]; tb.innerHTML = '';
+    var maxAbs = Math.max(0.005, Math.max.apply(null, a.wrappers.map(function(w){ return Math.max(Math.abs(w.premium_pct), Math.abs(w.total_pct || 0)); })));
+    a.wrappers.forEach(function(w){
+      var tr = document.createElement('tr'); if (w.symbol === a.best) tr.className = 'best';
+      var bar = function(v){ return v == null ? '' : '<i class="bar ' + cls(v) + '" style="width:' + Math.round(Math.min(1, Math.abs(v) / maxAbs) * 100) + '%"></i>'; };
+      tr.innerHTML = '<td><b>' + esc(w.symbol) + '</b></td><td>' + esc(w.issuer) + '</td><td><span class="badge ' + w.access + '" title="' + esc(w.kyc || '') + '">' + w.access + '</span></td><td class="num">' + num(w.price) + '</td><td class="num ' + cls(w.premium_pct) + '"><span class="v">' + pct(w.premium_pct) + '</span>' + bar(w.premium_pct) + '</td><td class="num ' + cls(w.total_pct) + '">' + (w.total_pct == null ? '' : '<span class="v">' + pct(w.total_pct) + '</span>' + bar(w.total_pct)) + '</td><td class="num">' + (w.total_pct == null ? '' : num(usdAmt / w.price, 4)) + '</td>';
+      tr.title = (w.redemption ? 'Redemption: ' + w.redemption : '') + (w.kyc ? '\nKYC: ' + w.kyc : '');
+      tb.appendChild(tr);
+    });
+    $('ladderNote').innerHTML = 'Total cost = (1 + dollar premium) × (1 + wrapper premium) − 1. Access from the issuer\'s and venues\' published lists; hover a row for redemption and KYC terms. Ladder computed ' + age(ladder.ts) + ', dollar fixing ' + (ladder.fixing_ts ? age(ladder.fixing_ts) : 'n/a') + '. Raw: <code>ladder/' + esc(ladder.country) + '.json</code>';
+  }
+  cSel.addEventListener('change', function(){ setPersona(null); loadLadder(cSel.value); });
+  aSel.addEventListener('change', renderLadder);
+  amt.addEventListener('input', renderLadder);
+
+  /* ---- heatmap ---- */
+  var tip = $('tip');
+  function color(p){ /* diverging, clamped at ±3 % */
+    var t = Math.max(-1, Math.min(1, p / 0.03)), a = Math.abs(t);
+    var c = t < 0 ? [59,130,246] : [239,68,68], m = [56,56,53];
+    var rgb = c.map(function(v, i){ return Math.round(m[i] + (v - m[i]) * a); });
+    return 'rgba(' + rgb.join(',') + ',' + (0.25 + 0.75 * a).toFixed(2) + ')';
+  }
+  function renderHeatmap(d){
+    var issuers = {};
+    d.assets.forEach(function(a){ a.tokens.forEach(function(t){ if (!t.is_perp && !t.suspect) issuers[t.issuer] = (issuers[t.issuer] || 0) + 1; }); });
+    var cols = Object.keys(issuers).sort(function(x, y){ return issuers[y] - issuers[x]; }).slice(0, 7);
+    var h = '<table><thead><tr><th class="row">Asset</th><th class="num">Reference</th>' + cols.map(function(c){ return '<th>' + esc(c.replace(' Assets', '')) + '</th>'; }).join('') + '<th class="num">Spread</th></tr></thead><tbody>';
+    d.assets.forEach(function(a){
+      h += '<tr><th class="row"><b>' + esc(a.symbol) + '</b> <span style="color:var(--t4);font-weight:400">' + esc(a.regime) + '</span></th><td class="ref">' + num(a.ref_price) + '</td>';
+      cols.forEach(function(c){
+        var ts = a.tokens.filter(function(t){ return t.issuer === c && !t.is_perp && !t.suspect; });
+        if (!ts.length) { h += '<td class="empty"><span class="cell">·</span></td>'; return; }
+        var t = ts.sort(function(x, y){ return (y.volume_24h || 0) - (x.volume_24h || 0); })[0];
+        h += '<td><span class="cell" style="background:' + color(t.premium_pct) + '" data-tip="' + esc(t.symbol + ' (' + t.issuer + ')\n' + num(t.price) + ' $ vs ' + num(a.ref_price) + ' reference (' + a.ref_session + ')\n' + pct(t.premium_pct) + (t.vs_proxy_pct != null ? ', ' + pct(t.vs_proxy_pct) + ' vs perp oracle' : '') + '\n24h volume ' + num(t.volume_24h, 0) + ' $') + '">' + pct(t.premium_pct, 1) + '</span></td>';
+      });
+      h += '<td class="spread">' + pct(a.wrapper_spread_pct, 1) + '</td></tr>';
+    });
+    $('hm').innerHTML = h + '</tbody></table>';
+    $('hmMeta').textContent = d.assets.length + ' assets, computed ' + age(d.ts);
+  }
+  document.addEventListener('mouseover', function(e){ var c = e.target.closest('[data-tip]'); if (!c) { tip.style.display = 'none'; return; } tip.textContent = c.getAttribute('data-tip'); tip.style.whiteSpace = 'pre-line'; tip.style.display = 'block'; });
+  document.addEventListener('mousemove', function(e){ if (tip.style.display !== 'block') return; var x = e.clientX + 14, y = e.clientY + 14; if (x + 290 > innerWidth) x = e.clientX - 290; if (y + 120 > innerHeight) y = e.clientY - 110; tip.style.left = x + 'px'; tip.style.top = y + 'px'; });
+
+  /* ---- dollar ---- */
+  var fSel = $('fiat');
+  function renderFiat(){
+    if (!fixing) return;
+    var f = fSel.value, sides = fixing.fixing[f] || {}, off = fixing.official[f];
+    var all = (sides.buy || {}).ALL, sell = (sides.sell || {}).ALL;
+    var rails = Object.keys(sides.buy || {}).filter(function(r){ return r !== 'ALL' && r !== 'Other'; }).map(function(r){ return {rail: r, v: sides.buy[r]}; }).sort(function(x, y){ return y.v.depth_usd - x.v.depth_usd; });
+    var cheapest = rails.slice().sort(function(x, y){ return x.v.price - y.v.price; })[0];
+    $('fiatCards').innerHTML =
+      '<div class="card"><h3>Official</h3><div class="big">' + num(off.rate) + '<small>' + esc(f) + ' per $</small></div><div class="meta">' + esc(off.source) + '</div></div>' +
+      '<div class="card"><h3>Buying a dollar</h3><div class="big">' + (all ? num(all.price) : '') + '<small>' + esc(f) + '</small></div><div class="meta">' + (all ? 'all rails, <span class="chip ' + (cls(all.premium_pct) || 'flat') + '">' + pct(all.premium_pct) + '</span> vs official, ' + all.n + ' ads, ' + num(all.depth_usd, 0) + ' $ of depth' : 'no data') + (cheapest ? '<br>cheapest rail <b>' + esc(cheapest.rail) + '</b> at ' + num(cheapest.v.price) + ' (' + pct(cheapest.v.premium_pct) + ')' : '') + '</div></div>' +
+      '<div class="card"><h3>Selling a dollar</h3><div class="big">' + (sell ? num(sell.price) : '') + '<small>' + esc(f) + '</small></div><div class="meta">' + (sell ? '<span class="chip ' + (cls(sell.premium_pct) || 'flat') + '">' + pct(sell.premium_pct) + '</span> vs official' + (all ? ', round trip costs <b>' + pct(all.price / sell.price - 1) + '</b>' : '') : 'no data') + '</div></div>';
+    var tb = $('fiatTable').tBodies[0]; tb.innerHTML = '';
+    ['buy', 'sell'].forEach(function(side){
+      Object.keys(sides[side] || {}).map(function(r){ return {rail: r, v: sides[side][r]}; }).sort(function(x, y){ return y.v.depth_usd - x.v.depth_usd; }).forEach(function(r){
+        var tr = document.createElement('tr');
+        tr.innerHTML = '<td>' + side + '</td><td>' + (r.rail === 'ALL' ? '<b>all rails</b>' : esc(r.rail)) + '</td><td class="num">' + num(r.v.price) + '</td><td class="num ' + cls(r.v.premium_pct) + '">' + pct(r.v.premium_pct) + '</td><td class="num">' + r.v.n + '</td><td class="num">' + num(r.v.depth_usd, 0) + ' $</td>';
+        tb.appendChild(tr);
+      });
+    });
+    $('fiatNote').innerHTML = 'Snapshot ' + age(fixing.ts) + ', sha256 <code>' + esc(fixing.sha256.slice(0, 16)) + '…</code>. Raw: <code>fixing/latest.json</code>';
+  }
+  fSel.addEventListener('change', renderFiat);
+
+  /* ---- world ranking ---- */
+  function renderWorld(w){
+    var tb = $('worldTable').tBodies[0]; tb.innerHTML = '';
+    w.countries.filter(function(c){ return c.premium_pct != null; }).sort(function(a, b){ return b.premium_pct - a.premium_pct; }).forEach(function(c){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td><b>' + esc(c.name) + '</b></td><td>' + esc(c.fiat) + '</td><td class="num">' + num(c.official) + '</td><td class="num"><span class="chip ' + (cls(c.premium_pct) || 'flat') + '">' + pct(c.premium_pct, 1) + '</span></td><td class="num ' + cls(c.sell_premium_pct) + '">' + pct(c.sell_premium_pct, 1) + '</td><td>' + esc(c.best_rail === 'ALL' ? 'all rails' : (c.best_rail || '')) + '</td><td class="num">' + (c.wrappers_ok || 0) + '</td>';
+      tr.style.cursor = 'pointer'; tr.title = 'Open the ladder for ' + c.name; tr.addEventListener('click', function(){ window.pegwatchSelect(c.cc); });
+      tb.appendChild(tr);
+    });
+  }
+
+  /* ---- boot ---- */
+  get('premiums/latest.json').then(function(d){ premiums = d; renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
+  get('fixing/latest.json').then(function(d){ fixing = d; Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
+  get('world.json').then(function(w){
+    world = w; fillCountries(w.countries); renderWorld(w);
+    if (window.pegwatchWorld) window.pegwatchWorld(w);
+    var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), aminata = PERSONAS[0];
+    if (region && COUNTRIES[region] && region !== aminata.cc) { cSel.value = region; setPersona(null); loadLadder(region); }
+    else { cSel.value = aminata.cc; amt.value = aminata.amount; setPersona(aminata); loadLadder(aminata.cc, aminata.asset); }
+  }).catch(function(e){ $('ladderNote').textContent = 'World data unavailable: ' + e.message; });
+})();
+</script>
+
+<script>
+(function(){
+  var cvBg = document.getElementById('globe-bg'), cvGl = document.getElementById('globe'), cvFx = document.getElementById('globe-fx');
+  if (!cvBg || !cvGl || !cvFx) return;
+  var bg = cvBg.getContext('2d'), fx = cvFx.getContext('2d');
+  var reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* 360x180 one-bit land mask (Natural Earth 110m), row-major from lat 90 down, lon -180 to 180 */
+  var MASK = "AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA/P8HAAD//wEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAD+////P+7///8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOD/////////////AAAAAAAAAAAAAAAAAA4AAAAAAAAAAAAAAAAAAAAAAAAAAPj///////////8PAAAA+v8AAP8AAAAAgD8AAAAAAAAAAAAAAAAAAAAAAAAAHPj//x/8//////8DAADA/z8AAAAAAAAAAP4HAAAAAAAAAAAAAAAAAAAAAAB4/N73//3///////8BAACA/w8AAAAAAAAAAOA/AAAAAAAAAAAAAAAAAAAAAPB8AH34f/D///////8BAAAAfh8AAAAAAAAAAIB+AAAAAAAAAAAAAAAAAAAAAP7v4v//f8D///////8DAAAAOAAAAAAA/gEAAM7/PwAAwAMAAAAAAAAAAAAAAMT/5///DwAA/v////8BAAAAAAAAAAD4HwAA+P//fwAA8P8HAAAAAAAAAAAAgH98APv/HwAA/P////8BAAAAAAAAAAB4AAAA/P//BwAAwJ8DAAAAAAAAAAAAgP+Dz///+wAA+P////8AAAAAAAAAAAAeAALw/////48fgA8AAAAAAAAAAAAAwP9/5//+/wEA8P///z8AAAAAAAAAAIAPAN7+//////8/gP8DAAAABwCAAQAAwP//j//8/w8A8P///z8AAAAAABABAIAPwP////////8///8HAgDAAwD8/xcAnOH///r9//8B4P///38AAAAAAP4PAAA+wN//////////////D0DAAAD////x////f//H//8D4P///wcAAAAAgP//AQAA3////////////////89/B+D/////////P/7Ph/8DgP///wEAAAAA8P//hwf+////////////////////P4D/////////////x/kPwP//DwAAAAAA/P//v/f//////////////////////+H/////////////Afx/wP//AzA5AAAA/v/////////////////////////////////////////fwf8dgP//APh/AAAA/+d//v//////////////////////8eD/////////////7/8XgP8PAPA/AADA//P/////////////////////////AI/////////////zDvgPAP8HAOAHAADw//7///////////////////////9/AMT///////////8D//8HAPwDAAAAAAD+P/7/////////////////////////AOD//////////z8A2H8CAPwDAAAAAAD/P/7///////////////////////8HAPD//////////z8AwH8IAPgBAAAAAAD+f/7/////////////////////8P8BAGD/85D//////z8AwH8cAAAAAAAAAAD+P/z/////////////////////8EUAAAD0BwD8/////38A4P8/AAAAAAAAwAGeP/j//////////////////wEYfAAAAADgDwDA//////8DgP8/AAAAAAAAwAfwH/7/////////////////fwAA/wAAAAD4AgCA//////8PgP9/AAAAAAAA4ANwD/7/////////////////PwCA/wAAAAA/AAAA////////4///AQAAAAAA8APwB/7/////////////////HwCAPwAAAIABAADA////////8///BwAAAAAA+A/w////////////////////3wSAfwAAAAAAAADA/P//////4///HwAAAAAAvB///////////////////////weAHwAAAAAAAACA/f//////5///HwAAAAAAvD///////////////////////w8ABwAAAAAAAAAA8P//////////HwAAAAAAzP///////////////////////w8ABwAAAAAAAAAA+P//////////DAAAAAAAwP///////////////////////w0AAAAAAAAAAAAA+P////////9/fgAAAAAAQPz//////////////////////w0AAAAAAAAAAAAAwP////////8P/wAAAAAAgP///////////////////////xcAAAAAAAAAAAAAgP////////+P/wAAAAAAgP///////3///////////////wQAAAAAAAAAAAAAgP////////+/cAAAAAAAAPz//////x/8////////////fw4AAAAAAAAAAAAAAP//////////AQAAAAAAAPz////z/wf8////////////HwYAAAAAAAAAAAAAAP////////8fAAAAAAAAAPz////j/gP/////////////Dy4AAAAAAAAAAAAAgP///////38GAAAAAAAA/P/v8/8B+Af/////////////Dz8AAAAAAAAAAAAAgP///////z8AAAAAAAAA+H/w5//g4Af8//////////9/gx8AAAAAAAAAAAAAgP///////38AAAAAAAAA/P8wn///+Q/4//////////8/gAsAAAAAAAAAAAAAgP///////x8AAAAAAAAA+B8w/P///x/4//////////8/gAMAAAAAAAAAAAAAAP///////wMAAAAAAAAA/A8w+M///x/8/////////+8PAAMAAAAAAAAAAAAAAP///////wMAAAAAAAAA/B8QP9///w/8/////////ycfgAEAAAAAAAAAAAAAAP7//////wEAAAAAAAAA+A/sH57//x/8/////////38/0AEAAAAAAAAAAAAAAPz//////wEAAAAAAAAA+PP/DI7//z/8/////////3888AEAAAAAAAAAAAAAAPj//////wEAAAAAAAAA4P9/AHjw/////////////w88/wEAAAAAAAAAAAAAAPj//////wAAAAAAAAAA4P9/ABDw/////////////x/cfwAAAAAAAAAAAAAAAOD/////PwAAAAAAAAAA+P//AACA/////////////x/gDwAAAAAAAAAAAAAAAMD/////DwAAAAAAAAAA/P//Dw/A/////////////z/gAwAAAAAAAAAAAAAAAID/////BwAAAAAAAAAA/P//n//f/////////////z/AAAAAAAAAAAAAAAAAAID/////BwAAAAAAAAAA/P///////////////////z8AAAAAAAAAAAAAAAAAAAD///9HDwAAAAAAAAAA/v///////////////////38AAAAAAAAAAAAAAAAAAAD+/x8ADgAAAAAAAACA/////////9///////////z8AAAAAAAAAAAAAAAAAAAD//wcATgAAAAAAAADA/////////7///////////x8AAAAAAAAAAAAAAAAAAADc/wcA7gAAAAAAAADg//////9////+/////////w8AAAAAAAAAAAAAAAAAAAD4/wcAbAAAAAAAAADg//////9////4/////////y8AAAAAAAAAAAAAAAAAAAA4/wcAYAAAAAAAAADw//////9//v8fgP///////zcAAAAAAAAAAAAAAAAAAABg/gcATgAAAAAAAAD4/////////P9/gP///////zMAAAAAAAAAAAAQAAAAAABg/geAfwAAAAAAAAD4////////+f//AP7//////zAAAAAAAAAAAADwAAAAAAAA/Ae8+AEAAAAAAAD8////////+///APz/f///DxAAAAAAAAAAAACAAQAAAAAA/Ac+4AMAAAAAAAD8////////+f9/APz/D/9/BgAAAAAAAAAAAACAAwAAAAAA/A8ewH8AAAAAAAD4////////8/8/APD/A/4/DwAAAAAAAAAAAAAAAQAAAAAA8P8f4P4HAAAAAAD4////////4/8/AOD/APx/B3AAAAAAAAAAAAAAAAAAAAAA4P8PwBAHAAAAAAD4////////5/8fAOD/APx/AHAAAAAAAAAAAAAAAAAAAAAAAP8vAAAAAAAAAAD4////////x/8HAOB/APz/AXgAAAAAAAAAAAAAAAAAAAAAAMz/AQAAAAAAAAD4////////z/8BAOAfAOz/ATgAAAAAAAAAAAAAAAAAAAAAAID/AQAAAAAAAAD8/////////z8AAMAfAOD/AXAAAAAAAAAAAAAAAAAAAAAAAAD/AQAAAAAAAAD4/////////x8AAMAfAMD/A/AAAAAAAAAAAAAAAAAAAAAAAADwAVAAAAAAAAD4/////////8MAAMAPAMD/AzADAAAAAAAAAAAAAAAAAAAAAADgAf4AAAAAAAD4//////////gAAIAPAMD4A+gDAAAAAAAAAAAAAAAAAAAAAADAAf//AAAAAADg//////////8AAAAPAMD4AOwDAAAAAAAAAAAAAAAAAAAAAADAv///AAAAAADg/////////38AAAAfAMBwAMYGAAAAAAAAAAAAAAAAAAAAAAAA////AQAAAADA/////////38AAAA/AMAhAMIHAAAAAAAAAAAAAAAAAAAAAAAA7P//AwAAAACA/////////z8AAAA6AMABAOAHAAAAAAAAAAAAAAAAAAAAAAAAwP//FwAAAAAA/////////z8AAAA4AIAHAMMHAAAAAAAAAAAAAAAAAAAAAAAAwP///wAAAAAA/D/+/////x8AAAAQADgHgA8CAAAAAAAAAAAAAAAAAAAAAAAAwP///wEAAAAAfAf+/////w8AAAAAAHgPwAcAAAAAAAAAAAAAAAAAAAAAAAAAwP///wEAAAAAAADw/////wcAAAAAAPAP8AMAAAAAAAAAAAAAAAAAAAAAAAAA4P///wEAAAAAAADg/////wcAAAAAAOAP+gcIAAAAAAAAAAAAAAAAAAAAAAAA4P///wcAAAAAAADg/////wEAAAAAAMAf/jMaAAAAAAAAAAAAAAAAAAAAAAAA+P///wMAAAAAAADg/////wAAAAAAAIAP//8ZAAAAAAAAAAAAAAAAAAAAAAAA+P///z8AAAAAAADw////fwAAAAAAAAAP/vvYAwAAAAAAAAAAAAAAAAAAAAAA+P////8AAAAAAADw////PwAAAAAAAAAf/vnAZwAAAAAAAAAAAAAAAAAAAAAA+P////8fAAAAAADg////HwAAAAAAAAA//D2w9wMMAAAAAAAAAAAAAAAAAAAA+P////8/AAAAAACA////HwAAAAAAAAB8+Hl+/x84AAAAAAAAAAAAAAAAAAAA/P////9/AAAAAACA////DwAAAAAAAAA8QPkA+z84AAAAAAAAAAAAAAAAAAAA+P//////AQAAAACA////BwAAAAAAAAD4ANgA5D/PAAAAAAAAAAAAAAAAAAAA/P//////AwAAAAAA////DwAAAAAAAADgHwAAxP+HAQAAAAAAAAAAAAAAAAAA8P//////AwAAAAAA////DwAAAAAAAADAfwAAwP8ABwAAAAAAAAAAAAAAAAAA8P//////AQAAAAAA////DwAAAAAAAAAA/H4P4M8BGAAAAAAAAAAAAAAAAAAA4P//////AQAAAAAA////DwAAAAAAAAAAAJ8DAIYHOAAAAAAAAAAAAAAAAAAA4P//////AAAAAAAA/v//HwAAAAAAAAAAAJABAIQHYAAAAAAAAAAAAAAAAAAAwP////9/AAAAAAAA/v//HwAAAAAAAAAAAACAHw4AAAAAAAAAAAAAAAAAAAAAwP////9/AAAAAAAA/v//HzAAAAAAAAAAAADAHw4AAAAAAAAAAAAAAAAAAAAAgP////8/AAAAAAAA////H3gAAAAAAAAAAADsHw4AAAAAAAAAAAAAAAAAAAAAgP////8/AAAAAAAA////H3gAAAAAAAAAAAD+Dz4AAAwAAAAAAAAAAAAAAAAAAP////8/AAAAAACA////H34AAAAAAAAAAAD/Pz4AAAwAAQAAAAAAAAAAAAAAAPz///8fAAAAAACA////H38AAAAAAAAAAID/fz4AAAjAAAAAAAAAAAAAAAAAAPD///8fAAAAAACA////hz8AAAAAAAAAAMD//38AAABgAAAAAAAAAAAAAAAAAOD///8fAAAAAACA////AT8AAAAAAAAAAOD//38AAABgAAAAAAAAAAAAAAAAAOD///8fAAAAAAAA////AD8AAAAAAAAAAPj///8BAAAAAAAAAAAAAAAAAAAAAOD///8PAAAAAAAA/v9/gB8AAAAAAAAAAP////8BAAMAAAAAAAAAAAAAAAAAAOD///8PAAAAAAAA/v//gA8AAAAAAAAAwP////8DAAcAAAAAAAAAAAAAAAAAAOD///8HAAAAAAAA/P//gA8AAAAAAAAA4P////8HAAwAAAAAAAAAAAAAAAAAAOD///8AAAAAAAAA/P//gA8AAAAAAAAA4P////8HAAAAAAAAAAAAAAAAAAAAAOD//z8AAAAAAAAA/P//gA8AAAAAAAAA4P////8fAAAAAAAAAAAAAAAAAAAAAOD//w8AAAAAAAAA/P8/AAcAAAAAAAAA4P////8fAAAAAAAAAAAAAAAAAAAAAOD//w8AAAAAAAAA/P8fAAAAAAAAAAAA4P////8/AAAAAAAAAAAAAAAAAAAAAOD//w8AAAAAAAAA+P8fAAAAAAAAAAAAwP////8/AAAAAAAAAAAAAAAAAAAAAPD//w8AAAAAAAAA8P8fAAAAAAAAAAAAwP////8/AAAAAAAAAAAAAAAAAAAAAPD//wcAAAAAAAAA4P8PAAAAAAAAAAAAgP////8/AAAAAAAAAAAAAAAAAAAAAPD//wMAAAAAAAAA4P8HAAAAAAAAAAAAwP////8/AAAAAAAAAAAAAAAAAAAAAPD//wEAAAAAAAAAwP8HAAAAAAAAAAAAgP////8fAAAAAAAAAAAAAAAAAAAAAPD//wAAAAAAAAAA4P8BAAAAAAAAAAAAgP8P//8fAAAAAAAAAAAAAAAAAAAAAPD//wAAAAAAAAAAwP8AAAAAAAAAAAAAgP8B/P8PAAAAAAAAAAAAAAAAAAAAAPD/fwAAAAAAAAAAwAMAAAAAAAAAAAAAgE8A+P8PAAADAAAAAAAAAAAAAAAAAPj/BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAcA8P8HAAAGAAAAAAAAAAAAAAAAAPj/DwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgP8HAAAOAAAAAAAAAAAAAAAAAPz/BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgP8DAAB8AAAAAAAAAAAAAAAAAPz/BwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAAB8AAAAAAAAAAAAAAAAAPw/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAA+AAAAAAAAAAAAAAAAAPw/AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAALABAAAbAAAAAAAAAAAAAAAAAP43AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPABAIAfAAAAAAAAAAAAAAAAAP4fAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAOABAIADAAAAAAAAAAAAAAAAAP4HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAMAAAPADAAAAAAAAAAAAAAAAAP4HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAAAAAP4HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAHwAAAAAAAAAAAAAAAAAAP8BAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwAAAAAAAAAAAAAAAAAAP8HAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP8HAAAAAAAAAAAAAAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP8BAAAAAAAAAAAAAAAAAAAAAAcAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP8AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP/ABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAP6AAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPwBAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPgHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAPAHAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAADwAwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAAAAAAeAAAAAAAcIAAACAAAAAAAAAAAAAAAAAAAAAAAAAA/AAAAAAAAAAAAAAAAAMA/AAAAGAD//+P//z8AAAAAAAAAAAAAAAAAAAAAAAAPAAAAAAAAAAAAAAAAAP7/+wHw/////////38AAAAAAAAAAAAAAAAAAAAAACAfAAAAAAAAAAAAAABg8P///wP8////////////AAAAAAAAAAAAAAAAAAAAAPA/AAAAAAAAAAAI4gD8/////+P/////////////DwAAAAAAAAAAAAAAAAAAAPB/AAAAAAAAIID//////////+P//////////////x8AAAAAAAAAAAAA4AsAAP9/AAAAAAAA//////////////n///////////////8AAAAAAAAAAAAA8A8EAP5/AAAAAADg//////////////////////////////8AAAAAAAAA8D4E8P//////AAAAAAD4/////////////////////////////z8AAAAAAAD+////+P////9/AAAAAAD4/////////////////////////////w8AAAAAAP7///////////8PAAAAAMD//////////////////////////////wEAAABggP////////////8AAAAAgP///////////////////////////////wAAAADg/////////////wcAACAA/P///////////////////////////////wEAAADv/////////////wMAAPwB/////////////////////////////////wcAAAAe/////////////wDAAP8B/////////////////////////////////wAAAAAAAP///////////x/+4f8B/v//////////////////////////////HwAAAACA//////////////+fAP7+////////////////////////////////PwAAAAAA/P///////////////////////////////////////////////////wMAAAQA/P///////////////////////////////////////////////////z8A//8A4P//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////";
+  var bits = atob(MASK), land = function(lat, lon){
+    var x = Math.floor((lon + 180) % 360), y = Math.min(179, Math.floor(90 - lat));
+    var i = y * 360 + x; return (bits.charCodeAt(i >> 3) & (1 << (i & 7))) !== 0;
+  };
+  /* points on a Fibonacci sphere: land dots plus a sparse ocean trame for the volume */
+  var N = innerWidth < 700 ? 16000 : 34000, GA = Math.PI * (3 - Math.sqrt(5)), tmp = [], pts = [];
+  for (var i = 0; i < N; i++) {
+    var y = 1 - (i / (N - 1)) * 2, r = Math.sqrt(1 - y * y), th = GA * i;
+    var x = Math.cos(th) * r, z = Math.sin(th) * r;
+    var isLand = land(Math.asin(y) * 180 / Math.PI, Math.atan2(x, z) * 180 / Math.PI);
+    if (isLand) { tmp.push(x, y, z, 1); pts.push(x, y, z); } else if (i % 3 === 0) tmp.push(x, y, z, 0);
+  }
+  var verts = new Float32Array(tmp), nv = tmp.length / 4;
+  var TILT = 23.4 * Math.PI / 180, ct = Math.cos(TILT), st = Math.sin(TILT);
+  /* network: one hub per country (from world.json), arcs to the two reference venues, pulses running along them */
+  var hubs = [], arcs = [], SEG = 28;
+  function xyz(lat, lon){ var la = lat * Math.PI / 180, lo = lon * Math.PI / 180; return [Math.cos(la) * Math.sin(lo), Math.sin(la), Math.cos(la) * Math.cos(lo)]; }
+  function slerp(a, b, t){ var d = Math.max(-1, Math.min(1, a[0] * b[0] + a[1] * b[1] + a[2] * b[2])), o = Math.acos(d), so = Math.sin(o) || 1;
+    var wa = Math.sin((1 - t) * o) / so, wb = Math.sin(t * o) / so, lift = 1 + 0.045 * Math.sin(t * Math.PI) * o;
+    return [(a[0] * wa + b[0] * wb) * lift, (a[1] * wa + b[1] * wb) * lift, (a[2] * wa + b[2] * wb) * lift]; }
+  function hubColor(p){ if (p == null) return [196, 181, 253]; var t = Math.max(-1, Math.min(1, p / 0.15)), a = Math.abs(t), c = t < 0 ? [96, 165, 250] : [255, 120, 90], m = [221, 214, 254];
+    return [0, 1, 2].map(function(i){ return Math.round(m[i] + (c[i] - m[i]) * a); }); }
+  window.pegwatchWorld = function(w){
+    var seed = 7, rnd = function(){ seed = (seed * 1664525 + 1013904223) >>> 0; return seed / 4294967296; };
+    hubs = w.countries.filter(function(c){ return c.lat != null; }).map(function(c){ var v = xyz(c.lat, c.lon); return {p: v, c: c, col: hubColor(c.premium_pct), big: c.premium_pct != null}; });
+    /* regional mesh: each country linked to its two nearest neighbours, no duplicate pair */
+    arcs = []; var seen = {};
+    hubs.forEach(function(h, i){
+      hubs.map(function(o, k){ return [h.p[0] * o.p[0] + h.p[1] * o.p[1] + h.p[2] * o.p[2], k]; }).filter(function(c){ return c[1] !== i; }).sort(function(x, y){ return y[0] - x[0]; }).slice(0, 2).forEach(function(c){
+        var key = Math.min(i, c[1]) + '-' + Math.max(i, c[1]); if (seen[key]) return; seen[key] = 1;
+        var seg = new Float32Array((SEG + 1) * 3); for (var t = 0; t <= SEG; t++) { var q = slerp(h.p, hubs[c[1]].p, t / SEG); seg[t * 3] = q[0]; seg[t * 3 + 1] = q[1]; seg[t * 3 + 2] = q[2]; }
+        arcs.push({p: seg, phase: rnd(), speed: 3000 + rnd() * 3000}); }); });
+    if (!running) frame(0);
+  };
+  var proj = new Float32Array((SEG + 1) * 3);
+
+  /* WebGL: every dot in one draw call, rotation in the vertex shader */
+  var gl = cvGl.getContext('webgl', {alpha: true, antialias: false, premultipliedAlpha: true, powerPreference: 'high-performance'}), prog, uni = {};
+  if (gl) {
+    var vs = 'attribute vec4 a;uniform float ang,ct,st,R,base,dpr;uniform vec2 c,res;varying float d,l;' +
+      'void main(){float ca=cos(ang),sa=sin(ang);float x1=a.x*ca+a.z*sa;float z1=-a.x*sa+a.z*ca;float y2=a.y*ct-z1*st;float z2=a.y*st+z1*ct;' +
+      'd=z2;l=a.w;vec2 p=vec2(c.x+x1*R,c.y-y2*R);gl_Position=vec4(p.x/res.x*2.0-1.0,1.0-p.y/res.y*2.0,0.0,1.0);' +
+      'float s=base*(0.55+0.45*z2)*(a.w>0.5?1.0:0.6);gl_PointSize=(z2<0.02)?0.0:s*2.0*dpr+1.5*dpr;}';
+    var fs = 'precision mediump float;varying float d,l;void main(){vec2 q=gl_PointCoord-0.5;float r=length(q);if(r>0.5)discard;' +
+      'float e=smoothstep(0.5,0.35,r);float a=(l>0.5?0.30+0.70*d:0.04+0.06*d)*e;vec3 col=mix(vec3(0.43,0.27,0.78),vec3(0.77,0.71,0.99),d);gl_FragColor=vec4(col*a,a);}';
+    function sh(type, src){ var s = gl.createShader(type); gl.shaderSource(s, src); gl.compileShader(s); if (!gl.getShaderParameter(s, gl.COMPILE_STATUS)) { console.warn(gl.getShaderInfoLog(s)); return null; } return s; }
+    var v1 = sh(gl.VERTEX_SHADER, vs), f1 = sh(gl.FRAGMENT_SHADER, fs);
+    if (v1 && f1) {
+      prog = gl.createProgram(); gl.attachShader(prog, v1); gl.attachShader(prog, f1); gl.linkProgram(prog); gl.useProgram(prog);
+      var buf = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, buf); gl.bufferData(gl.ARRAY_BUFFER, verts, gl.STATIC_DRAW);
+      var loc = gl.getAttribLocation(prog, 'a'); gl.enableVertexAttribArray(loc); gl.vertexAttribPointer(loc, 4, gl.FLOAT, false, 0, 0);
+      ['ang', 'ct', 'st', 'R', 'base', 'dpr', 'c', 'res'].forEach(function(n){ uni[n] = gl.getUniformLocation(prog, n); });
+      gl.enable(gl.BLEND); gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA); gl.clearColor(0, 0, 0, 0);
+    } else gl = null;
+  }
+  /* 2D fallback sprites when WebGL is unavailable */
+  var sprites = [];
+  function sprite(rad, r, g, b){ var c = document.createElement('canvas'), s = Math.ceil(rad * 2 + 2); c.width = c.height = s; var g2 = c.getContext('2d');
+    g2.fillStyle = 'rgb(' + r + ',' + g + ',' + b + ')'; g2.beginPath(); g2.arc(s / 2, s / 2, rad, 0, Math.PI * 2); g2.fill(); return c; }
+
+  var W, H, R, CX, CY, dpr, base, stars = [];
+  function resize(){
+    dpr = Math.min(devicePixelRatio || 1, 1.5);
+    var rect = cvBg.getBoundingClientRect(); W = rect.width; H = rect.height;
+    [cvBg, cvGl, cvFx].forEach(function(c){ c.width = Math.round(W * dpr); c.height = Math.round(H * dpr); });
+    bg.setTransform(dpr, 0, 0, dpr, 0, 0); fx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    R = W * 0.47; CX = W * 0.51; CY = H * 0.10 + R; base = Math.max(0.9, R / 270);   /* globe top at 10 %, like the still it replaces */
+    stars = []; for (var i = 0; i < 260; i++) stars.push([Math.random() * W, Math.random() * H, Math.random() * 1.2 + .3, Math.random() * .5 + .2]);
+    if (gl) { gl.viewport(0, 0, cvGl.width, cvGl.height); gl.uniform1f(uni.ct, ct); gl.uniform1f(uni.st, st); gl.uniform1f(uni.R, R); gl.uniform1f(uni.base, base); gl.uniform1f(uni.dpr, dpr); gl.uniform2f(uni.c, CX, CY); gl.uniform2f(uni.res, W, H); }
+    else { sprites = []; for (var k = 0; k < 8; k++) { var t = k / 7; sprites.push(sprite(base * (0.55 + 0.45 * t), Math.round(110 + 86 * t), Math.round(70 + 111 * t), Math.round(200 + 53 * t))); } }
+    drawBg(0);
+  }
+  function drawBg(t){
+    bg.clearRect(0, 0, W, H);
+    bg.fillStyle = '#fff';
+    for (var i = 0; i < stars.length; i++) { var s = stars[i]; bg.globalAlpha = s[3]; bg.fillRect(s[0], s[1], s[2], s[2]); }
+    bg.globalAlpha = 1;
+    var breathe = 0.9 + 0.1 * Math.sin(t / 2600);
+    var g = bg.createRadialGradient(CX, CY, R * 0.92, CX, CY, R * 1.22);
+    g.addColorStop(0, 'rgba(124,58,237,' + (0.55 * breathe).toFixed(3) + ')'); g.addColorStop(0.35, 'rgba(124,58,237,0.14)'); g.addColorStop(1, 'rgba(124,58,237,0)');
+    bg.fillStyle = g; bg.beginPath(); bg.arc(CX, CY, R * 1.22, 0, Math.PI * 2); bg.fill();
+    var b = bg.createRadialGradient(CX - R * 0.25, CY - R * 0.35, R * 0.1, CX, CY, R);
+    b.addColorStop(0, '#1b0f3a'); b.addColorStop(0.7, '#0d0722'); b.addColorStop(1, '#2a1660');
+    bg.fillStyle = b; bg.beginPath(); bg.arc(CX, CY, R, 0, Math.PI * 2); bg.fill();
+  }
+  var bgTick = 0;
+  function frame(t){
+    /* continents drift right to left, one turn every 80 s */
+    var a = -t / 80000 * Math.PI * 2, ca = Math.cos(a), sa = Math.sin(a);
+    if ((bgTick++ & 7) === 0) drawBg(t);                       /* halo breathes slowly: every 8th frame is plenty */
+    if (gl) { gl.clear(gl.COLOR_BUFFER_BIT); gl.uniform1f(uni.ang, a); gl.drawArrays(gl.POINTS, 0, nv); }
+    else {
+      var c2 = cvGl.getContext('2d'); c2.setTransform(dpr, 0, 0, dpr, 0, 0); c2.clearRect(0, 0, W, H);
+      for (var i = 0; i < verts.length; i += 4) {
+        var x = verts[i], y = verts[i + 1], z = verts[i + 2], isL = verts[i + 3] > 0.5;
+        var x1 = x * ca + z * sa, z1 = -x * sa + z * ca, y2 = y * ct - z1 * st, z2 = y * st + z1 * ct;
+        if (z2 < 0.02) continue;
+        var k = Math.min(7, Math.floor(z2 * 7.99)), sp = sprites[isL ? k : k >> 1];
+        c2.globalAlpha = isL ? 0.30 + 0.70 * z2 : 0.04 + 0.06 * z2;
+        c2.drawImage(sp, CX + x1 * R - sp.width / 2, CY - y2 * R - sp.height / 2);
+      }
+      c2.globalAlpha = 1;
+    }
+    /* arcs and hubs */
+    fx.clearRect(0, 0, W, H);
+    fx.save(); fx.beginPath(); fx.arc(CX, CY, R * 0.995, 0, Math.PI * 2); fx.clip();
+    fx.lineWidth = Math.max(1.2, R / 600); fx.lineCap = 'round';
+    for (var ai = 0; ai < arcs.length; ai++) {
+      var A = arcs[ai], P = A.p, on = false, depth = 0;
+      for (var s2 = 0; s2 <= SEG; s2++) { var vx = P[s2 * 3], vy = P[s2 * 3 + 1], vz = P[s2 * 3 + 2];
+        var px1 = vx * ca + vz * sa, pz1 = -vx * sa + vz * ca; proj[s2 * 3] = CX + px1 * R; proj[s2 * 3 + 1] = CY - (vy * ct - pz1 * st) * R; proj[s2 * 3 + 2] = vy * st + pz1 * ct; }
+      fx.beginPath();
+      for (s2 = 0; s2 <= SEG; s2++) { var dz = proj[s2 * 3 + 2]; if (dz < 0) { on = false; continue; } depth += dz; if (!on) { fx.moveTo(proj[s2 * 3], proj[s2 * 3 + 1]); on = true; } else fx.lineTo(proj[s2 * 3], proj[s2 * 3 + 1]); }
+      var mean = depth / (SEG + 1); if (mean <= 0 || proj[2] < 0.12 || proj[SEG * 3 + 2] < 0.12) continue;   /* both ends clearly on the visible face */
+      fx.strokeStyle = 'rgba(196,181,253,' + (0.18 + 0.42 * mean).toFixed(3) + ')'; fx.stroke();
+      var u = ((t / A.speed) + A.phase) % 1 * SEG, i0 = Math.min(SEG - 1, Math.floor(u)) * 3, f = u - i0 / 3;
+      var qx = proj[i0] + (proj[i0 + 3] - proj[i0]) * f, qy = proj[i0 + 1] + (proj[i0 + 4] - proj[i0 + 1]) * f, pd = proj[i0 + 2] + (proj[i0 + 5] - proj[i0 + 2]) * f;
+      if (pd > 0) { fx.globalAlpha = 0.5 + 0.5 * pd; fx.fillStyle = '#ede9fe'; fx.beginPath(); fx.arc(qx, qy, Math.max(1.6, R / 260), 0, Math.PI * 2); fx.fill();
+        fx.globalAlpha = 0.18 * pd; fx.beginPath(); fx.arc(qx, qy, Math.max(4, R / 90), 0, Math.PI * 2); fx.fill(); fx.globalAlpha = 1; }
+    }
+    for (var hi = 0; hi < hubs.length; hi++) { var H0 = hubs[hi], h = H0.p, hx1 = h[0] * ca + h[2] * sa, hz1 = -h[0] * sa + h[2] * ca, hz = h[1] * st + hz1 * ct;
+      if (hz < 0.05) { H0.sx = -1; continue; }
+      var sx = CX + hx1 * R, sy = CY - (h[1] * ct - hz1 * st) * R; H0.sx = sx; H0.sy = sy; H0.z = hz;
+      var rgb = 'rgb(' + H0.col.join(',') + ')', hot = hovered === H0;
+      fx.globalAlpha = 0.35 + 0.65 * hz; fx.strokeStyle = rgb; fx.lineWidth = hot ? 2 : 1.2; fx.beginPath(); fx.arc(sx, sy, Math.max(3, R / (hot ? 80 : 130)), 0, Math.PI * 2); fx.stroke();
+      fx.fillStyle = rgb; fx.beginPath(); fx.arc(sx, sy, Math.max(1.4, R / 330), 0, Math.PI * 2); fx.fill();
+      if (H0.big) { fx.globalAlpha = 0.12 * hz; fx.beginPath(); fx.arc(sx, sy, Math.max(6, R / 55), 0, Math.PI * 2); fx.fill(); } }
+    fx.globalAlpha = 1; fx.restore();
+  }
+  var running = false, raf = 0, visible = true, hovered = null;
+  function loop(t){ frame(t); raf = running ? requestAnimationFrame(loop) : 0; }
+  /* hover and click on country hubs: nearest hub within 16 px */
+  var heroEl = document.querySelector('.hero'), tipEl = document.getElementById('tip'), pctf = function(x){ return x == null ? 'no P2P market' : (x >= 0 ? '+' : '') + (x * 100).toFixed(1) + '%'; };
+  function nearest(e){ var r = cvFx.getBoundingClientRect(), mx = e.clientX - r.left, my = e.clientY - r.top, best = null, bd = 16 * 16;
+    for (var i = 0; i < hubs.length; i++) { var h = hubs[i]; if (h.sx < 0) continue; var d = (h.sx - mx) * (h.sx - mx) + (h.sy - my) * (h.sy - my); if (d < bd) { bd = d; best = h; } } return best; }
+  heroEl.addEventListener('mousemove', function(e){ var h = nearest(e); hovered = h; heroEl.style.cursor = h ? 'pointer' : 'default';
+    if (!h) { if (tipEl.dataset.globe) { tipEl.style.display = 'none'; delete tipEl.dataset.globe; } return; }
+    var c = h.c; tipEl.dataset.globe = '1'; tipEl.style.whiteSpace = 'pre-line'; tipEl.style.display = 'block';
+    tipEl.textContent = c.name + ' (' + c.fiat + ')\nDollar: ' + pctf(c.premium_pct) + (c.best_rail ? ' via ' + c.best_rail : '') + (c.sell_premium_pct != null ? ', sell ' + pctf(c.sell_premium_pct) : '') + '\n' + (c.wrappers_ok || 0) + ' Nvidia wrappers open' + (c.nvda_total_pct != null ? ', best total ' + pctf(c.nvda_total_pct) : '') + '\nClick for the ladder';
+    var x = e.clientX + 14, y = e.clientY + 14; if (x + 290 > innerWidth) x = e.clientX - 290; if (y + 110 > innerHeight) y = e.clientY - 100; tipEl.style.left = x + 'px'; tipEl.style.top = y + 'px'; });
+  heroEl.addEventListener('mouseleave', function(){ hovered = null; if (tipEl.dataset.globe) { tipEl.style.display = 'none'; delete tipEl.dataset.globe; } });
+  heroEl.addEventListener('click', function(e){ var h = nearest(e); if (h && window.pegwatchSelect) window.pegwatchSelect(h.c.cc); });
+  function setRun(on){ on = on && visible && !document.hidden && !reduced; if (on === running) return; running = on; if (on) raf = requestAnimationFrame(loop); else cancelAnimationFrame(raf); }
+  resize(); frame(0);
+  addEventListener('resize', function(){ resize(); if (!running) frame(0); });
+  document.addEventListener('visibilitychange', function(){ setRun(!document.hidden); });
+  if ('IntersectionObserver' in window) new IntersectionObserver(function(e){ visible = e[0].isIntersecting; setRun(visible); }).observe(cvGl);
+  setRun(true);
+})();
+</script>
+
+</body>
+</html>

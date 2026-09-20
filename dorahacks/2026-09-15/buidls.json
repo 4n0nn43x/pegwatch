@@ -1,0 +1,222 @@
+[
+  {
+    "id": 48763,
+    "name": "Baserate",
+    "vision": "Crypto screeners show what matches today. BaseRate also shows what happened the last few thousand times — on two years of CoinMarketCap data.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/kryptoholik1/Baserate",
+    "demo_link": "https://baserate.pro/",
+    "demo_video": "https://www.youtube.com/watch?v=0qRsHGvkglo",
+    "social_links": [],
+    "owner_name": "kryptoholik",
+    "owner_username": "kryptoholik",
+    "track_name": "",
+    "track_names": [
+      "Markets and Trading Tools"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-15T00:34:08+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48762,
+    "name": "MarketMind",
+    "vision": "MarketMind turns raw cryptocurrency market data into understandable AI-powered market intelligence, helping users understand not just what moved, but what the data may be telling them.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/tijjania/marketmind",
+    "demo_link": "https://marketmind-ruby.vercel.app/",
+    "demo_video": "https://youtube.com/shorts/XEwrTtaZ9Vw?feature=share",
+    "social_links": [],
+    "owner_name": "elkanemi",
+    "owner_username": "TUmarmuktar",
+    "track_name": "",
+    "track_names": [
+      "AI Agents and Automation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-14T19:35:10+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48675,
+    "name": "Python CLI tool ",
+    "vision": "A Python Script that can be used to send notifications to a specified email address, and can be further modified to monitor market inefficiencies, arbitrage opportunities etc .. ",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/AllFatherZA/Coin_Market_Cap_Hackathon_Project",
+    "demo_link": "https://allfatherza.github.io/BlessingsPortfolio/",
+    "demo_video": "https://youtu.be/3ObLTfAXv5E",
+    "social_links": [],
+    "owner_name": "mnyandenilunga",
+    "owner_username": "AllFatherZA",
+    "track_name": "",
+    "track_names": [
+      "Markets and Trading Tools"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-13T18:09:49+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48668,
+    "name": "Precedent Panel",
+    "vision": "Precedent Panel turns every DeFi price lookup into a risk snapshot: governance flags, treasury concentration, hack alerts, and historical event impacts. Powered by live data, priced per call via x402—not subscriptions.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/organiccryptoyyc/precedent-panel",
+    "demo_link": "",
+    "demo_video": "https://youtu.be/ZEHyfxV1QS0",
+    "social_links": [],
+    "owner_name": "9718149",
+    "owner_username": "organiccryptoyyc",
+    "track_name": "",
+    "track_names": [
+      "AI Agents and Automation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-13T17:35:17+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48601,
+    "name": "OverWatch",
+    "vision": "market tools feel dense, number-heavy, and intimidating especially for people who do not enjoy complex metrics or math. OverWatch addresses this by taking real live data from CMC and presenting it in a way that feels alive and human instead of technical.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/Valorian0108/Over-Watch",
+    "demo_link": "https://overwatch-teal.vercel.app/",
+    "demo_video": "https://youtu.be/opxnlAZvXMo",
+    "social_links": [],
+    "owner_name": "demi",
+    "owner_username": "equationx",
+    "track_name": "",
+    "track_names": [
+      "Data and Visualisation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-12T12:20:21+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48443,
+    "name": "Catalyst Edge",
+    "vision": "Catalyst Edge turns live CoinMarketCap data into ranked, explainable long and short research setups with transparent entry, target, invalidation, and risk levels.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/esolver3/catalyst-edge",
+    "demo_link": "https://catalyst-edge.saptael.chatgpt.site",
+    "demo_video": "https://catalyst-edge.saptael.chatgpt.site/Catalyst_Edge_Demo.mp4",
+    "social_links": [],
+    "owner_name": "nanadaka",
+    "owner_username": "U_ed86fe9f8bcb2b",
+    "track_name": "",
+    "track_names": [
+      "Markets and Trading Tools"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-11T20:54:43+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48575,
+    "name": "Will RWA Let Me In",
+    "vision": "My vision is to make RWA investing as simple as asking a question: an agent helps you understand the assets, check what you can access, and prepare transactions you review and sign in your own wallet.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/Robinhill85/willrwaletmein",
+    "demo_link": "https://willrwaletmein.com",
+    "demo_video": "https://youtu.be/OR6Wfplwx4w",
+    "social_links": [],
+    "owner_name": "Robinhill85",
+    "owner_username": "robinhill85",
+    "track_name": "",
+    "track_names": [
+      "AI Agents and Automation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-11T20:22:26+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48570,
+    "name": "Crypto Derivatives Risk Radar",
+    "vision": "Turn fragmented crypto-derivatives data into a live, transparent view of where market stress is building and what is driving it.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/callumconnel1/crypto-derivatives-risk-radar",
+    "demo_link": "https://cdrr.duckdns.org/",
+    "demo_video": "https://youtu.be/fex3wMqbCPA",
+    "social_links": [],
+    "owner_name": "CSquant",
+    "owner_username": "CSquant",
+    "track_name": "",
+    "track_names": [
+      "Data and Visualisation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-11T19:14:14+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48422,
+    "name": "TrendLab Market Structure Map",
+    "vision": " TrendLab helps crypto researchers distinguish broad market participation from moves driven by only large-cap assets or a narrow category, so they can use more precise language before publishing a market narrative.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/ruiui009-art/trendlab-market-structure-map",
+    "demo_link": "https://map.trendlab.space/",
+    "demo_video": "https://youtu.be/ktiws7bGvO0?si=fie8H4iMJ56O-Pjf",
+    "social_links": [],
+    "owner_name": "Aleksandr ",
+    "owner_username": "U_784801dc0b382e",
+    "track_name": "",
+    "track_names": [
+      "Data and Visualisation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-10T14:56:03+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48344,
+    "name": "Elephant Tracks",
+    "vision": "Every DEX flow tool reduces the tape to one signed number, and that number cannot tell one desk selling into a crowd from a thousand matched pairs. Elephant Tracks makes the shape of flow readable from data anyone can already fetch.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/edycutjong/elephant",
+    "demo_link": "https://elephant.edycu.dev",
+    "demo_video": "https://youtu.be/I1yOhXSutAk",
+    "social_links": [],
+    "owner_name": "Edy Cu",
+    "owner_username": "edycutjong",
+    "track_name": "",
+    "track_names": [
+      "Data and Visualisation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-09T10:02:55+00:00",
+    "winner_prizes": []
+  },
+  {
+    "id": 48301,
+    "name": "CMC-Alpha-Terminal",
+    "vision": "An institutional-grade, zero-heap quantitative screening engine and FastMCP agent gateway powered by the CoinMarketCap Pro API with Power of 10 Deterministic Safety Invariants.",
+    "project_description": "",
+    "team_description": "",
+    "github_page": "https://github.com/Ishant5436/cmc-alpha-terminal",
+    "demo_link": "https://github.com/Ishant5436/cmc-alpha-terminal",
+    "demo_video": "https://github.com/Ishant5436/cmc-alpha-terminal/raw/main/assets/cmc_terminal_demo.mp4",
+    "social_links": [],
+    "owner_name": "Ishant5436",
+    "owner_username": "U_31eba657a235b6",
+    "track_name": "",
+    "track_names": [
+      "AI Agents and Automation"
+    ],
+    "upvotes": 0,
+    "created_at": "2026-09-09T04:04:07+00:00",
+    "winner_prizes": []
+  }
+]

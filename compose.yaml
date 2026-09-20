@@ -1,0 +1,35 @@
+# pegwatch derrière le Caddy commun (~/apps/edge sur le serveur). Jamais publié sur l'hôte :
+# seul Caddy l'atteint par le réseau "edge". Bloc de site : ~/apps/edge/sites/pegwatch.caddy.
+name: pegwatch
+
+services:
+  web:
+    build: .
+    image: pegwatch:local
+    container_name: pegwatch-web     # nom stable : c'est ce que Caddy résout
+    restart: unless-stopped
+    env_file: .env                   # CMC_API_KEY, jamais dans l'image
+    volumes:
+      - data:/app/data               # p2p/, rwa_quotes/, fixing/ (JSONL + JSON)
+    networks: [edge]
+    read_only: true
+    tmpfs: [/tmp]                    # pm2 y met son état (PM2_HOME)
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    mem_limit: 512m
+    pids_limit: 128
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request,urllib.error\ntry: urllib.request.urlopen('http://127.0.0.1:8080/', timeout=3)\nexcept urllib.error.HTTPError: pass"]
+      interval: 60s
+      timeout: 5s
+      retries: 3
+      start_period: 2m
+    logging: { driver: json-file, options: { max-size: "10m", max-file: "3" } }
+
+networks:
+  edge:
+    name: edge
+    external: true
+
+volumes:
+  data:
