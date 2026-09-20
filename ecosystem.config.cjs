@@ -1,4 +1,4 @@
-// pm2 dans le conteneur : trois batchs sur cron + un serveur statique sur data/.
+// pm2 dans le conteneur : des batchs sur cron, un serveur statique sur data/, le serveur MCP HTTP.
 //   pm2-runtime ecosystem.config.cjs
 // Chaque batch tourne une fois au démarrage puis à son horaire (UTC). autorestart:false = un batch se termine.
 const py = (name, mod, cron) => ({
@@ -16,5 +16,8 @@ module.exports = {
     { ...py("fixing-daily", "pegwatch.fixing", "0 12 * * *"), args: "-m pegwatch.fixing --daily" },
     py("monday", "pegwatch.monday", "0 14 * * *"),   // after the 13:30 UTC NYSE open; rebuilds every weekend on disk
     { name: "web", script: "serve", env: { PM2_SERVE_PATH: "data", PM2_SERVE_PORT: 8080 } },
+    // MCP Streamable HTTP on :8081/mcp (Caddy routes pegwatch.fyra.fun/mcp here); reads the site's own JSON over :8080.
+    { name: "mcp", script: "/usr/local/bin/python3", args: "-m pegwatch.mcp_server --http", interpreter: "none",
+      autorestart: true, time: true, env: { PEGWATCH_URL: "http://127.0.0.1:8080" } },
   ],
 };
