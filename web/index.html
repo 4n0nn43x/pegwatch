@@ -159,6 +159,21 @@ tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .legend .bar{width:160px;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--div-neg),var(--div-mid) 50%,var(--div-pos))}
 .tip{position:fixed;pointer-events:none;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.5;color:var(--t1);z-index:30;display:none;max-width:280px}
 .note{font-size:13px;color:var(--t3);margin:16px 0 0;line-height:1.6}
+/* evidence drawer: the real CMC request and response behind the numbers */
+.evidence{margin:18px 0 0;border-radius:var(--r-card);background:var(--s1);box-shadow:var(--card-shadow)}
+.evidence>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:14px 18px;font-size:13px;font-weight:600;color:var(--t2)}
+.evidence>summary::-webkit-details-marker{display:none}
+.evidence>summary::before{content:"";width:7px;height:7px;border-right:1.5px solid var(--accent);border-bottom:1.5px solid var(--accent);transform:rotate(-45deg);transition:transform .2s var(--ease)}
+.evidence[open]>summary::before{transform:rotate(45deg)}
+.evidence>summary .meta{margin-left:auto;font-weight:400;color:var(--t3)}
+.evidence .ev{padding:4px 18px 18px;border-top:1px solid var(--line);font-size:13px;color:var(--t2)}
+.evidence .ev h4{margin:16px 0 8px;font-size:13px;font-weight:600;color:var(--t1);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
+.evidence .ev .facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 8px;font-size:12px;color:var(--t3)}
+.evidence .ev .facts b{color:var(--t1);font-weight:600}
+.evidence .ev .ok{color:var(--good)}
+.evidence pre{margin:6px 0 0;padding:12px 14px;border-radius:var(--r-ctl);background:rgba(0,0,0,.5);color:var(--t2);font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;max-height:320px;white-space:pre-wrap;word-break:break-all}
+.evidence pre.sample{white-space:pre;max-height:360px}
+.evidence details summary{cursor:pointer;font-size:12px;color:var(--accent);margin-top:8px}
 .note code,.meta code,.method code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--s3);padding:2px 7px;border-radius:6px;color:var(--t2)}
 .method{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .method .card p{margin:0;font-size:14px;line-height:1.6;color:var(--t3)}
@@ -318,6 +333,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="reveal grid" id="ladderCards"></div>
     <div class="reveal tbl"><table id="ladderTable"><thead><tr><th>Wrapper</th><th>Issuer</th><th>Access</th><th class="num">Token price</th><th class="num">vs real asset</th><th class="num">Total cost</th><th class="num">You get</th></tr></thead><tbody></tbody></table></div>
     <p class="note" id="ladderNote"></p>
+    <p class="note">Token prices, issuers and volumes come from the CoinMarketCap RWA API: <a href="#evidence">see the actual request and response</a>.</p>
   </section>
 
   <section class="block" id="heatmap">
@@ -327,6 +343,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="reveal hm" id="hm"></div>
     <div class="legend"><span>discount</span><span class="bar" aria-hidden="true"></span><span>premium</span><span id="hmMeta" style="margin-left:auto"></span></div>
     <p class="note">Perp entries ("Derivatives", Hyperliquid Assets) and tokens with no volume or a unit mismatch are excluded from the wrapper spread but listed in the JSON with a <code>suspect</code> flag.</p>
+    <details class="evidence" id="evidence"><summary>Evidence: the real CoinMarketCap calls behind these numbers <span class="meta" id="evMeta">loading…</span></summary><div class="ev" id="evBody"></div></details>
   </section>
 
   <section class="block" id="dollar">
@@ -524,6 +541,21 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   /* ---- boot ---- */
   get('premiums/latest.json').then(function(d){ premiums = d; renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
   get('fixing/latest.json').then(function(d){ fixing = d; Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
+  /* ---- evidence drawer ---- */
+  function renderEvidence(ev){
+    var paths = Object.keys(ev), newest = paths.map(function(p){ return ev[p].ts; }).sort().pop();
+    $('evMeta').textContent = paths.length + ' endpoints, last call ' + age(newest) + ', ' + paths.reduce(function(n, p){ return n + (ev[p].credit_count || 0); }, 0) + ' credit per cycle';
+    $('evBody').innerHTML = paths.map(function(p){
+      var e = ev[p], lens = Object.keys(e.list_lengths || {}).map(function(k){ return k + '[' + e.list_lengths[k] + ']'; }).join(', ');
+      return '<h4>GET ' + esc(p) + '</h4>' +
+        '<div class="facts"><span>HTTP <b class="' + (e.http_status === 200 ? 'ok' : '') + '">' + esc(e.http_status) + '</b></span><span>credits <b>' + esc(e.credit_count) + '</b></span><span><b>' + esc(e.elapsed_ms) + '</b> ms</span><span><b>' + num(e.bytes, 0) + '</b> bytes</span><span>' + esc(lens) + '</span><span>' + esc(age(e.ts)) + '</span><span>sha256 <b>' + esc(String(e.sha256).slice(0, 16)) + '…</b></span></div>' +
+        '<pre>' + esc(e.method + ' ' + e.url) + '\n' + Object.keys(e.headers).map(function(h){ return h + ': ' + e.headers[h]; }).join('\n') + '</pre>' +
+        '<pre>' + esc(e.curl) + '</pre>' +
+        '<details><summary>Response, first ' + (e.response_sample.data && e.response_sample.data.rwa_assets ? e.response_sample.data.rwa_assets.length : '') + ' items of each list</summary><pre class="sample">' + esc(JSON.stringify(e.response_sample, null, 1)) + '</pre></details>';
+    }).join('');
+  }
+  get('evidence/latest.json').then(renderEvidence).catch(function(e){ $('evMeta').textContent = 'unavailable'; $('evBody').textContent = 'Evidence unavailable: ' + e.message; });
+
   get('world.json').then(function(w){
     world = w; fillCountries(w.countries); renderWorld(w);
     if (window.pegwatchWorld) window.pegwatchWorld(w);

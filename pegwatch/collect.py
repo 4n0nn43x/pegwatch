@@ -4,6 +4,7 @@
     python -m pegwatch.collect --probe  # only check key + RWA access (go/no-go)
 """
 
+import hashlib
 import json
 import os
 import sys
@@ -26,10 +27,34 @@ S.headers["Accept"] = "application/json"
 def get(path: str, **params) -> dict:
     r = S.get(BASE + path, params=params, timeout=30)
     body = r.json()
+    evidence(path, r, body, params)
     st = body.get("status", {})
     if r.status_code != 200 or str(st.get("error_code", "0")) != "0":
         raise RuntimeError(f"{path} -> HTTP {r.status_code} error_code={st.get('error_code')} {st.get('error_message')}")
     return body
+
+
+def evidence(path: str, r, body: dict, params: dict, keep: int = 3) -> None:
+    """The evidence drawer: last real request and response per CMC endpoint in data/evidence/latest.json, key masked,
+    response lists cut to `keep` items with their full length noted. The site shows it under every CMC-based number."""
+    out = DATA / "evidence" / "latest.json"
+    try:
+        doc = json.loads(out.read_text()) if out.exists() else {}
+    except ValueError:
+        doc = {}
+    sample = {k: ({kk: (vv[:keep] if isinstance(vv, list) else vv) for kk, vv in v.items()} if isinstance(v, dict) else v)
+              for k, v in body.items()}
+    lists = {f"data.{kk}": len(vv) for v in body.values() if isinstance(v, dict) for kk, vv in v.items() if isinstance(vv, list)}
+    short = {k: ",".join(str(v).split(",")[:5]) for k, v in params.items()}    # a copy-pastable request: first 5 ids only
+    url = r.url if len(r.url) <= 200 else r.url[:200] + f"...(+{len(r.url) - 200} chars)"
+    doc[path] = {"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), "method": "GET", "url": url,
+                 "headers": {"X-CMC_PRO_API_KEY": "••••••••", "Accept": "application/json"},
+                 "http_status": r.status_code, "elapsed_ms": round(r.elapsed.total_seconds() * 1000),
+                 "credit_count": body.get("status", {}).get("credit_count"), "bytes": len(r.content),
+                 "sha256": hashlib.sha256(r.content).hexdigest(), "list_lengths": lists, "response_sample": sample,
+                 "curl": "curl -H 'X-CMC_PRO_API_KEY: $CMC_API_KEY' '" + requests.Request("GET", BASE + path, params=short).prepare().url + "'"}
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(json.dumps(doc, indent=1))
 
 
 def append(name: str, rows: list[dict]) -> Path:
