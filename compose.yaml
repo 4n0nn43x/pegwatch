@@ -16,7 +16,7 @@ services:
     tmpfs: [/tmp]                    # pm2 y met son état (PM2_HOME)
     security_opt: [no-new-privileges:true]
     cap_drop: [ALL]
-    mem_limit: 512m
+    mem_limit: 1g        # DuckDB parses ~80 MB JSONL files; 512 m OOM-killed the premiums batch on 2026-09-25
     pids_limit: 128
     healthcheck:
       test: ["CMD", "python3", "-c", "import urllib.request,urllib.error\ntry: urllib.request.urlopen('http://127.0.0.1:8080/', timeout=3)\nexcept urllib.error.HTTPError: pass"]
