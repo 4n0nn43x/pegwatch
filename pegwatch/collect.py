@@ -77,12 +77,17 @@ def db():
 
 
 def latest(name: str, where: str = "true") -> tuple[str, list[dict]]:
-    """Rows of the most recent snapshot in data/<name>/*.jsonl, ts as ISO string. ("", []) when nothing yet."""
-    if not list((DATA / name).glob("*.jsonl")):
+    """Rows of the most recent snapshot in data/<name>/*.jsonl, ts as ISO string. ("", []) when nothing yet.
+
+    Only the last two daily files are read: the archive grows by ~80 MB a day and scanning the whole glob was
+    OOM-killing the 512 MB container. Two files cover the day boundary, when today's file may not exist yet.
+    """
+    days = sorted((DATA / name).glob("*.jsonl"))[-2:]
+    if not days:
         return "", []
-    files = str(DATA / name / "*.jsonl")
+    files = "', '".join(str(d) for d in days)
     rel = db().sql(f"select * replace (strftime(ts, '%Y-%m-%dT%H:%M:%SZ') as ts) "
-                   f"from read_json_auto('{files}') where ts = (select max(ts) from read_json_auto('{files}')) and {where}")
+                   f"from read_json_auto(['{files}']) where ts = (select max(ts) from read_json_auto(['{files}'])) and {where}")
     rows = [dict(zip(rel.columns, r)) for r in rel.fetchall()]
     return (rows[0]["ts"] if rows else ""), rows
 
