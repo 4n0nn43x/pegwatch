@@ -7,27 +7,46 @@ stocks, Sunday before 18:00 ET for metals) vs the first real print after the wee
 wrapper is sunday_price / monday_open - 1; the perp oracle (Hyperliquid, `proxy`) competes as "perps"; holding Friday's
 close is the naive baseline. Tests CMC Research's peg-tightness ranking bStocks > xStocks > Ondo with real weekends.
 Pure logic (score) has no I/O and is tested in tests/test_monday.py.
+
+Memory stays flat as the archive grows: each weekend is queried on its own daily files only (3 premiums days, 3
+ref_quotes days, plain or gzipped), and a closed weekend's rows are cached in data/monday/weekends/<monday>.json so it
+is never queried again. Delete that folder after changing the SQL below.
 """
 
 import json
 import sys
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 
 from .collect import DATA, db
 
 NY = "America/New_York"
 PERPS = "perps"          # the proxy competes under this issuer name
+PREMIUM_DAYS = (-2, -1, 0)   # Sat, Sun, Mon UTC files hold every premium row of the NY weekend
+REF_DAYS = (-1, 0, 1)        # Sun, Mon, Tue UTC files hold every Sunday/Monday NY reopen print
 
 
-def snapshots() -> list[dict]:
-    """One row per (weekend, wrapper): last weekend snapshot before the reference reopened, joined with the open print."""
-    pf, rf = str(DATA / "premiums" / "*.jsonl"), str(DATA / "ref_quotes" / "*.jsonl")
-    if not list((DATA / "premiums").glob("*.jsonl")) or not list((DATA / "ref_quotes").glob("*.jsonl")):
+def day_files(name: str, monday: date, offsets: tuple[int, ...]) -> list[str]:
+    """The daily files of data/<name>/ around one Monday, plain .jsonl or compacted .jsonl.gz."""
+    days = [monday + timedelta(days=o) for o in offsets]
+    return [str(f) for d in days for f in (DATA / name / f"{d}.jsonl", DATA / name / f"{d}.jsonl.gz") if f.exists()]
+
+
+def mondays_on_disk() -> list[date]:
+    """Every Monday that closes a weekend with at least one premiums file on disk."""
+    days = {date.fromisoformat(f.name[:10]) for f in (DATA / "premiums").glob("*.jsonl*")}
+    return sorted({d + timedelta(days=(7 - d.weekday()) % 7) for d in days if d.weekday() in (5, 6, 0)})
+
+
+def snapshots(monday: date) -> list[dict]:
+    """One row per wrapper for one weekend: last weekend snapshot before the reference reopened, joined with the open print."""
+    pf, rf = day_files("premiums", monday, PREMIUM_DAYS), day_files("ref_quotes", monday, REF_DAYS)
+    if not pf or not rf:
         return []
+    pl, rl = ("[" + ", ".join(f"'{f}'" for f in fs) + "]" for fs in (pf, rf))
     rel = db().sql(f"""
-        with p as (select *, ts::timestamptz at time zone '{NY}' as ny from read_json_auto('{pf}', union_by_name=true) where regime = 'weekend'),
-        r as (select ts, ticker, price, ts::timestamptz at time zone '{NY}' as ny from read_json_auto('{rf}', union_by_name=true)
+        with p as (select *, ts::timestamptz at time zone '{NY}' as ny from read_json_auto({pl}, union_by_name=true) where regime = 'weekend'),
+        r as (select ts, ticker, price, ts::timestamptz at time zone '{NY}' as ny from read_json_auto({rl}, union_by_name=true)
               where source = 'ostium' and kind = 'session'),
         reopen as (
             select ticker, mon, min(ts) as reopen, arg_min(price, ts) as open_price from (
@@ -44,6 +63,22 @@ def snapshots() -> list[dict]:
         qualify p.ts = max(p.ts) over (partition by p.symbol, rp.mon)
         order by monday, p.asset, p.symbol""")
     return [dict(zip(rel.columns, r)) for r in rel.fetchall()]
+
+
+def all_rows(today: date) -> list[dict]:
+    """Snapshot rows of every weekend on disk, closed weekends from the cache."""
+    rows, cache = [], DATA / "monday" / "weekends"
+    for mon in mondays_on_disk():
+        f = cache / f"{mon}.json"
+        if f.exists():
+            rows += json.loads(f.read_text())
+            continue
+        got = snapshots(mon)
+        if mon + timedelta(days=2) < today:      # the Tuesday UTC ref file is closed: the weekend is final
+            cache.mkdir(parents=True, exist_ok=True)
+            f.write_text(json.dumps(got))
+        rows += got
+    return rows
 
 
 def score(rows: list[dict]) -> dict:
@@ -83,7 +118,7 @@ def _table(agg: dict) -> list[dict]:
 
 
 def main() -> int:
-    rows = snapshots()
+    rows = all_rows(datetime.now(timezone.utc).date())
     if not rows:
         print("no complete weekend yet (need weekend premiums + a Monday session print)"); return 0
     doc = {"ts": datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"), **score(rows)}

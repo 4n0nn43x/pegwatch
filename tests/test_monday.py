@@ -23,3 +23,32 @@ def test_winner_and_baseline():
 
 def test_empty():
     assert score([]) == {"weekends": [], "cumulative": []}
+
+
+def _jsonl(path, rows, gz=False):
+    import gzip, json
+    text = "".join(json.dumps(r) + "\n" for r in rows)
+    if gz:
+        with gzip.open(str(path) + ".gz", "wt") as f:
+            f.write(text)
+    else:
+        path.write_text(text)
+
+
+def test_snapshots_reads_only_the_weekend_files_plain_or_gzipped(tmp_path, monkeypatch):
+    from datetime import date
+    import pegwatch.monday as m
+    monkeypatch.setattr(m, "DATA", tmp_path)
+    (tmp_path / "premiums").mkdir(); (tmp_path / "ref_quotes").mkdir()
+    tok = {"asset": "NVDA", "symbol": "NVDAX", "issuer": "Backed", "ref_price": 100.0, "proxy": 101.0, "is_perp": False, "suspect": False}
+    _jsonl(tmp_path / "premiums" / "2026-09-19.jsonl", [{"ts": "2026-09-19T15:00:00+00:00", "regime": "weekend", "price": 101.0, **tok}], gz=True)
+    _jsonl(tmp_path / "premiums" / "2026-09-20.jsonl", [{"ts": "2026-09-20T23:55:00+00:00", "regime": "weekend", "price": 102.5, **tok}])
+    _jsonl(tmp_path / "premiums" / "2026-09-12.jsonl", [{"ts": "2026-09-12T15:00:00+00:00", "regime": "weekend", "price": 1.0, **tok}])  # other weekend
+    _jsonl(tmp_path / "ref_quotes" / "2026-09-21.jsonl", [
+        {"ts": "2026-09-21T13:35:00+00:00", "source": "ostium", "ticker": "NVDA", "kind": "session", "price": 102.0},
+        {"ts": "2026-09-21T13:40:00+00:00", "source": "ostium", "ticker": "NVDA", "kind": "session", "price": 109.0}])
+    assert m.mondays_on_disk() == [date(2026, 9, 14), date(2026, 9, 21)]
+    rows = m.snapshots(date(2026, 9, 21))
+    assert len(rows) == 1 and rows[0]["price"] == 102.5 and rows[0]["open_price"] == 102.0 and rows[0]["monday"] == "2026-09-21"
+    assert m.all_rows(date(2026, 9, 30)) == rows                                  # 09-14 has no Monday print: no row
+    assert (tmp_path / "monday" / "weekends" / "2026-09-21.json").exists()       # closed weekend cached

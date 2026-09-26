@@ -15,6 +15,7 @@ module.exports = {
     py("fixing", "pegwatch.fixing", "1-59/5 * * * *"),
     { ...py("fixing-daily", "pegwatch.fixing", "0 12 * * *"), args: "-m pegwatch.fixing --daily" },
     py("monday", "pegwatch.monday", "0 14 * * *"),   // after the 13:30 UTC NYSE open; rebuilds every weekend on disk
+    py("archive", "pegwatch.archive", "17 3 * * *"), // gzip closed daily JSONL files, the archive would fill the disk otherwise
     { name: "web", script: "serve", env: { PM2_SERVE_PATH: "data", PM2_SERVE_PORT: 8080 } },
     // MCP Streamable HTTP on :8081/mcp (Caddy routes pegwatch.fyra.fun/mcp here); reads the site's own JSON over :8080.
     { name: "mcp", script: "/usr/local/bin/python3", args: "-m pegwatch.mcp_server --http", interpreter: "none",
