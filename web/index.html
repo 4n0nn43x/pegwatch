@@ -449,14 +449,17 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     if (!ladder) return;
     var a = ladder.assets.filter(function(x){ return x.symbol === aSel.value; })[0]; if (!a) return;
     var usd = ladder.dollar, amount = Number(amt.value) || 0;
-    var rate = usd.official ? usd.official * (1 + usd.premium_pct) : 1, usdAmt = amount / rate;
+    // no rate = no conversion: never fall back to 1 fiat = 1 $ (1 000 EUR is not 1 000 $)
+    var rate = usd.official && usd.premium_pct != null ? usd.official * (1 + usd.premium_pct) : null, usdAmt = rate ? amount / rate : null;
     var cards = [];
-    cards.push('<div class="card"><h3>Your dollar</h3><div class="big">' + (usd.official ? num(usd.official * (1 + usd.premium_pct)) + '<small>' + esc(usd.fiat) + ' per $</small>' : 'official rate') + '</div><div class="meta">' +
-      (usd.official ? 'official <b>' + num(usd.official) + '</b>, premium <span class="chip ' + (cls(usd.premium_pct) || 'flat') + '">' + pct(usd.premium_pct) + '</span> via <b>' + esc(usd.best) + '</b>' + (usd.rails.length > 1 ? '<br>' + usd.rails.map(function(r){ return esc(r.rail) + ' ' + num(r.price) + ' (' + pct(r.premium_pct, 1) + ')'; }).join(', ') : '') : 'no P2P layer: the dollar is bought at the official rate') +
-      '<br>' + num(amount, 0) + ' ' + esc(usd.fiat) + ' = <b>' + num(usdAmt) + ' $</b></div></div>');
+    cards.push('<div class="card"><h3>Your dollar</h3><div class="big">' + (rate ? num(rate) + '<small>' + esc(usd.fiat) + ' per $</small>' : 'n/a') + '</div><div class="meta">' +
+      (!rate ? 'no ' + esc(usd.fiat) + ' rate in the current fixing' :
+       usd.p2p === false ? 'no P2P layer: the dollar is bought at the official rate' :
+       'official <b>' + num(usd.official) + '</b>, premium <span class="chip ' + (cls(usd.premium_pct) || 'flat') + '">' + pct(usd.premium_pct) + '</span> via <b>' + esc(usd.best) + '</b>' + (usd.rails.length > 1 ? '<br>' + usd.rails.map(function(r){ return esc(r.rail) + ' ' + num(r.price) + ' (' + pct(r.premium_pct, 1) + ')'; }).join(', ') : '')) +
+      (rate ? '<br>' + num(amount, 0) + ' ' + esc(usd.fiat) + ' = <b>' + num(usdAmt) + ' $</b>' : '') + '</div></div>');
     cards.push('<div class="card"><h3>Real ' + esc(a.symbol) + '</h3><div class="big">' + num(a.ref_price) + '<small>$</small></div><div class="meta">regime <b>' + esc(a.regime) + '</b>, reference <b>' + esc(a.ref_session) + '</b>' + (a.proxy ? '<br>perp oracle <b>' + num(a.proxy) + '</b> (' + pct(a.proxy / a.ref_price - 1) + ' vs reference)' : '') + '</div></div>');
     var best = a.wrappers.filter(function(w){ return w.symbol === a.best; })[0];
-    cards.push('<div class="card total"><h3>Best route from ' + esc(ladder.name) + '</h3>' + (best ? '<div class="big">' + pct(best.total_pct) + '<small>above the real price</small></div><div class="meta"><b>' + esc(usd.best || 'official') + '</b> then <b>' + esc(best.symbol) + '</b> (' + esc(best.issuer) + '): ' + num(usdAmt / best.price, 4) + ' units for ' + num(amount, 0) + ' ' + esc(usd.fiat) + '</div>' : '<div class="big">none</div><div class="meta">no wrapper with published access from ' + esc(ladder.name) + '</div>') + '</div>');
+    cards.push('<div class="card total"><h3>Best route from ' + esc(ladder.name) + '</h3>' + (best ? '<div class="big">' + pct(best.total_pct) + '<small>above the real price</small></div><div class="meta"><b>' + esc(usd.best || 'official') + '</b> then <b>' + esc(best.symbol) + '</b> (' + esc(best.issuer) + '): ' + (rate ? num(usdAmt / best.price, 4) : 'n/a') + ' units for ' + num(amount, 0) + ' ' + esc(usd.fiat) + '</div>' : '<div class="big">none</div><div class="meta">no wrapper with published access from ' + esc(ladder.name) + '</div>') + '</div>');
     $('ladderCards').innerHTML = cards.join('');
     [].forEach.call($('ladderCards').children, function(c, i){ c.style.setProperty('--i', i); });
     var tb = $('ladderTable').tBodies[0]; tb.innerHTML = '';
@@ -464,7 +467,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     a.wrappers.forEach(function(w){
       var tr = document.createElement('tr'); if (w.symbol === a.best) tr.className = 'best';
       var bar = function(v){ return v == null ? '' : '<i class="bar ' + cls(v) + '" style="width:' + Math.round(Math.min(1, Math.abs(v) / maxAbs) * 100) + '%"></i>'; };
-      tr.innerHTML = '<td><b>' + esc(w.symbol) + '</b></td><td>' + esc(w.issuer) + '</td><td><span class="badge ' + w.access + '" title="' + esc(w.kyc || '') + '">' + w.access + '</span></td><td class="num">' + num(w.price) + '</td><td class="num ' + cls(w.premium_pct) + '"><span class="v">' + pct(w.premium_pct) + '</span>' + bar(w.premium_pct) + '</td><td class="num ' + cls(w.total_pct) + '">' + (w.total_pct == null ? '' : '<span class="v">' + pct(w.total_pct) + '</span>' + bar(w.total_pct)) + '</td><td class="num">' + (w.total_pct == null ? '' : num(usdAmt / w.price, 4)) + '</td>';
+      tr.innerHTML = '<td><b>' + esc(w.symbol) + '</b></td><td>' + esc(w.issuer) + '</td><td><span class="badge ' + w.access + '" title="' + esc(w.kyc || '') + '">' + w.access + '</span></td><td class="num">' + num(w.price) + '</td><td class="num ' + cls(w.premium_pct) + '"><span class="v">' + pct(w.premium_pct) + '</span>' + bar(w.premium_pct) + '</td><td class="num ' + cls(w.total_pct) + '">' + (w.total_pct == null ? '' : '<span class="v">' + pct(w.total_pct) + '</span>' + bar(w.total_pct)) + '</td><td class="num">' + (w.total_pct == null || !rate ? '' : num(usdAmt / w.price, 4)) + '</td>';
       tr.title = (w.redemption ? 'Redemption: ' + w.redemption : '') + (w.kyc ? '\nKYC: ' + w.kyc : '');
       tb.appendChild(tr);
     });

@@ -42,19 +42,22 @@ def access(w: dict | None, cc: str) -> str:
 def dollar(cc: str, country: dict, fixing: dict) -> dict:
     """Layer 1 for one country: official rate and the buy-side premium on each local rail."""
     fiat = country["fiat"]
-    if country.get("rails") == [] or fiat not in fixing.get("fixing", {}):
-        return {"fiat": fiat, "official": None, "rails": [], "best": None, "premium_pct": 0.0}
-    off = fixing["official"][fiat]["rate"]
+    off = 1.0 if fiat == "USD" else fixing.get("official", {}).get(fiat, {}).get("rate")
+    if country.get("rails") == []:            # no P2P layer (FR, US): the dollar is bought at the official rate
+        return {"fiat": fiat, "official": off, "p2p": False, "rails": [], "best": None, "premium_pct": 0.0}
+    if fiat not in fixing.get("fixing", {}):  # P2P country missing from this fixing: no rate at all, never a silent 1:1
+        return {"fiat": fiat, "official": None, "p2p": True, "rails": [], "best": None, "premium_pct": None}
     buy = fixing["fixing"][fiat].get("buy", {})
     wanted = country.get("rails") or sorted((r for r in buy if r not in ("ALL", "Other")), key=lambda r: -buy[r]["depth_usd"])
     rails = [{"rail": r, **buy[r]} for r in wanted if r in buy]
     rails.sort(key=lambda r: r["price"])
     head = fixing["fixing"][fiat].get("dollar", {})
     best = rails[0] if rails else {"rail": "ALL", **buy["ALL"]} if "ALL" in buy else None
-    if head.get("crossed") or not best:        # buy ads are not fillable: the sell side is what a dollar really costs
-        return {"fiat": fiat, "official": off, "rails": rails, "best": "market (crossed book)" if head else None,
-                "premium_pct": head.get("premium_pct", 0.0), "crossed": bool(head.get("crossed")), "thin": bool(head.get("thin"))}
-    return {"fiat": fiat, "official": off, "rails": rails, "best": best["rail"],
+    if head.get("crossed") or not best:        # buy ads are not fillable (or absent): the sell side is what a dollar really costs
+        label = "market (crossed book)" if head.get("crossed") else "market (sell side)" if head else None
+        return {"fiat": fiat, "official": off, "p2p": True, "rails": rails, "best": label,
+                "premium_pct": head.get("premium_pct"), "crossed": bool(head.get("crossed")), "thin": bool(head.get("thin"))}
+    return {"fiat": fiat, "official": off, "p2p": True, "rails": rails, "best": best["rail"],
             "premium_pct": best["premium_pct"], "crossed": False, "thin": bool(head.get("thin"))}
 
 
@@ -70,7 +73,8 @@ def ladder(cc: str, country: dict, fixing: dict, premiums: dict, wrappers: dict)
             w = wrappers.get(t["issuer"], {})
             rows.append({"symbol": t["symbol"], "issuer": t["issuer"], "price": t["price"], "premium_pct": t["premium_pct"],
                          "access": st, "kyc": w.get("kyc"), "redemption": w.get("redemption"),
-                         "total_pct": round((1 + usd["premium_pct"]) * (1 + t["premium_pct"]) - 1, 5) if st != "excluded" else None})
+                         "total_pct": round((1 + usd["premium_pct"]) * (1 + t["premium_pct"]) - 1, 5)
+                         if st != "excluded" and usd["premium_pct"] is not None else None})
         rows.sort(key=lambda r: (STATUS_ORDER[r["access"]], r["total_pct"] if r["total_pct"] is not None else 9))
         best = next((r for r in rows if r["access"] in ("allowed", "likely")), None)
         assets.append({"symbol": a["symbol"], "name": a["name"], "asset_type": a["asset_type"], "regime": a["regime"],
@@ -87,8 +91,9 @@ def true_price(cc: str, asset: str, amount_fiat: float, lad: dict) -> dict:
     if not a:
         raise KeyError(f"no reference for {asset}")
     usd = lad["dollar"]
-    rate = usd["official"] * (1 + usd["premium_pct"]) if usd["official"] else 1.0
-    usd_amount = amount_fiat / rate
+    if not usd["official"] or usd["premium_pct"] is None:
+        raise ValueError(f"no {usd['fiat']} rate in the current fixing for {lad['country']}, cannot convert the amount")
+    usd_amount = amount_fiat / (usd["official"] * (1 + usd["premium_pct"]))
     return {**{k: lad[k] for k in ("country", "name", "ts")}, "asset": asset, "amount_fiat": amount_fiat, "fiat": usd["fiat"],
             "dollar": {"official": usd["official"], "best_rail": usd["best"], "premium_pct": usd["premium_pct"], "usd": round(usd_amount, 2)},
             "reference": {"price": a["ref_price"], "session": a["ref_session"], "regime": a["regime"], "proxy": a["proxy"]},
@@ -116,7 +121,7 @@ def main(argv: list[str]) -> int:
         sell = fixing.get("fixing", {}).get(c["fiat"], {}).get("sell", {}).get("ALL")
         nvda = next((a for a in lad["assets"] if a["symbol"] == "NVDA"), None)
         world.append({"cc": cc, "name": c["name"], "fiat": c["fiat"], "lat": c.get("lat"), "lon": c.get("lon"),
-                      "official": lad["dollar"]["official"], "premium_pct": lad["dollar"]["premium_pct"] if lad["dollar"]["official"] else None,
+                      "official": lad["dollar"]["official"], "premium_pct": lad["dollar"]["premium_pct"],
                       "sell_premium_pct": sell["premium_pct"] if sell else None, "best_rail": lad["dollar"]["best"],
                       "crossed": lad["dollar"].get("crossed", False), "thin": lad["dollar"].get("thin", False),
                       "rails": [r["rail"] for r in lad["dollar"]["rails"][:4]],

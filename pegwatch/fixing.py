@@ -23,6 +23,7 @@ MIN_USD = 100          # ads that cannot fill 100 $ are bait or dust, ignored
 MAX_W = 2.0            # weight cap per ad = MAX_W x the bucket's median depth: a few huge fake ads cannot outweigh the real market
 EUR_PEG = 655.957      # XOF and XAF are fixed to EUR, the USD rate floats with EUR/USD
 THIN_USD = 20_000      # a buy side with less depth than this (or under 10 ads) is flagged thin
+NO_P2P = ["EUR"]        # fiats of countries without a P2P layer (countries.yaml rails: []): they still need an official rate
 CROSSED = 0.98         # buy median below 98 % of the sell median = the buy ads are not fillable, the sell side is the real price
 
 # Central-bank official rates where open.er-api.com is stale, blended or lagging (research of 2026-09-16, see FEEDBACK.md and the vault).
@@ -38,26 +39,32 @@ OFFICIAL = {
 }
 
 # ponytail: substring rules, first match wins. Extend when a new mobile-money label shows up in data.
+# A third element restricts the rule to those fiats: BBVA, Santander or Banco Popular exist in many countries and
+# are only "Mexican bank" / "Dominican bank" in MXN / DOP; elsewhere they fall through to the generic "Bank".
 RAILS = [
+    (r"momo|zalo", "MoMo", {"VND"}),        # the Vietnamese wallet, not MTN
     (r"wave", "Wave"), (r"mtn|momo", "MTN MoMo"), (r"moov", "Moov Money"), (r"orange", "Orange Money"),
     (r"airtel|atmoney", "Airtel Money"), (r"t-?money", "T-Money"), (r"m-?pesa", "M-Pesa"),
     (r"vodafone|telecel", "Telecel Cash"), (r"\bopay|paycom", "OPay"), (r"palm ?pay", "PalmPay"),
-    (r"neopay|qi ?serv|zain ?cash|\bfib\b", "Iraqi wallet"), (r"nayapay|sadapay", "Pakistani wallet"), (r"pumb|sense|privat|monobank", "Ukrainian bank"),
-    (r"ziraat|garanti|kuveyt|akbank|vakif|isbank|yapi", "Turkish bank"), (r"baridimob|\bccp\b", "BaridiMob"), (r"bre-b|llaves", "Bre-B"),
-    (r"\bstp\b|bbva|banorte|santander|banamex", "Mexican bank"), (r"banreservas|popular", "Dominican bank"),
+    (r"neopay|qi ?serv|zain ?cash|\bfib\b", "Iraqi wallet", {"IQD"}), (r"nayapay|sadapay", "Pakistani wallet", {"PKR"}),
+    (r"pumb|sense|privat|monobank", "Ukrainian bank", {"UAH"}),
+    (r"ziraat|garanti|kuveyt|akbank|vakif|isbank|yapi", "Turkish bank", {"TRY"}), (r"baridimob|\bccp\b", "BaridiMob", {"DZD"}),
+    (r"bre-b|llaves", "Bre-B", {"COP"}),
+    (r"\bstp\b|bbva|banorte|santander|banamex", "Mexican bank", {"MXN"}), (r"banreservas|popular", "Dominican bank", {"DOP"}),
     (r"kuda", "Kuda"), (r"moniepoint", "Moniepoint"), (r"instapay", "InstaPay"),
     (r"pix", "Pix"), (r"mercado ?pago", "Mercado Pago"), (r"nequi", "Nequi"), (r"yape", "Yape"), (r"plin", "Plin"), (r"daviplata", "Daviplata"),
     (r"pago ?m[oó]vil", "Pago Móvil"), (r"spei|oxxo", "SPEI"), (r"papara", "Papara"), (r"jazz ?cash", "JazzCash"), (r"easypaisa", "Easypaisa"),
-    (r"bkash", "bKash"), (r"nagad", "Nagad"), (r"upi", "UPI"), (r"gcash", "GCash"), (r"maya|paymaya", "Maya"), (r"dana|ovo|gopay", "e-wallet"),
-    (r"momo|zalo", "MoMo"), (r"kaspi", "Kaspi"), (r"monobank|privat", "Monobank"), (r"esewa|khalti", "eSewa"), (r"telebirr", "Telebirr"),
+    (r"bkash", "bKash"), (r"nagad", "Nagad"), (r"upi", "UPI"), (r"gcash", "GCash"), (r"maya|paymaya", "Maya"),
+    (r"\b(dana|ovo|gopay)\b", "e-wallet", {"IDR"}),   # word-bounded: "Novo Banco" is not OVO
+    (r"kaspi", "Kaspi"), (r"esewa|khalti", "eSewa"), (r"telebirr", "Telebirr"),
     (r"wise|revolut|zelle|paypal|skrill|payoneer|advcash", "Fintech"), (r"cash|efectivo", "Cash"), (r"bank|transfer|banco|sepa|iban", "Bank"),
 ]
 
 
 def rail_of(pay: str, fiat: str = "") -> str:
-    if fiat == "VND" and re.search(r"momo|zalo", pay, re.I):
-        return "MoMo"                      # the Vietnamese wallet, not MTN
-    for pat, rail in RAILS:
+    for pat, rail, *only in RAILS:
+        if only and fiat not in only[0]:
+            continue
         if re.search(pat, pay, re.I):
             return rail
     return "Other"
@@ -134,7 +141,7 @@ def latest_snapshot(fiats: list[str] | None = None) -> tuple[str, list[dict]]:
 def build(fiats: list[str] | None = None) -> dict:
     ts, rows = latest_snapshot(fiats)
     fx = fixing(rows)
-    off = official_rates(sorted(fx))
+    off = official_rates(sorted(set(fx) | set(NO_P2P)))
     for fiat, sides in fx.items():
         for rails in sides.values():
             for v in rails.values():

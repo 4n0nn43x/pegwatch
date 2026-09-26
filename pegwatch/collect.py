@@ -52,7 +52,7 @@ def evidence(path: str, r, body: dict, params: dict, keep: int = 3) -> None:
                  "http_status": r.status_code, "elapsed_ms": round(r.elapsed.total_seconds() * 1000),
                  "credit_count": body.get("status", {}).get("credit_count"), "bytes": len(r.content),
                  "sha256": hashlib.sha256(r.content).hexdigest(), "list_lengths": lists, "response_sample": sample,
-                 "curl": "curl -H 'X-CMC_PRO_API_KEY: $CMC_API_KEY' '" + requests.Request("GET", BASE + path, params=short).prepare().url + "'"}
+                 "curl": "curl -H \"X-CMC_PRO_API_KEY: $CMC_API_KEY\" '" + requests.Request("GET", BASE + path, params=short).prepare().url + "'"}
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(doc, indent=1))
 
