@@ -1,3 +1,5 @@
+import pytest
+
 from pegwatch.ladder import ladder, true_price
 
 FIXING = {"ts": "t", "official": {"XOF": {"rate": 565.0}},
@@ -41,3 +43,28 @@ def test_unlisted_country_gets_likely_when_issuer_publishes_a_list():
 def test_country_without_p2p_layer():
     lad = ladder("US", {"name": "US", "fiat": "USD", "rails": []}, FIXING, PREMIUMS, WRAPPERS)
     assert lad["dollar"]["premium_pct"] == 0.0 and lad["assets"][0]["best"] == "NVDA.D"
+    assert true_price("US", "NVDA", 1000, lad)["dollar"]["usd"] == 1000
+
+
+def test_euro_amount_is_converted_not_read_as_dollars():
+    fx = {**FIXING, "official": {**FIXING["official"], "EUR": {"rate": 0.87}}}
+    lad = ladder("FR", {"name": "France", "fiat": "EUR", "rails": []}, fx, PREMIUMS, WRAPPERS)
+    assert lad["dollar"]["official"] == 0.87 and lad["dollar"]["premium_pct"] == 0.0
+    assert abs(true_price("FR", "NVDA", 1000, lad)["dollar"]["usd"] - 1000 / 0.87) < 0.01
+
+
+def test_missing_rate_refuses_to_convert():
+    lad = ladder("NG", {"name": "Nigeria", "fiat": "NGN"}, FIXING, PREMIUMS, WRAPPERS)   # no NGN in this fixing
+    assert lad["dollar"]["official"] is None and lad["assets"][0]["wrappers"][0]["total_pct"] is None
+    with pytest.raises(ValueError):
+        true_price("NG", "NVDA", 1_500_000, lad)
+    lad = ladder("FR", {"name": "France", "fiat": "EUR", "rails": []}, FIXING, PREMIUMS, WRAPPERS)  # EUR rate missing
+    with pytest.raises(ValueError):
+        true_price("FR", "NVDA", 1000, lad)
+
+
+def test_buy_side_empty_is_labelled_sell_side_not_crossed():
+    fx = {"ts": "t", "official": {"XOF": {"rate": 565.0}}, "fixing": {"XOF": {"buy": {}, "sell": {"ALL": {"price": 580}},
+          "dollar": {"price": 580, "premium_pct": 0.0265, "crossed": False, "thin": True}}}}
+    d = ladder("BJ", BJ, fx, PREMIUMS, WRAPPERS)["dollar"]
+    assert d["best"] == "market (sell side)" and d["premium_pct"] == 0.0265 and not d["crossed"]

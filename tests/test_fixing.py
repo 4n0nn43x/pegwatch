@@ -20,6 +20,16 @@ def test_rail_of(pay, rail):
     assert rail_of(pay) == rail
 
 
+@pytest.mark.parametrize("pay,fiat,rail", [
+    ("BBVA", "MXN", "Mexican bank"), ("BBVA", "COP", "Other"), ("Banco Santander", "ARS", "Bank"),
+    ("Banco Popular", "DOP", "Dominican bank"), ("Banco Popular", "COP", "Bank"),
+    ("Novo Banco", "EUR", "Bank"), ("OVO", "IDR", "e-wallet"),
+    ("MoMo", "VND", "MoMo"), ("MoMo", "GHS", "MTN MoMo"), ("Monobank", "UAH", "Ukrainian bank"),
+])
+def test_country_banks_only_in_their_currency(pay, fiat, rail):
+    assert rail_of(pay, fiat) == rail
+
+
 def ad(price, max_fiat, pay, side="buy", fiat="XOF"):
     return {"fiat": fiat, "side": side, "price": price, "max_fiat": max_fiat, "pay": pay}
 
