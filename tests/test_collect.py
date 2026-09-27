@@ -18,10 +18,10 @@ def test_cached_reuses_until_max_age_then_refreshes(tmp_path, monkeypatch):
     monkeypatch.setattr(c, "DATA", tmp_path)
     calls = []
     fetch = lambda: calls.append(1) or {"prices": {"NGN": len(calls)}}
-    assert c.cached("cmc_fx", 3600, fetch)["prices"] == {"NGN": 1}              # no file: fetched
-    assert c.cached("cmc_fx", 3600, fetch)["prices"] == {"NGN": 1} and len(calls) == 1   # fresh: reused, no credit spent
+    assert c.cached("usdt_fx", 3600, fetch)["prices"] == {"NGN": 1}              # no file: fetched
+    assert c.cached("usdt_fx", 3600, fetch)["prices"] == {"NGN": 1} and len(calls) == 1   # fresh: reused, no credit spent
     old = (datetime.now(timezone.utc) - timedelta(hours=2)).isoformat()
-    (tmp_path / "cmc_fx.json").write_text(json.dumps({"ts": old, "prices": {"NGN": 1}}))
-    doc = c.cached("cmc_fx", 3600, fetch)
+    (tmp_path / "cache" / "usdt_fx.json").write_text(json.dumps({"ts": old, "prices": {"NGN": 1}}))
+    doc = c.cached("usdt_fx", 3600, fetch)
     assert doc["prices"] == {"NGN": 2} and doc["ts"] > old                    # stale: refetched and restamped
-    assert json.loads((tmp_path / "cmc_fx.json").read_text()) == doc
+    assert json.loads((tmp_path / "cache" / "usdt_fx.json").read_text()) == doc

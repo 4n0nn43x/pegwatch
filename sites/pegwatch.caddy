@@ -2,7 +2,7 @@ pegwatch.fyra.fun {
 	import secure
 	# Raw archives stay private: they hold P2P advertiser nicknames and weigh up to ~80 MB a day each.
 	# Only the computed JSON (world.json, ladder/, fixing/, premiums/latest.json, monday/, evidence/) is public.
-	@raw path *.jsonl *.jsonl.gz *.gz.tmp
+	@raw path *.jsonl *.jsonl.gz *.gz.tmp /cache/* /latest/*
 	handle @raw {
 		respond 404
 	}

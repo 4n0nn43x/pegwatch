@@ -35,7 +35,7 @@ def due(now: datetime, minutes, hour) -> bool:
 
 OUTPUTS = {"p2p snapshot": ("latest/p2p.jsonl", None), "dollar fixing": ("fixing/latest.json", "ts"),
            "wrapper premiums": ("premiums/latest.json", "ts"), "ladders": ("world.json", "ts"),
-           "Monday scoreboard": ("monday/latest.json", "ts"), "exchange USDT price": ("cmc_fx.json", "ts")}
+           "Monday scoreboard": ("monday/latest.json", "ts"), "exchange USDT price": ("cache/usdt_fx.json", "ts")}
 
 
 def iso(t: float | None) -> str | None:

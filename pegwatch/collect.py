@@ -100,8 +100,9 @@ FX_MAX_AGE = 6 * 3600   # 1 credit per fiat converted: 37 fiats every 6 h stays 
 
 
 def cached(name: str, max_age: float, fetch) -> dict:
-    """data/<name>.json if younger than max_age seconds, else fetch() stamped with ts and saved. Keeps credit use flat."""
-    out = DATA / f"{name}.json"
+    """data/cache/<name>.json if younger than max_age seconds, else fetch() stamped with ts and saved. Keeps credit use
+    flat. data/cache/ is internal: Caddy does not serve it."""
+    out = DATA / "cache" / f"{name}.json"
     if out.exists():
         doc = json.loads(out.read_text())
         if time.time() - datetime.fromisoformat(doc["ts"]).timestamp() < max_age:
@@ -122,12 +123,12 @@ def usdt_in_fiats() -> dict:
         ok = [f for f in FIATS if f in listed]
         quote = get("/v2/cryptocurrency/quotes/latest", id=USDT_ID, convert=",".join(ok))["data"][str(USDT_ID)]["quote"]
         return {"prices": {f: q["price"] for f, q in quote.items()}, "unsupported": [f for f in FIATS if f not in listed]}
-    return cached("cmc_fx", FX_MAX_AGE, fetch)
+    return cached("usdt_fx", FX_MAX_AGE, fetch)
 
 
 def rwa_issuers() -> dict:
     """Every RWA issuer CMC tracks, with its token count: the denominator of our access matrix. 1 credit a day."""
-    return cached("cmc_issuers", 24 * 3600,
+    return cached("issuers", 24 * 3600,
                   lambda: {"issuers": get("/v5/real-world-assets/issuers/list", limit=100)["data"]["issuers"]})
 
 
