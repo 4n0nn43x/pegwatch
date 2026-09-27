@@ -89,7 +89,7 @@ A single container runs pm2. The schedule, from `ecosystem.config.cjs`, is in UT
 | Monday scoreboard | 14:00 |
 | `archive` (gzips closed daily JSONL files) | 03:17 |
 
-The same container serves `data/` on :8080 and MCP on :8081. The shared Caddy reaches it through the external `edge` network. `deploy.sh` rsyncs the repository and ships `.env` separately.
+The same container serves `data/` on :8080 and MCP on :8081. The shared Caddy reaches it through the external `edge` network. `PEGWATCH_HOST=user@server ./deploy.sh` rsyncs the repository and ships `.env` separately.
 
 The container runs as a non-root user with a read-only root filesystem, `cap_drop: ALL` and a 1 GB memory limit. `data/` is a volume. `PEGWATCH_KEEP_DAYS=N` deletes compressed archives older than N days; the default keeps everything.
 
