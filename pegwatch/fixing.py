@@ -17,7 +17,7 @@ from pathlib import Path
 
 import requests
 
-from .collect import DATA, latest
+from .collect import DATA, latest, usdt_in_fiats
 
 MIN_USD = 100          # ads that cannot fill 100 $ are bait or dust, ignored
 MAX_W = 2.0            # weight cap per ad = MAX_W x the bucket's median depth: a few huge fake ads cannot outweigh the real market
@@ -111,6 +111,15 @@ def headline(sides: dict, official: float) -> dict:
     return h
 
 
+def vs_cmc(h: dict, cmc_price: float | None, official: float) -> None:
+    """Add the third leg to a headline: CMC's aggregated USDT price in that fiat, and the P2P dollar against it.
+    CMC tracks the exchange-traded rate, so P2P vs CMC isolates what the street charges on top of the market."""
+    if h and cmc_price:
+        h["cmc_price"] = round(cmc_price, 6)
+        h["vs_cmc_pct"] = round(h["price"] / cmc_price - 1, 4)
+        h["cmc_vs_official_pct"] = round(cmc_price / official - 1, 4)
+
+
 def official_rates(fiats: list[str]) -> dict:
     """USD -> fiat official rate. XOF/XAF via the EUR peg, central-bank overrides from OFFICIAL, open.er-api.com blend otherwise."""
     rates = requests.get("https://open.er-api.com/v6/latest/USD", timeout=20).json()["rates"]
@@ -143,12 +152,18 @@ def build(fiats: list[str] | None = None) -> dict:
     ts, rows = latest_snapshot(fiats)
     fx = fixing(rows)
     off = official_rates(sorted(set(fx) | set(NO_P2P)))
+    try:
+        cmc = usdt_in_fiats()
+    except Exception as e:                    # the fixing never waits on CMC: without it the third leg is just missing
+        cmc = {"ts": None, "prices": {}, "error": str(e)}
     for fiat, sides in fx.items():
         for rails in sides.values():
             for v in rails.values():
                 v["premium_pct"] = round(v["price"] / off[fiat]["rate"] - 1, 4)
-        headline(sides, off[fiat]["rate"])
-    doc = {"ts": ts, "min_usd": MIN_USD, "official": off, "fixing": fx,
+        vs_cmc(headline(sides, off[fiat]["rate"]), cmc["prices"].get(fiat), off[fiat]["rate"])
+    cmc_doc = {"ts": cmc["ts"], "source": "CMC /v2/cryptocurrency/quotes/latest, USDT (id 825) converted to each fiat in /v1/fiat/map",
+               "prices": {f: p for f, p in cmc["prices"].items() if f in fx}, **({"error": cmc["error"]} if "error" in cmc else {})}
+    doc = {"ts": ts, "min_usd": MIN_USD, "official": off, "fixing": fx, "cmc_usdt": cmc_doc,
            "method": "premium = depth-weighted median ask for USDT on Binance, Bybit and OKX P2P / central-bank official rate - 1 "
                      "(BIS/IMF parity deviation, Aldasoro, Beltran & Grinberg 2026; IMF parallel premium, Tan 2026)"}
     doc["sha256"] = hashlib.sha256(json.dumps(doc, sort_keys=True).encode()).hexdigest()

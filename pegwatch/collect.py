@@ -95,6 +95,28 @@ def latest(name: str) -> tuple[str, list[dict]]:
     return (rows[0]["ts"] if rows else ""), rows
 
 
+USDT_ID = 825
+FX_MAX_AGE = 6 * 3600   # 1 credit per fiat converted: 37 fiats every 6 h stays inside the Basic plan with the 5-min RWA cycle
+
+
+def usdt_in_fiats() -> dict:
+    """CMC's own USDT price in each of our P2P fiats that CMC lists, the third leg next to P2P and the official rate.
+    Cached in data/cmc_fx.json for FX_MAX_AGE. {"ts", "prices": {fiat: price}, "unsupported": [fiats CMC does not list]}."""
+    from .p2p import FIATS
+    out = DATA / "cmc_fx.json"
+    if out.exists():
+        doc = json.loads(out.read_text())
+        if time.time() - datetime.fromisoformat(doc["ts"]).timestamp() < FX_MAX_AGE:
+            return doc
+    listed = {f["symbol"] for f in get("/v1/fiat/map", limit=5000)["data"]}
+    ok = [f for f in FIATS if f in listed]
+    quote = get("/v2/cryptocurrency/quotes/latest", id=USDT_ID, convert=",".join(ok))["data"][str(USDT_ID)]["quote"]
+    doc = {"ts": datetime.now(timezone.utc).isoformat(), "prices": {f: q["price"] for f, q in quote.items()},
+           "unsupported": [f for f in FIATS if f not in listed]}
+    out.write_text(json.dumps(doc, indent=1))
+    return doc
+
+
 def probe() -> int:
     """Go/no-go: key valid? RWA endpoints reachable? Prints the verdict, returns exit code."""
     try:

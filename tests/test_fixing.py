@@ -64,3 +64,13 @@ def test_headline_uses_sell_side_when_the_book_is_crossed():
     sides = {"buy": {"ALL": {"price": 592, "n": 84, "depth_usd": 118_000}}, "sell": {"ALL": {"price": 580, "n": 223, "depth_usd": 3_400_000}}}
     h = headline(sides, 568.5)
     assert not h["crossed"] and not h["thin"] and h["price"] == 592
+
+
+def test_vs_cmc_third_leg():
+    from pegwatch.fixing import vs_cmc
+    h = {"price": 1650.0}
+    vs_cmc(h, 1500.0, 1450.0)
+    assert h == {"price": 1650.0, "cmc_price": 1500.0, "vs_cmc_pct": 0.1, "cmc_vs_official_pct": 0.0345}
+    h2 = {"price": 600.0}
+    vs_cmc(h2, None, 560.0)                 # XOF: CMC does not list it, the headline stays two-legged
+    assert h2 == {"price": 600.0}
