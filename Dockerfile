@@ -19,7 +19,6 @@ RUN pip install --no-cache-dir --no-deps . && rm -rf build
 
 COPY ecosystem.config.cjs wrappers.yaml countries.yaml ./
 COPY web ./web
-COPY FEEDBACK.md ./web/
 
 # Non-root ; data est un volume, créé ici pour hériter du bon propriétaire.
 RUN useradd -r -u 1000 -d /app pegwatch && mkdir -p data && chown -R pegwatch:pegwatch /app

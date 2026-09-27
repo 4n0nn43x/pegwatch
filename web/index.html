@@ -167,26 +167,6 @@ tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .endpoint{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 20px;padding:14px 18px;border-radius:var(--r-card);background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow)}
 .endpoint code{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--t1);word-break:break-all}
 .card h3 small{font-weight:400;color:var(--t3)}
-.md h3{margin:22px 0 8px;font-size:15px;color:var(--t1)}
-.md ol{margin:0;padding-left:20px;color:var(--t2);font-size:14px;line-height:1.65}
-.md li{margin:0 0 10px}
-.md p{color:var(--t2);font-size:14px;line-height:1.65}
-.md code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--s3);padding:1px 6px;border-radius:6px}
-/* evidence drawer: the real CMC request and response behind the numbers */
-.evidence{margin:18px 0 0;border-radius:var(--r-card);background:var(--s1);box-shadow:var(--card-shadow)}
-.evidence>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:14px 18px;font-size:13px;font-weight:600;color:var(--t2)}
-.evidence>summary::-webkit-details-marker{display:none}
-.evidence>summary::before{content:"";width:7px;height:7px;border-right:1.5px solid var(--accent);border-bottom:1.5px solid var(--accent);transform:rotate(-45deg);transition:transform .2s var(--ease)}
-.evidence[open]>summary::before{transform:rotate(45deg)}
-.evidence>summary .meta{margin-left:auto;font-weight:400;color:var(--t3)}
-.evidence .ev{padding:4px 18px 18px;border-top:1px solid var(--line);font-size:13px;color:var(--t2)}
-.evidence .ev h4{margin:16px 0 8px;font-size:13px;font-weight:600;color:var(--t1);font-family:ui-monospace,SFMono-Regular,Menlo,monospace}
-.evidence .ev .facts{display:flex;flex-wrap:wrap;gap:8px 18px;margin:0 0 8px;font-size:12px;color:var(--t3)}
-.evidence .ev .facts b{color:var(--t1);font-weight:600}
-.evidence .ev .ok{color:var(--good)}
-.evidence pre{margin:6px 0 0;padding:12px 14px;border-radius:var(--r-ctl);background:rgba(0,0,0,.5);color:var(--t2);font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;max-height:320px;white-space:pre-wrap;word-break:break-all}
-.evidence pre.sample{white-space:pre;max-height:360px}
-.evidence details summary{cursor:pointer;font-size:12px;color:var(--accent);margin-top:8px}
 .note code,.meta code,.method code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--s3);padding:2px 7px;border-radius:6px;color:var(--t2)}
 .method{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
 .method .card p{margin:0;font-size:14px;line-height:1.6;color:var(--t3)}
@@ -309,7 +289,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   <header class="nav">
     <a class="logo" href="#">pegwatch</a>
     <nav class="nav-links" aria-label="Primary">
-      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#agents">Agents</a><a href="#data">Data</a><a href="#feedback">API feedback</a>
+      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#agents">Agents</a><a href="#data">Data</a>
     </nav>
     <div class="nav-actions">
       <a class="btn btn-login" href="#data">Open data</a>
@@ -318,7 +298,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span></button>
   </header>
   <nav class="menu" id="menu" aria-label="Mobile">
-    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#agents">Agents</a><a href="#data">Data</a><a href="#feedback">API feedback</a>
+    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#agents">Agents</a><a href="#data">Data</a>
     <div class="divider"></div>
     <a href="#data">Open data</a>
     <a class="m-start" href="https://github.com/4n0nn43x/pegwatch">GitHub <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -347,7 +327,6 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="reveal grid" id="ladderCards"></div>
     <div class="reveal tbl"><table id="ladderTable"><thead><tr><th>Wrapper</th><th>Issuer</th><th>Access</th><th class="num">Token price</th><th class="num">vs real asset</th><th class="num">Total cost</th><th class="num">You get</th></tr></thead><tbody></tbody></table></div>
     <p class="note" id="ladderNote"></p>
-    <p class="note">Token prices, issuers and volumes come from the CoinMarketCap RWA API: <a href="#evidence">see the actual request and response</a>.</p>
     <p class="note" id="coverageNote"></p>
   </section>
 
@@ -358,7 +337,6 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="reveal hm" id="hm"></div>
     <div class="legend"><span>discount</span><span class="bar" aria-hidden="true"></span><span>premium</span><span id="hmMeta" style="margin-left:auto"></span></div>
     <p class="note">Perp entries ("Derivatives", Hyperliquid Assets) and tokens with no volume or a unit mismatch are excluded from the wrapper spread but listed in the JSON with a <code>suspect</code> flag.</p>
-    <details class="evidence" id="evidence"><summary>Evidence: the real CoinMarketCap calls behind these numbers <span class="meta" id="evMeta">loading…</span></summary><div class="ev" id="evBody"></div></details>
   </section>
 
   <section class="block" id="monday">
@@ -411,21 +389,14 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <pre class="code" id="dataPreview" hidden></pre>
     <h3 style="margin:36px 0 10px;font-size:15px">Pipeline status <span class="meta" id="statusMeta"></span></h3>
     <div class="reveal tbl"><table id="statusTable"><thead><tr><th>Batch</th><th>Runs every</th><th class="num">Last start</th><th class="num">Last run</th><th class="num">Skipped / killed</th></tr></thead><tbody></tbody></table></div>
-    <p class="note" id="creditNote"></p>
   </section>
 
-  <section class="block" id="feedback">
-    <p class="kicker">API feedback</p>
-    <h2>What we learned <em>about the CMC API.</em></h2>
-    <p class="lead">Dated, reproducible findings met while building pegwatch, written for the CoinMarketCap team. Source: <a href="https://github.com/4n0nn43x/pegwatch/blob/main/FEEDBACK.md">FEEDBACK.md</a>.</p>
-    <div class="reveal card md" id="feedbackBody">loading…</div>
-  </section>
 
   <section class="block" id="method">
     <p class="kicker">Method and data</p>
     <h2>One engine, three layers, <em>no key needed.</em></h2>
     <div class="reveal method">
-      <div class="card"><h3>CoinMarketCap RWA API</h3><p><b>GET /v5/real-world-assets/map</b> (top 200 assets with tokens, 0 credits) and <b>GET /v5/real-world-assets/quotes/latest?rwa_id=…</b> (every wrapper's price, issuer, volume, plus the perp pseudo-token; 1 credit per 200 assets). Polled every 5 minutes. Feedback on what the API lacks is in <a href="FEEDBACK.md">FEEDBACK.md</a>.</p></div>
+      <div class="card"><h3>Tokenized assets</h3><p>The top 200 real-world assets that have tokens: every wrapper's price, issuer and 24 h volume, plus the aggregated perp price. Refreshed every 5 minutes.</p></div>
       <div class="card"><h3>Real-asset reference</h3><p><b>Ostium</b> price feed (session prints, last close, XAU and XAG spot) and the <b>Hyperliquid xyz oracle</b> (moves 24/7). NYSE regime from the New York clock and the holiday calendar.</p></div>
       <div class="card"><h3>P2P dollar</h3><p>Public P2P order books of <b>Binance, Bybit and OKX</b> for USDT in 48 emerging-market fiats (XOF, XAF, NGN, GHS, KES, EGP and more), both sides, three pages, payment methods normalised to rails. Official rate: EUR peg for CFA francs, interbank for the rest.</p></div>
       <div class="card"><h3>Who may buy what</h3><p>A hand-checked matrix of 17 issuers × 11 countries from their terms and restricted-country lists, with redemption terms and KYC path. Elsewhere, <b>likely</b> means the issuer publishes an exclusion list the country is not on; <b>unclear</b> means it publishes nothing. We say so rather than guess.</p></div>
@@ -433,7 +404,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <p class="note">Everything on this page is a static JSON you can read directly, see <a href="#data">Open data</a>. Information only, no advice, no execution.</p>
   </section>
 
-  <footer>pegwatch, built for the CoinMarketCap API hackathon, September 2026. Data refreshed every 5 minutes; if a source is down the page shows the last snapshot with its age. <a href="https://github.com/4n0nn43x/pegwatch" id="ghFoot">Source on GitHub</a>.</footer>
+  <footer>pegwatch, September 2026. Data refreshed every 5 minutes; if a source is down the page shows the last snapshot with its age. <a href="https://github.com/4n0nn43x/pegwatch" id="ghFoot">Source on GitHub</a>.</footer>
 </div>
 <div class="tip" id="tip"></div>
 
@@ -587,7 +558,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     var cheapest = rails.slice().sort(function(x, y){ return x.v.price - y.v.price; })[0];
     $('fiatCards').innerHTML =
       '<div class="card"><h3>Official</h3><div class="big">' + num(off.rate) + '<small>' + esc(f) + ' per $</small></div><div class="meta">' + esc(off.source) + '</div></div>' +
-      '<div class="card"><h3>CMC market</h3>' + (dol.cmc_price ? '<div class="big">' + num(dol.cmc_price) + '<small>' + esc(f) + ' per USDT</small></div><div class="meta">USDT on exchanges, <code>/v2/cryptocurrency/quotes/latest</code>. The street pays <span class="chip ' + (cls(dol.vs_cmc_pct) || 'flat') + '">' + pct(dol.vs_cmc_pct) + '</span> on top of it.</div>' : '<div class="meta">CMC does not list ' + esc(f) + ' in <code>/v1/fiat/map</code>, so the dollar here has two legs only: P2P and official.</div>') + '</div>' +
+      '<div class="card"><h3>Market price</h3>' + (dol.cmc_price ? '<div class="big">' + num(dol.cmc_price) + '<small>' + esc(f) + ' per USDT</small></div><div class="meta">USDT as traded on exchanges. The street pays <span class="chip ' + (cls(dol.vs_cmc_pct) || 'flat') + '">' + pct(dol.vs_cmc_pct) + '</span> on top of it.</div>' : '<div class="meta">No exchange price for ' + esc(f) + ', so the dollar here has two legs only: P2P and official.</div>') + '</div>' +
       '<div class="card"><h3>Buying a dollar</h3><div class="big">' + (all ? num(all.price) : '') + '<small>' + esc(f) + '</small></div><div class="meta">' + (all ? 'all rails, <span class="chip ' + (cls(all.premium_pct) || 'flat') + '">' + pct(all.premium_pct) + '</span> vs official, ' + all.n + ' ads, ' + num(all.depth_usd, 0) + ' $ of depth' : 'no data') + (cheapest ? '<br>cheapest rail <b>' + esc(cheapest.rail) + '</b> at ' + num(cheapest.v.price) + ' (' + pct(cheapest.v.premium_pct) + ')' : '') + '</div></div>' +
       '<div class="card"><h3>Selling a dollar</h3><div class="big">' + (sell ? num(sell.price) : '') + '<small>' + esc(f) + '</small></div><div class="meta">' + (sell ? '<span class="chip ' + (cls(sell.premium_pct) || 'flat') + '">' + pct(sell.premium_pct) + '</span> vs official' + (all ? ', round trip costs <b>' + pct(all.price / sell.price - 1) + '</b>' : '') : 'no data') + '</div></div>';
     var tb = $('fiatTable').tBodies[0]; tb.innerHTML = '';
@@ -625,19 +596,6 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   }).catch(function(e){ $('mondayNote').textContent = 'Scoreboard unavailable: ' + e.message; });
   get('premiums/latest.json').then(function(d){ premiums = d; stale(d.ts, 'wrapper premiums'); renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
   get('fixing/latest.json').then(function(d){ fixing = d; stale(d.ts, 'dollar fixing'); Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
-  /* ---- evidence drawer ---- */
-  function renderEvidence(ev){
-    var paths = Object.keys(ev), newest = paths.map(function(p){ return ev[p].ts; }).sort().pop();
-    $('evMeta').textContent = paths.length + ' endpoints, last call ' + age(newest) + ', ' + paths.reduce(function(n, p){ return n + (ev[p].credit_count || 0); }, 0) + ' credit per cycle';
-    $('evBody').innerHTML = paths.map(function(p){
-      var e = ev[p], lens = Object.keys(e.list_lengths || {}).map(function(k){ return k + '[' + e.list_lengths[k] + ']'; }).join(', ');
-      return '<h4>GET ' + esc(p) + '</h4>' +
-        '<div class="facts"><span>HTTP <b class="' + (e.http_status === 200 ? 'ok' : '') + '">' + esc(e.http_status) + '</b></span><span>credits <b>' + esc(e.credit_count) + '</b></span><span><b>' + esc(e.elapsed_ms) + '</b> ms</span><span><b>' + num(e.bytes, 0) + '</b> bytes</span><span>' + esc(lens) + '</span><span>' + esc(age(e.ts)) + '</span><span>sha256 <b>' + esc(String(e.sha256).slice(0, 16)) + '…</b></span></div>' +
-        '<pre>' + esc(e.method + ' ' + e.url) + '\n' + Object.keys(e.headers).map(function(h){ return h + ': ' + e.headers[h]; }).join('\n') + '</pre>' +
-        '<pre>' + esc(e.curl) + '</pre>' +
-        '<details><summary>Response, first ' + (e.response_sample.data && e.response_sample.data.rwa_assets ? e.response_sample.data.rwa_assets.length : '') + ' items of each list</summary><pre class="sample">' + esc(JSON.stringify(e.response_sample, null, 1)) + '</pre></details>';
-    }).join('');
-  }
 
   /* ---- share links: ?cc=BJ&asset=NVDA&amount=300000 reproduces a ladder ---- */
   var shared = false;   // the URL carries a ladder only once someone picked one (or arrived through a shared link)
@@ -668,13 +626,12 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
 
   /* ---- open data ---- */
   var FILES = [
-    ['world.json', 'All 59 countries: dollar premium, cheapest rail, wrappers open, access coverage against CMC issuers'],
+    ['world.json', 'All 59 countries: dollar premium, cheapest rail, wrappers open, access coverage by issuer'],
     ['ladder/BJ.json', 'One country\'s full ladder (any code: ladder/NG.json, ladder/KE.json…)'],
     ['premiums/latest.json', 'Every wrapper against its real asset, by trading regime, with the perp oracle'],
-    ['fixing/latest.json', 'The dollar fixing: 48 fiats × payment rails × buy and sell, official rate, CMC price, sha256'],
+    ['fixing/latest.json', 'The dollar fixing: 48 fiats × payment rails × buy and sell, official rate, exchange price, sha256'],
     ['monday/latest.json', 'The Monday scoreboard, per weekend and per issuer'],
-    ['evidence/latest.json', 'The last real CoinMarketCap request and response per endpoint'],
-    ['status', 'Pipeline health: each batch\'s last run, output ages, CMC credits used']
+    ['status', 'Pipeline health: each batch\'s last run, output ages']
   ];
   var tbd = $('dataTable').tBodies[0];
   FILES.forEach(function(f){
@@ -697,32 +654,14 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       tr.innerHTML = '<td><code>' + esc(n) + '</code></td><td>' + esc(j.every) + '</td><td class="num">' + (j.last_start ? age(j.last_start) : '') + '</td><td class="num"' + (j.last_exit && j.last_exit !== 0 ? ' style="color:var(--bad)"' : '') + '>' + esc(run) + '</td><td class="num">' + j.skipped + ' / ' + j.killed + '</td>';
       tb.appendChild(tr);
     });
-    var c = st.cmc_credits || {};
-    $('creditNote').innerHTML = c.used_today != null ? 'CoinMarketCap credits used today: <b>' + num(c.used_today, 0) + '</b>, this month: <b>' + num(c.used_month, 0) + '</b> (from <code>/v1/key/info</code>, refreshed hourly). A full 5-minute RWA cycle costs 1 credit.' : '';
   }).catch(function(){ $('statusMeta').textContent = 'unavailable'; });
 
-  /* ---- FEEDBACK.md rendered: headings, numbered items, paragraphs, **bold**, `code` ---- */
-  function md(src){
-    var inline = function(t){ return esc(t).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); };
-    var html = '', list = false;
-    src.split(/\n/).forEach(function(l){
-      var m = l.match(/^(\d+)\.\s+(.*)/);
-      if (m) { if (!list) { html += '<ol start="' + m[1] + '">'; list = true; } html += '<li>' + inline(m[2]) + '</li>'; return; }
-      if (list && l.trim()) { html += '</ol>'; list = false; }
-      if (/^# /.test(l)) return;
-      if (/^## /.test(l)) html += '<h3>' + inline(l.slice(3)) + '</h3>';
-      else if (l.trim()) html += '<p>' + inline(l) + '</p>';
-    });
-    return html + (list ? '</ol>' : '');
-  }
-  fetch('FEEDBACK.md', {cache: 'no-store'}).then(function(r){ return r.text(); }).then(function(t){ $('feedbackBody').innerHTML = md(t); }).catch(function(){ $('feedbackBody').textContent = 'FEEDBACK.md unavailable.'; });
-  get('evidence/latest.json').then(renderEvidence).catch(function(e){ $('evMeta').textContent = 'unavailable'; $('evBody').textContent = 'Evidence unavailable: ' + e.message; });
 
   get('world.json').then(function(w){
     var cov = w.access_coverage || {};
     if (cov.listed_issuers) {
       var gaps = cov.issuers.filter(function(r){ return !r.access_verified; }).map(function(r){ return esc(r.issuer); });
-      $('coverageNote').innerHTML = 'Access rules hand-checked for <b>' + cov.verified_issuers + ' of the ' + cov.listed_issuers + '</b> wrapper issuers CMC lists (<code>/v5/real-world-assets/issuers/list</code>), <b>' + (cov.verified_token_share * 100).toFixed(1) + '%</b> of their tokens.' + (gaps.length ? ' Not yet checked, shown as "unclear": ' + gaps.join(', ') + '.' : '');
+      $('coverageNote').innerHTML = 'Access rules hand-checked for <b>' + cov.verified_issuers + ' of the ' + cov.listed_issuers + '</b> wrapper issuers we track, <b>' + (cov.verified_token_share * 100).toFixed(1) + '%</b> of their tokens.' + (gaps.length ? ' Not yet checked, shown as "unclear": ' + gaps.join(', ') + '.' : '');
     }
     world = w; fillCountries(w.countries); renderWorld(w);
     if (window.pegwatchWorld) window.pegwatchWorld(w);
