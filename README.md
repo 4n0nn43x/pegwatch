@@ -77,7 +77,7 @@ PEGWATCH_URL=http://127.0.0.1:8080 python -m pegwatch.mcp_server               #
 
 ## Deployment
 
-A single container runs pm2. The schedule, from `ecosystem.config.cjs`, is in UTC:
+A single container runs pm2 with three processes: the batch scheduler `pegwatch/cron.py`, the static server and MCP. The scheduler skips a slot while the previous run of that batch is still going and kills a run that outlives its limit. The schedule is in UTC:
 
 | Batch | When |
 |---|---|
