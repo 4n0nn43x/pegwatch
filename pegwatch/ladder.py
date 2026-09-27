@@ -13,7 +13,8 @@ from pathlib import Path
 
 import yaml
 
-from .collect import DATA
+from .collect import DATA, rwa_issuers
+from .premiums import PERP_ISSUERS
 
 ROOT = Path(__file__).resolve().parent.parent
 STATUS_ORDER = {"allowed": 0, "likely": 1, "unclear": 2, "excluded": 3}
@@ -101,6 +102,17 @@ def true_price(cc: str, asset: str, amount_fiat: float, lad: dict) -> dict:
             "best": a["best"], "best_total_pct": a["best_total_pct"]}
 
 
+def coverage(cmc_issuers: list[dict], wrappers: dict) -> dict:
+    """How much of CMC's RWA catalogue the hand-checked access matrix covers, by issuer and by token count. Perps are
+    not wrappers anyone buys from an issuer, they are left out of the denominator."""
+    rows = [{"issuer": i["name"], "website": i["website"], "tokens": i["num_tokens"], "access_verified": i["name"] in wrappers}
+            for i in cmc_issuers if i["name"] not in PERP_ISSUERS and i["num_tokens"]]
+    total = sum(r["tokens"] for r in rows)
+    return {"issuers": sorted(rows, key=lambda r: -r["tokens"]),
+            "verified_issuers": sum(r["access_verified"] for r in rows), "listed_issuers": len(rows),
+            "verified_token_share": round(sum(r["tokens"] for r in rows if r["access_verified"]) / total, 4) if total else None}
+
+
 def main(argv: list[str]) -> int:
     wrappers, countries = load_static()
     fx_path, pr_path = DATA / "fixing" / "latest.json", DATA / "premiums" / "latest.json"
@@ -127,7 +139,12 @@ def main(argv: list[str]) -> int:
                       "rails": [r["rail"] for r in lad["dollar"]["rails"][:4]],
                       "wrappers_ok": sum(1 for w in (nvda["wrappers"] if nvda else []) if w["access"] in ("allowed", "likely")),
                       "nvda_total_pct": nvda["best_total_pct"] if nvda else None})
-    (DATA / "world.json").write_text(json.dumps({"ts": premiums["ts"], "fixing_ts": fixing.get("ts"), "countries": world}, ensure_ascii=False))
+    try:
+        cov = coverage(rwa_issuers()["issuers"], wrappers)
+    except Exception as e:                   # CMC down or no key: the ladders still ship, the coverage line says why
+        cov = {"error": str(e)}
+    (DATA / "world.json").write_text(json.dumps({"ts": premiums["ts"], "fixing_ts": fixing.get("ts"), "countries": world,
+                                                 "access_coverage": cov}, ensure_ascii=False))
     print(f"{len(countries)} ladders + world.json -> {out}")
     return 0
 

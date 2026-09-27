@@ -68,3 +68,12 @@ def test_buy_side_empty_is_labelled_sell_side_not_crossed():
           "dollar": {"price": 580, "premium_pct": 0.0265, "crossed": False, "thin": True}}}}
     d = ladder("BJ", BJ, fx, PREMIUMS, WRAPPERS)["dollar"]
     assert d["best"] == "market (sell side)" and d["premium_pct"] == 0.0265 and not d["crossed"]
+
+
+def test_access_coverage_ignores_perps_and_empty_issuers():
+    from pegwatch.ladder import coverage
+    cmc = [{"name": "Backed Assets", "website": "b", "num_tokens": 300}, {"name": "Ondo Assets", "website": "o", "num_tokens": 100},
+           {"name": "NA (Derivatives)", "website": None, "num_tokens": 250}, {"name": "Coinbase", "website": "c", "num_tokens": 0}]
+    c = coverage(cmc, {"Backed Assets": {}})
+    assert (c["verified_issuers"], c["listed_issuers"], c["verified_token_share"]) == (1, 2, 0.75)
+    assert [r["issuer"] for r in c["issuers"]] == ["Backed Assets", "Ondo Assets"]

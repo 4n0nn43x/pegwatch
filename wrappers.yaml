@@ -140,7 +140,7 @@
     - https://docs.trade.xyz/perpetuals/mechanics/fees
     - https://hyperliquid.gitbook.io/hyperliquid-docs/for-developers/api/error-responses
 
-- issuer_name: "PreStocks"
+- issuer_name: "PreStocks Assets"   # exact CMC issuer name, the ladder joins on it
   product: "Tokenized pre-IPO exposure (preSPACEX, preOPENAI) on Solana"
   legal: "Bearer tokens backed by undisclosed holding entities/SPVs; no issuer legal entity named"
   redemption: "Primary exit on-chain via Jupiter; processed redemption 'subject to eligibility, minimum size, notice'; at IPO convert to tokenized public stock within 9 months; M&A cash pro-rata USDC 6-month window"

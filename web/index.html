@@ -335,6 +335,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="reveal tbl"><table id="ladderTable"><thead><tr><th>Wrapper</th><th>Issuer</th><th>Access</th><th class="num">Token price</th><th class="num">vs real asset</th><th class="num">Total cost</th><th class="num">You get</th></tr></thead><tbody></tbody></table></div>
     <p class="note" id="ladderNote"></p>
     <p class="note">Token prices, issuers and volumes come from the CoinMarketCap RWA API: <a href="#evidence">see the actual request and response</a>.</p>
+    <p class="note" id="coverageNote"></p>
   </section>
 
   <section class="block" id="heatmap">
@@ -585,6 +586,11 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   get('evidence/latest.json').then(renderEvidence).catch(function(e){ $('evMeta').textContent = 'unavailable'; $('evBody').textContent = 'Evidence unavailable: ' + e.message; });
 
   get('world.json').then(function(w){
+    var cov = w.access_coverage || {};
+    if (cov.listed_issuers) {
+      var gaps = cov.issuers.filter(function(r){ return !r.access_verified; }).map(function(r){ return esc(r.issuer); });
+      $('coverageNote').innerHTML = 'Access rules hand-checked for <b>' + cov.verified_issuers + ' of the ' + cov.listed_issuers + '</b> wrapper issuers CMC lists (<code>/v5/real-world-assets/issuers/list</code>), <b>' + (cov.verified_token_share * 100).toFixed(1) + '%</b> of their tokens.' + (gaps.length ? ' Not yet checked, shown as "unclear": ' + gaps.join(', ') + '.' : '');
+    }
     world = w; fillCountries(w.countries); renderWorld(w);
     if (window.pegwatchWorld) window.pegwatchWorld(w);
     var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), aminata = PERSONAS[0];

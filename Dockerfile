@@ -11,9 +11,11 @@ COPY --from=pm2 /usr/local/bin/node /usr/local/bin/node
 COPY --from=pm2 /usr/local/lib/node_modules/pm2 /usr/local/lib/node_modules/pm2
 RUN ln -s /usr/local/lib/node_modules/pm2/bin/pm2-runtime /usr/local/bin/pm2-runtime
 
+# Dependencies first, on an empty package: a code change then rebuilds in seconds instead of reinstalling everything.
 COPY pyproject.toml ./
+RUN mkdir pegwatch && touch pegwatch/__init__.py && pip install --no-cache-dir ".[agent]" && rm -rf build pegwatch
 COPY pegwatch ./pegwatch
-RUN pip install --no-cache-dir ".[agent]" && rm -rf build
+RUN pip install --no-cache-dir --no-deps . && rm -rf build
 
 COPY ecosystem.config.cjs wrappers.yaml countries.yaml ./
 COPY web ./web
