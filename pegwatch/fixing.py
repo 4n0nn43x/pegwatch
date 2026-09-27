@@ -44,7 +44,7 @@ OFFICIAL = {
 RAILS = [
     (r"momo|zalo", "MoMo", {"VND"}),        # the Vietnamese wallet, not MTN
     (r"wave", "Wave"), (r"mtn|momo", "MTN MoMo"), (r"moov", "Moov Money"), (r"orange", "Orange Money"),
-    (r"airtel|atmoney", "Airtel Money"), (r"t-?money", "T-Money"), (r"m-?pesa", "M-Pesa"),
+    (r"airtel|atmoney", "Airtel Money"), (r"\bt-?money", "T-Money"), (r"m-?pesa", "M-Pesa"),
     (r"vodafone|telecel", "Telecel Cash"), (r"\bopay|paycom", "OPay"), (r"palm ?pay", "PalmPay"),
     (r"neopay|qi ?serv|zain ?cash|\bfib\b", "Iraqi wallet", {"IQD"}), (r"nayapay|sadapay", "Pakistani wallet", {"PKR"}),
     (r"pumb|sense|privat|monobank", "Ukrainian bank", {"UAH"}),

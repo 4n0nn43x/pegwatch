@@ -13,3 +13,18 @@ def test_slots():
     for _, _, minutes, hour, limit in JOBS:
         if hour is None:                                   # a run is killed before its next slot comes
             assert limit < 60 * (minutes[1] - minutes[0])
+
+
+def test_job_table_sanity():
+    from importlib.util import find_spec
+    assert len({j[0] for j in JOBS}) == len(JOBS)
+    for name, args, minutes, hour, limit in JOBS:
+        assert find_spec(args[0]) is not None, name
+        assert all(0 <= m < 60 for m in minutes) and (hour is None or 0 <= hour < 24)
+        assert 0 < limit < 24 * 3600
+
+
+def test_derived_jobs_run_after_their_inputs():
+    # collect/ref at :00, fixing :01, premiums :02, ladder :03 within each 5-min block
+    first = {name: min(minutes) for name, _, minutes, _, _ in JOBS}
+    assert first["collect"] == first["ref"] < first["fixing"] < first["premiums"] < first["ladder"] < 5

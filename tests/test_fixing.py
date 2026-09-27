@@ -74,3 +74,94 @@ def test_vs_cmc_third_leg():
     h2 = {"price": 600.0}
     vs_cmc(h2, None, 560.0)                 # XOF: CMC does not list it, the headline stays two-legged
     assert h2 == {"price": 600.0}
+
+
+@pytest.mark.parametrize("pay,fiat,rail", [
+    ("Novo Banco", "IDR", "Bank"),              # OVO is word-bounded
+    ("Zalo Pay", "XOF", "Other"),               # the Vietnamese wallet rule stays in VND
+    ("Vodafone Cash", "GHS", "Telecel Cash"),   # before the generic cash rule
+    ("Cash Deposit to Bank", "MAD", "Cash"),    # cash wins over bank, first match
+    ("Paycom or Opay", "NGN", "OPay"),
+    ("Airteltigo Money", "GHS", "Airtel Money"),
+])
+def test_rail_of_first_match_edge_cases(pay, fiat, rail):
+    assert rail_of(pay, fiat) == rail
+
+
+def test_perfect_money_is_not_t_money():
+    assert rail_of("PerfectMoney", "DZD") != "T-Money"
+
+
+def test_weighted_median_ties_and_zero_depth():
+    assert weighted_median([(2, 1), (1, 1)]) == 1          # exactly half the depth at 1: the lower price
+    assert weighted_median([(1, 0), (5, 3)]) == 5          # zero-depth ads do not count
+    with pytest.raises(ValueError):
+        weighted_median([(1, 0)])
+
+
+def test_min_usd_boundary():
+    rows = [ad(500, 50_000, ["Wave"]), ad(510, 49_999, ["Wave"])]   # exactly 100 $ is kept, 99.99 $ is not
+    assert fixing(rows)["XOF"]["buy"]["ALL"] == {"price": 500, "n": 1, "depth_usd": 100}
+    assert fixing(rows, min_usd=50)["XOF"]["buy"]["ALL"]["n"] == 2
+
+
+def test_ad_counts_once_per_rail_and_splits_by_fiat():
+    rows = [ad(580, 300_000, ["MTNMobileMoney", "MoMoNew"]), ad(1500, 1_500_000, ["Kuda"], fiat="NGN")]
+    fx = fixing(rows)
+    assert fx["XOF"]["buy"]["MTN MoMo"]["n"] == 1 and set(fx["XOF"]["buy"]) == {"MTN MoMo", "ALL"}
+    assert fx["NGN"]["buy"]["Kuda"]["price"] == 1500 and "sell" not in fx["NGN"]
+
+
+def test_weight_cap_is_two_times_the_median_depth():
+    # depths 100, 100, 1000 $: median 100, cap 200, so the 1000 $ ad weighs 200 of 400 and just reaches half
+    rows = [ad(10, 1000, ["Bank"]), ad(11, 1100, ["Bank"]), ad(12, 12_000, ["Bank"])]
+    assert fixing(rows)["XOF"]["buy"]["Bank"]["price"] == 11
+    assert fixing(rows)["XOF"]["buy"]["Bank"]["depth_usd"] == 1200      # the reported depth is not capped
+
+
+def test_headline_edges():
+    assert headline({"buy": {}, "sell": {}}, 500) == {}
+    sides = {"sell": {"ALL": {"price": 580, "n": 50, "depth_usd": 90_000}}}
+    h = headline(sides, 500)
+    assert h == {"price": 580, "premium_pct": 0.16, "crossed": False, "thin": True, "sell_premium_pct": 0.16} and sides["dollar"] is h
+    sides = {"buy": {"ALL": {"price": 98, "n": 9, "depth_usd": 50_000}}, "sell": {"ALL": {"price": 100, "n": 50, "depth_usd": 1}}}
+    h = headline(sides, 90)
+    assert not h["crossed"] and h["price"] == 98 and h["thin"]     # exactly 98 % of sell is not crossed, n < 10 is thin
+    sides["buy"]["ALL"]["price"] = 97.99
+    assert headline(sides, 90)["crossed"]
+
+
+def test_vs_cmc_needs_a_headline():
+    from pegwatch.fixing import vs_cmc
+    h = {}
+    vs_cmc(h, 1500.0, 1450.0)
+    assert h == {}
+
+
+def fake_get(responses):
+    class R:
+        def __init__(self, body):
+            self.body = body
+        def json(self):
+            if isinstance(self.body, Exception):
+                raise self.body
+            return self.body
+    return lambda url, timeout: R(responses[url])
+
+
+def test_official_rates(monkeypatch):
+    import pegwatch.fixing as f
+    monkeypatch.setattr(f.requests, "get", fake_get({
+        "https://open.er-api.com/v6/latest/USD": {"rates": {"EUR": 0.87, "NGN": 1500.0, "VES": 40.0, "BOB": 6.9, "IQD": 1300.0}},
+        f.OFFICIAL["ARS"][0]: {"compra": 1350, "venta": "1400.5"},
+        f.OFFICIAL["VES"][0]: ValueError("down"),
+        f.OFFICIAL["BOB"][0]: {"compra": 6.86},                       # field missing
+        f.OFFICIAL["AOA"][0]: {"date": "x", "usd": {"aoa": 912.3}},
+    }))
+    out = f.official_rates(["XOF", "XAF", "NGN", "ARS", "VES", "BOB", "IQD", "AOA"])
+    assert out["XOF"]["rate"] == out["XAF"]["rate"] == pytest.approx(655.957 * 0.87)
+    assert out["NGN"] == {"rate": 1500.0, "source": "open.er-api.com blended reference"}
+    assert out["ARS"]["rate"] == 1400.5 and out["AOA"]["rate"] == 912.3
+    assert out["IQD"]["rate"] == 1310.0                                # the constant wins over er-api
+    assert out["VES"]["rate"] == 40.0 and "fallback" in out["VES"]["source"]
+    assert out["BOB"]["rate"] == 6.9 and "fallback" in out["BOB"]["source"]

@@ -58,3 +58,30 @@ def test_session_prefers_live_print():
 def test_wrapper_spread():
     assert wrapper_spread({"xstocks": 104.0, "ondo": 101.5, "bstocks": 100.0}) == pytest.approx(0.04)
     assert wrapper_spread({"xstocks": 104.0}) == 0.0
+
+
+@pytest.mark.parametrize("r,which", [
+    (SESSION, "session"), (PRE, "extended"), (POST, "extended"), (NIGHT, "close"), (WEEKEND, "close"), (HOLIDAY, "close"),
+])
+def test_pick_reference_per_regime(r, which):
+    from pegwatch.premium import pick_reference
+    q = RefQuote(last_close=100.0, extended=101.0, session=102.0)
+    assert pick_reference(q, r) == ({"session": 102.0, "extended": 101.0, "close": 100.0}[which], which)
+
+
+def test_session_without_live_print_uses_extended_then_close():
+    from pegwatch.premium import pick_reference
+    assert pick_reference(RefQuote(last_close=100.0, extended=101.0), SESSION) == (101.0, "extended")
+    assert pick_reference(RefQuote(last_close=100.0), SESSION) == (100.0, "close")
+
+
+def test_premium_rejects_non_positive_prices():
+    for price, close in ((0.0, 100.0), (-1.0, 100.0), (100.0, 0.0)):
+        with pytest.raises(ValueError):
+            premium(price, RefQuote(last_close=close), utc(2026, 9, 12, 15, 0))
+
+
+def test_wrapper_spread_empty_and_order_free():
+    assert wrapper_spread({}) == 0.0
+    assert wrapper_spread({"a": 100.0, "b": 100.0}) == 0.0
+    assert wrapper_spread({"a": 95.0, "b": 100.0}) == wrapper_spread({"b": 100.0, "a": 95.0}) == pytest.approx(100 / 95 - 1)

@@ -52,3 +52,37 @@ def test_snapshots_reads_only_the_weekend_files_plain_or_gzipped(tmp_path, monke
     assert len(rows) == 1 and rows[0]["price"] == 102.5 and rows[0]["open_price"] == 102.0 and rows[0]["monday"] == "2026-09-21"
     assert m.all_rows(date(2026, 9, 30)) == rows                                  # 09-14 has no Monday print: no row
     assert (tmp_path / "monday" / "weekends" / "2026-09-21.json").exists()       # closed weekend cached
+
+
+def test_mae_wins_and_beat_close_across_weekends():
+    rows = [row("NVDA", "NVDAX", "Backed", 101.0, 100.0, close=98.0),                   # +1 %, close is -2 %: beats it
+            row("NVDA", "NVDAon", "Ondo", 97.0, 100.0, close=98.0),                     # -3 %
+            row("NVDA", "NVDAX", "Backed", 104.0, 100.0, close=100.0, monday="2026-09-28"),  # +4 %, close is 0 %
+            row("NVDA", "NVDAon", "Ondo", 99.0, 100.0, close=100.0, monday="2026-09-28")]    # -1 %
+    d = score(rows)
+    assert [w["monday"] for w in d["weekends"]] == ["2026-09-21", "2026-09-28"]
+    assert [a["winner"] for w in d["weekends"] for a in w["assets"]] == ["Backed", "Ondo"]
+    assert d["weekends"][1]["assets"][0]["gap_pct"] == 0.0
+    cum = {r["issuer"]: r for r in d["cumulative"]}
+    assert cum["Backed"] == {"issuer": "Backed", "n": 2, "mae_pct": 0.025, "wins": 1, "beat_close": 1}
+    assert cum["Ondo"] == {"issuer": "Ondo", "n": 2, "mae_pct": 0.02, "wins": 1, "beat_close": 0}
+    assert [r["issuer"] for r in d["cumulative"]] == ["Ondo", "Backed"]
+    assert "perps" not in cum                                             # no proxy, no oracle entry
+
+
+def test_tie_goes_to_the_first_token_and_missing_prices_are_dropped():
+    rows = [row("NVDA", "A", "First", 101.0, 100.0), row("NVDA", "B", "Second", 99.0, 100.0),
+            row("NVDA", "C", "NoPrice", None, 100.0), row("TSLA", "T", "NoOpen", 50.0, None)]
+    d = score(rows)
+    a = d["weekends"][0]["assets"]
+    assert len(a) == 1 and a[0]["winner"] == "First" and a[0]["tokens"][0]["beat_close"] is False   # 1 % vs close 0 %: not strictly better
+
+
+def test_mondays_on_disk_maps_the_weekend_to_its_monday(tmp_path, monkeypatch):
+    from datetime import date
+    import pegwatch.monday as m
+    monkeypatch.setattr(m, "DATA", tmp_path)
+    (tmp_path / "premiums").mkdir()
+    for f in ("2026-09-19.jsonl", "2026-09-20.jsonl.gz", "2026-09-28.jsonl", "2026-09-23.jsonl", "latest.json"):
+        (tmp_path / "premiums" / f).write_text("")
+    assert m.mondays_on_disk() == [date(2026, 9, 21), date(2026, 9, 28)]   # Wednesday files belong to no weekend
