@@ -121,6 +121,8 @@ select option{background:#0f1011;color:#fff}
 .tbl{overflow:auto;max-height:560px;border-radius:var(--r-card);background:var(--s1);box-shadow:var(--card-shadow)}
 table{border-collapse:separate;border-spacing:0;width:100%;font-size:14px;font-variant-numeric:tabular-nums}
 th,td{padding:0 14px;height:44px;text-align:left;white-space:nowrap;border-bottom:1px solid var(--line);vertical-align:middle}
+table.wrap td.num{white-space:nowrap}
+table.wrap td{white-space:normal;padding-top:10px;padding-bottom:10px;height:auto;line-height:1.5}
 th{font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--t3);font-weight:600;position:sticky;top:0;z-index:2;background:rgba(10,10,12,.85);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
 tbody tr{transition:background .15s ease}
 tbody tr:hover td{background:var(--s1)}
@@ -159,6 +161,17 @@ tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .legend .bar{width:160px;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--div-neg),var(--div-mid) 50%,var(--div-pos))}
 .tip{position:fixed;pointer-events:none;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.5;color:var(--t1);z-index:30;display:none;max-width:280px}
 .note{font-size:13px;color:var(--t3);margin:16px 0 0;line-height:1.6}
+.code{margin:8px 0 0;padding:12px 14px;border-radius:var(--r-ctl);background:rgba(0,0,0,.5);color:var(--t2);font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;max-height:360px;white-space:pre-wrap;word-break:break-word}
+.copy,.mini{font:inherit;font-size:12px;color:var(--t2);background:var(--s3);border:0;border-radius:999px;padding:5px 12px;cursor:pointer;transition:color .15s}
+.copy:hover,.mini:hover{color:var(--t1)}
+.endpoint{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 20px;padding:14px 18px;border-radius:var(--r-card);background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow)}
+.endpoint code{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--t1);word-break:break-all}
+.card h3 small{font-weight:400;color:var(--t3)}
+.md h3{margin:22px 0 8px;font-size:15px;color:var(--t1)}
+.md ol{margin:0;padding-left:20px;color:var(--t2);font-size:14px;line-height:1.65}
+.md li{margin:0 0 10px}
+.md p{color:var(--t2);font-size:14px;line-height:1.65}
+.md code{font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:var(--s3);padding:1px 6px;border-radius:6px}
 /* evidence drawer: the real CMC request and response behind the numbers */
 .evidence{margin:18px 0 0;border-radius:var(--r-card);background:var(--s1);box-shadow:var(--card-shadow)}
 .evidence>summary{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px;padding:14px 18px;font-size:13px;font-weight:600;color:var(--t2)}
@@ -296,18 +309,18 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   <header class="nav">
     <a class="logo" href="#">pegwatch</a>
     <nav class="nav-links" aria-label="Primary">
-      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
+      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#agents">Agents</a><a href="#data">Data</a><a href="#feedback">API feedback</a>
     </nav>
     <div class="nav-actions">
-      <a class="btn btn-login" href="world.json">JSON</a>
+      <a class="btn btn-login" href="#data">Open data</a>
       <a class="btn btn-nav-start" href="https://github.com/4n0nn43x/pegwatch" id="ghTop">GitHub <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
     </div>
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span></button>
   </header>
   <nav class="menu" id="menu" aria-label="Mobile">
-    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
+    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#agents">Agents</a><a href="#data">Data</a><a href="#feedback">API feedback</a>
     <div class="divider"></div>
-    <a href="world.json">JSON</a>
+    <a href="#data">Open data</a>
     <a class="m-start" href="https://github.com/4n0nn43x/pegwatch">GitHub <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
   </nav>
   <div class="hero-inner">
@@ -367,6 +380,47 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <p class="note" id="fiatNote"></p>
   </section>
 
+  <section class="block" id="agents">
+    <p class="kicker">For agents</p>
+    <h2>Ask it from <em>Claude, Cursor or any MCP client.</em></h2>
+    <p class="lead">pegwatch is also a public MCP server: Streamable HTTP, read-only, no key, no sign-up. Your assistant gets the same numbers as this page as five tools, and can answer "how much Nvidia do 300 000 CFA francs buy in Cotonou right now?" with the live ladder.</p>
+    <div class="endpoint"><code id="mcpUrl">https://pegwatch.fyra.fun/mcp</code><button class="copy" data-copy="https://pegwatch.fyra.fun/mcp">Copy URL</button></div>
+    <div class="reveal grid">
+      <div class="card"><h3>Claude Code</h3><p class="meta">One command in a terminal:</p><pre class="code">claude mcp add --transport http pegwatch https://pegwatch.fyra.fun/mcp</pre><button class="copy" data-copy="claude mcp add --transport http pegwatch https://pegwatch.fyra.fun/mcp">Copy</button></div>
+      <div class="card"><h3>Claude <small>(desktop and web)</small></h3><p class="meta">Settings, <b>Connectors</b>, <b>Add custom connector</b>, then paste the URL above. No authentication to configure.</p></div>
+      <div class="card"><h3>Cursor, VS Code, others</h3><p class="meta">Add to the client's MCP config (for Cursor, <code>~/.cursor/mcp.json</code>):</p><pre class="code">{ "mcpServers": { "pegwatch": { "url": "https://pegwatch.fyra.fun/mcp" } } }</pre><button class="copy" data-copy='{ "mcpServers": { "pegwatch": { "url": "https://pegwatch.fyra.fun/mcp" } } }'>Copy</button></div>
+    </div>
+    <div class="reveal tbl"><table class="wrap"><thead><tr><th>Tool</th><th>Returns</th><th>Ask your assistant</th></tr></thead><tbody>
+      <tr><td><code>true_price</code></td><td>The full ladder for one asset, one country, one amount: dollar premium on the best rail, every wrapper with its premium, access status, KYC path and units received.</td><td>"What does 800 000 naira of Tesla really cost from Lagos tonight?"</td></tr>
+      <tr><td><code>dollar_premium</code></td><td>What a dollar costs in one country: official rate, premium per payment rail, buy and sell.</td><td>"Which rail gives the cheapest dollar in Accra?"</td></tr>
+      <tr><td><code>premiums</code></td><td>Every wrapper against its real asset, with the trading regime and the perp oracle.</td><td>"Which tokenized gold trades furthest from spot?"</td></tr>
+      <tr><td><code>monday_scoreboard</code></td><td>Whose Sunday price matched the real Monday open, per issuer.</td><td>"Which issuer priced last weekend best?"</td></tr>
+      <tr><td><code>countries</code></td><td>The 59 countries, their fiat, today's dollar premium and how many wrappers are open.</td><td>"Where is the dollar most expensive today?"</td></tr>
+    </tbody></table></div>
+    <div class="card" style="margin-top:16px"><h3>Try it live</h3><p class="meta">Calls the real server from your browser with the ladder currently selected above, over the same JSON-RPC your assistant would use.</p>
+      <div class="controls" style="margin:12px 0 0"><button class="btn btn-ghost" id="mcpTry" style="height:38px">Call true_price</button></div>
+      <pre class="code" id="mcpReq" hidden></pre><pre class="code" id="mcpRes" hidden></pre></div>
+    <p class="note">A recorded session with a real MCP client is in the repository: <a href="https://github.com/4n0nn43x/pegwatch/blob/main/docs/proof/mcp_session.md">docs/proof/mcp_session.md</a>.</p>
+  </section>
+
+  <section class="block" id="data">
+    <p class="kicker">Open data</p>
+    <h2>Every number here is a file <em>you can fetch.</em></h2>
+    <p class="lead">The page is only a view over these JSON files, refreshed by the batches below. No key, no rate limit beyond common sense. Preview one here or open it raw.</p>
+    <div class="reveal tbl"><table id="dataTable" class="wrap"><thead><tr><th>File</th><th>What it holds</th><th class="num">Updated</th><th></th></tr></thead><tbody></tbody></table></div>
+    <pre class="code" id="dataPreview" hidden></pre>
+    <h3 style="margin:36px 0 10px;font-size:15px">Pipeline status <span class="meta" id="statusMeta"></span></h3>
+    <div class="reveal tbl"><table id="statusTable"><thead><tr><th>Batch</th><th>Runs every</th><th class="num">Last start</th><th class="num">Last run</th><th class="num">Skipped / killed</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" id="creditNote"></p>
+  </section>
+
+  <section class="block" id="feedback">
+    <p class="kicker">API feedback</p>
+    <h2>What we learned <em>about the CMC API.</em></h2>
+    <p class="lead">Dated, reproducible findings met while building pegwatch, written for the CoinMarketCap team. Source: <a href="https://github.com/4n0nn43x/pegwatch/blob/main/FEEDBACK.md">FEEDBACK.md</a>.</p>
+    <div class="reveal card md" id="feedbackBody">loading…</div>
+  </section>
+
   <section class="block" id="method">
     <p class="kicker">Method and data</p>
     <h2>One engine, three layers, <em>no key needed.</em></h2>
@@ -376,7 +430,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       <div class="card"><h3>P2P dollar</h3><p>Public P2P order books of <b>Binance, Bybit and OKX</b> for USDT in 48 emerging-market fiats (XOF, XAF, NGN, GHS, KES, EGP and more), both sides, three pages, payment methods normalised to rails. Official rate: EUR peg for CFA francs, interbank for the rest.</p></div>
       <div class="card"><h3>Who may buy what</h3><p>A hand-checked matrix of 17 issuers × 11 countries from their terms and restricted-country lists, with redemption terms and KYC path. Elsewhere, <b>likely</b> means the issuer publishes an exclusion list the country is not on; <b>unclear</b> means it publishes nothing. We say so rather than guess.</p></div>
     </div>
-    <p class="note">Everything on this page is a static JSON you can read directly: <code>world.json</code>, <code>ladder/&lt;CC&gt;.json</code>, <code>premiums/latest.json</code>, <code>fixing/latest.json</code>. Information only, no advice, no execution.</p>
+    <p class="note">Everything on this page is a static JSON you can read directly, see <a href="#data">Open data</a>. Information only, no advice, no execution.</p>
   </section>
 
   <footer>pegwatch, built for the CoinMarketCap API hackathon, September 2026. Data refreshed every 5 minutes; if a source is down the page shows the last snapshot with its age. <a href="https://github.com/4n0nn43x/pegwatch" id="ghFoot">Source on GitHub</a>.</footer>
@@ -449,7 +503,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     if (p) { $('ladderTitle').innerHTML = esc(p.name) + ', ' + esc(p.where) + ', <em>' + esc(p.when) + '.</em>'; $('ladderLead').innerHTML = p.story; }
     else { $('ladderTitle').innerHTML = 'Your ladder, <em>' + esc(COUNTRIES[cSel.value] || cSel.value) + '.</em>'; $('ladderLead').textContent = 'Pick a country, an asset and an amount. The ladder stacks every layer: what your dollar costs on your payment rail, which wrappers you may actually buy from where you are, and what each one costs against the real asset.'; }
   }
-  PERSONAS.forEach(function(p){ var b = document.createElement('button'); b.className = 'persona'; b.dataset.cc = p.cc; b.innerHTML = '<b>' + esc(p.name) + '</b> · ' + esc(p.where) + ' · ' + esc(p.asset); b.addEventListener('click', function(){ amt.value = p.amount; cSel.value = p.cc; setPersona(p); loadLadder(p.cc, p.asset); }); $('personas').appendChild(b); });
+  PERSONAS.forEach(function(p){ var b = document.createElement('button'); b.className = 'persona'; b.dataset.cc = p.cc; b.innerHTML = '<b>' + esc(p.name) + '</b> · ' + esc(p.where) + ' · ' + esc(p.asset); b.addEventListener('click', function(){ shared = true; amt.value = p.amount; cSel.value = p.cc; setPersona(p); loadLadder(p.cc, p.asset); }); $('personas').appendChild(b); });
   window.pegwatchSelect = function(cc){ if (!COUNTRIES[cc]) return; cSel.value = cc; setPersona(null); loadLadder(cc); document.getElementById('ladder').scrollIntoView({behavior: 'smooth'}); };
   function loadLadder(cc, wantAsset){
     get('ladder/' + cc + '.json').then(function(d){
@@ -487,11 +541,12 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       tr.title = (w.redemption ? 'Redemption: ' + w.redemption : '') + (w.kyc ? '\nKYC: ' + w.kyc : '');
       tb.appendChild(tr);
     });
-    $('ladderNote').innerHTML = 'Total cost = (1 + dollar premium) × (1 + wrapper premium) − 1. Access from the issuer\'s and venues\' published lists; hover a row for redemption and KYC terms. Ladder computed ' + age(ladder.ts) + ', dollar fixing ' + (ladder.fixing_ts ? age(ladder.fixing_ts) : 'n/a') + '. Raw: <code>ladder/' + esc(ladder.country) + '.json</code>';
+    $('ladderNote').innerHTML = 'Total cost = (1 + dollar premium) × (1 + wrapper premium) − 1. Access from the issuer\'s and venues\' published lists; hover a row for redemption and KYC terms. Ladder computed ' + age(ladder.ts) + ', dollar fixing ' + (ladder.fixing_ts ? age(ladder.fixing_ts) : 'n/a') + '. Raw: <a href="ladder/' + esc(ladder.country) + '.json" target="_blank" rel="noopener"><code>ladder/' + esc(ladder.country) + '.json</code></a>. <button class="copy" data-copy="location">Copy link to this ladder</button>';
+    shareUrl();
   }
-  cSel.addEventListener('change', function(){ setPersona(null); loadLadder(cSel.value); });
-  aSel.addEventListener('change', renderLadder);
-  amt.addEventListener('input', renderLadder);
+  cSel.addEventListener('change', function(){ shared = true; setPersona(null); loadLadder(cSel.value); });
+  aSel.addEventListener('change', function(){ shared = true; renderLadder(); });
+  amt.addEventListener('input', function(){ shared = true; renderLadder(); });
 
   /* ---- heatmap ---- */
   var tip = $('tip');
@@ -543,7 +598,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
         tb.appendChild(tr);
       });
     });
-    $('fiatNote').innerHTML = 'Snapshot ' + age(fixing.ts) + ', sha256 <code>' + esc(fixing.sha256.slice(0, 16)) + '…</code>. Raw: <code>fixing/latest.json</code>';
+    $('fiatNote').innerHTML = 'Snapshot ' + age(fixing.ts) + ', sha256 <code>' + esc(fixing.sha256.slice(0, 16)) + '…</code>. Raw: <a href="fixing/latest.json" target="_blank" rel="noopener"><code>fixing/latest.json</code></a>';
   }
   fSel.addEventListener('change', renderFiat);
 
@@ -566,7 +621,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       tr.innerHTML = '<td>' + esc(r.issuer === 'perps' ? 'perp oracle (24/7)' : r.issuer) + '</td><td class="num">' + r.n + '</td><td class="num">' + (r.mae_pct * 100).toFixed(2) + '%' + '</td><td class="num">' + r.beat_close + ' / ' + r.n + '</td><td class="num">' + r.wins + '</td>';
       tb.appendChild(tr);
     });
-    $('mondayNote').innerHTML = d.weekends.length + ' weekend' + (d.weekends.length > 1 ? 's' : '') + ' scored (Monday ' + d.weekends.map(function(w){ return esc(w.monday); }).join(', ') + '), updated ' + age(d.ts) + '. Raw: <code>monday/latest.json</code>, also the MCP tool <code>monday_scoreboard</code>.';
+    $('mondayNote').innerHTML = d.weekends.length + ' weekend' + (d.weekends.length > 1 ? 's' : '') + ' scored (Monday ' + d.weekends.map(function(w){ return esc(w.monday); }).join(', ') + '), updated ' + age(d.ts) + '. Raw: <a href="monday/latest.json" target="_blank" rel="noopener"><code>monday/latest.json</code></a>, also the MCP tool <code>monday_scoreboard</code>.';
   }).catch(function(e){ $('mondayNote').textContent = 'Scoreboard unavailable: ' + e.message; });
   get('premiums/latest.json').then(function(d){ premiums = d; stale(d.ts, 'wrapper premiums'); renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
   get('fixing/latest.json').then(function(d){ fixing = d; stale(d.ts, 'dollar fixing'); Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
@@ -583,6 +638,84 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
         '<details><summary>Response, first ' + (e.response_sample.data && e.response_sample.data.rwa_assets ? e.response_sample.data.rwa_assets.length : '') + ' items of each list</summary><pre class="sample">' + esc(JSON.stringify(e.response_sample, null, 1)) + '</pre></details>';
     }).join('');
   }
+
+  /* ---- share links: ?cc=BJ&asset=NVDA&amount=300000 reproduces a ladder ---- */
+  var shared = false;   // the URL carries a ladder only once someone picked one (or arrived through a shared link)
+  function shareUrl(){
+    if (!ladder || !shared) return;
+    var q = '?cc=' + encodeURIComponent(cSel.value) + '&asset=' + encodeURIComponent(aSel.value) + '&amount=' + encodeURIComponent(amt.value);
+    try { history.replaceState(null, '', q + location.hash); } catch (e) {}
+  }
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-copy]'); if (!b) return;
+    var text = b.getAttribute('data-copy') === 'location' ? location.href : b.getAttribute('data-copy');
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function(){ var t = b.textContent; b.textContent = 'Copied'; setTimeout(function(){ b.textContent = t; }, 1400); }, function(){ window.prompt('Copy:', text); });
+  });
+
+  /* ---- MCP: call the real server from the page ---- */
+  $('mcpTry').addEventListener('click', function(){
+    var body = {jsonrpc: '2.0', id: 1, method: 'tools/call', params: {name: 'true_price', arguments: {country: cSel.value || 'BJ', asset: aSel.value || 'NVDA', amount: Number(amt.value) || 1000}}};
+    $('mcpReq').hidden = false; $('mcpReq').textContent = 'POST https://pegwatch.fyra.fun/mcp\nContent-Type: application/json\nAccept: application/json, text/event-stream\n\n' + JSON.stringify(body, null, 1);
+    $('mcpRes').hidden = false; $('mcpRes').textContent = 'calling…';
+    var t0 = Date.now();
+    fetch('mcp', {method: 'POST', headers: {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream'}, body: JSON.stringify(body)})
+      .then(function(r){ return r.json(); })
+      .then(function(d){
+        var c = d.result && d.result.content && d.result.content[0], out = c ? JSON.parse(c.text) : d;
+        $('mcpRes').textContent = '200 OK in ' + (Date.now() - t0) + ' ms, result.content[0].text parsed:\n\n' + JSON.stringify(out, null, 1);
+      }).catch(function(e){ $('mcpRes').textContent = 'Error: ' + e.message; });
+  });
+
+  /* ---- open data ---- */
+  var FILES = [
+    ['world.json', 'All 59 countries: dollar premium, cheapest rail, wrappers open, access coverage against CMC issuers'],
+    ['ladder/BJ.json', 'One country\'s full ladder (any code: ladder/NG.json, ladder/KE.json…)'],
+    ['premiums/latest.json', 'Every wrapper against its real asset, by trading regime, with the perp oracle'],
+    ['fixing/latest.json', 'The dollar fixing: 48 fiats × payment rails × buy and sell, official rate, CMC price, sha256'],
+    ['monday/latest.json', 'The Monday scoreboard, per weekend and per issuer'],
+    ['evidence/latest.json', 'The last real CoinMarketCap request and response per endpoint'],
+    ['status', 'Pipeline health: each batch\'s last run, output ages, CMC credits used']
+  ];
+  var tbd = $('dataTable').tBodies[0];
+  FILES.forEach(function(f){
+    var tr = document.createElement('tr'), url = f[0] === 'status' ? 'status' : f[0];
+    tr.innerHTML = '<td><a href="' + url + '" target="_blank" rel="noopener"><code>/' + esc(f[0]) + '</code></a></td><td>' + esc(f[1]) + '</td><td class="num" data-age>…</td><td class="num"><button class="mini" data-preview="' + url + '">Preview</button></td>';
+    tbd.appendChild(tr);
+    get(url).then(function(d){ tr.querySelector('[data-age]').textContent = d.ts ? age(d.ts) : (Object.keys(d).length + ' keys'); }).catch(function(){ tr.querySelector('[data-age]').textContent = 'unavailable'; });
+  });
+  document.addEventListener('click', function(e){
+    var b = e.target.closest('[data-preview]'); if (!b) return;
+    var pre = $('dataPreview'); pre.hidden = false; pre.textContent = 'loading ' + b.dataset.preview + '…';
+    get(b.dataset.preview).then(function(d){ var lines = JSON.stringify(d, null, 1).split('\n'); pre.textContent = '/' + b.dataset.preview + '\n\n' + lines.slice(0, 300).join('\n') + (lines.length > 300 ? '\n… ' + (lines.length - 300) + ' more lines, open the file for all of it' : ''); pre.scrollIntoView({block: 'nearest', behavior: 'smooth'}); });
+  });
+  get('status').then(function(st){
+    $('statusMeta').textContent = 'as of ' + age(st.ts);
+    var tb = $('statusTable').tBodies[0];
+    Object.keys(st.jobs).forEach(function(n){
+      var j = st.jobs[n], tr = document.createElement('tr');
+      var run = j.last_exit == null ? (j.last_start ? 'running' : 'not yet') : (j.last_exit === 0 ? 'ok' : 'exit ' + j.last_exit) + (j.last_seconds != null ? ', ≤ ' + j.last_seconds + ' s' : '');
+      tr.innerHTML = '<td><code>' + esc(n) + '</code></td><td>' + esc(j.every) + '</td><td class="num">' + (j.last_start ? age(j.last_start) : '') + '</td><td class="num"' + (j.last_exit && j.last_exit !== 0 ? ' style="color:var(--bad)"' : '') + '>' + esc(run) + '</td><td class="num">' + j.skipped + ' / ' + j.killed + '</td>';
+      tb.appendChild(tr);
+    });
+    var c = st.cmc_credits || {};
+    $('creditNote').innerHTML = c.used_today != null ? 'CoinMarketCap credits used today: <b>' + num(c.used_today, 0) + '</b>, this month: <b>' + num(c.used_month, 0) + '</b> (from <code>/v1/key/info</code>, refreshed hourly). A full 5-minute RWA cycle costs 1 credit.' : '';
+  }).catch(function(){ $('statusMeta').textContent = 'unavailable'; });
+
+  /* ---- FEEDBACK.md rendered: headings, numbered items, paragraphs, **bold**, `code` ---- */
+  function md(src){
+    var inline = function(t){ return esc(t).replace(/`([^`]+)`/g, '<code>$1</code>').replace(/\*\*([^*]+)\*\*/g, '<b>$1</b>'); };
+    var html = '', list = false;
+    src.split(/\n/).forEach(function(l){
+      var m = l.match(/^(\d+)\.\s+(.*)/);
+      if (m) { if (!list) { html += '<ol start="' + m[1] + '">'; list = true; } html += '<li>' + inline(m[2]) + '</li>'; return; }
+      if (list && l.trim()) { html += '</ol>'; list = false; }
+      if (/^# /.test(l)) return;
+      if (/^## /.test(l)) html += '<h3>' + inline(l.slice(3)) + '</h3>';
+      else if (l.trim()) html += '<p>' + inline(l) + '</p>';
+    });
+    return html + (list ? '</ol>' : '');
+  }
+  fetch('FEEDBACK.md', {cache: 'no-store'}).then(function(r){ return r.text(); }).then(function(t){ $('feedbackBody').innerHTML = md(t); }).catch(function(){ $('feedbackBody').textContent = 'FEEDBACK.md unavailable.'; });
   get('evidence/latest.json').then(renderEvidence).catch(function(e){ $('evMeta').textContent = 'unavailable'; $('evBody').textContent = 'Evidence unavailable: ' + e.message; });
 
   get('world.json').then(function(w){
@@ -593,8 +726,11 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     }
     world = w; fillCountries(w.countries); renderWorld(w);
     if (window.pegwatchWorld) window.pegwatchWorld(w);
-    var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), aminata = PERSONAS[0];
-    if (region && COUNTRIES[region] && region !== aminata.cc) { cSel.value = region; setPersona(null); loadLadder(region); }
+    var region = ((navigator.language || '').split('-')[1] || '').toUpperCase(), aminata = PERSONAS[0], qs = new URLSearchParams(location.search), qcc = (qs.get('cc') || '').toUpperCase();
+    var local = PERSONAS.filter(function(p){ return p.cc === region; })[0];
+    if (COUNTRIES[qcc]) { shared = true; cSel.value = qcc; if (Number(qs.get('amount')) > 0) amt.value = qs.get('amount'); setPersona(null); loadLadder(qcc, (qs.get('asset') || '').toUpperCase() || null); if (!location.hash) document.getElementById('ladder').scrollIntoView(); }
+    else if (local) { cSel.value = local.cc; amt.value = local.amount; setPersona(local); loadLadder(local.cc, local.asset); }
+    else if (region && COUNTRIES[region] && region !== aminata.cc) { cSel.value = region; setPersona(null); loadLadder(region); }
     else { cSel.value = aminata.cc; amt.value = aminata.amount; setPersona(aminata); loadLadder(aminata.cc, aminata.asset); }
   }).catch(function(e){ $('ladderNote').textContent = 'World data unavailable: ' + e.message; });
 })();

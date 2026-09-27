@@ -73,14 +73,17 @@ To view the site, copy `web/` into `data/` and serve `data/` with any static ser
 
 | Path | Content |
 |---|---|
-| `world.json` | One row per country: dollar premium, cheapest rail, wrappers open for NVDA |
+| `world.json` | One row per country: dollar premium, cheapest rail, wrappers open for NVDA, plus access coverage against CMC's issuer list |
 | `ladder/<CC>.json` | The full ladder for one country |
 | `fixing/latest.json`, `fixing/<day>.json` | Live dollar fixing, plus the 12:00 UTC daily archive (with a sha256 of the content) |
 | `premiums/latest.json` | Every wrapper vs its real asset |
 | `monday/latest.json` | Weekend scoreboard |
 | `evidence/latest.json` | The last real CMC request and response behind the numbers (key masked) |
+| `status` | Pipeline health, rewritten every minute: each batch's last run, skipped and killed slots, age of every output, CMC credits used today and this month |
 
-The raw archives (`*.jsonl`, `*.jsonl.gz`) are not served publicly (see `sites/pegwatch.caddy`).
+The raw archives (`*.jsonl`, `*.jsonl.gz`) are not served publicly (see `sites/pegwatch.caddy`). The page's **Open data** section lists these files with their age and a preview.
+
+Any ladder is a link: `https://pegwatch.fyra.fun/?cc=NG&asset=TSLA&amount=800000` opens Lagos, Tesla, 800 000 naira.
 
 ## MCP server
 
@@ -91,6 +94,10 @@ claude mcp add --transport http pegwatch https://pegwatch.fyra.fun/mcp        # 
 python -m pegwatch.mcp_server                                                  # local stdio
 PEGWATCH_URL=http://127.0.0.1:8080 python -m pegwatch.mcp_server               # against a local instance
 ```
+
+Claude desktop or web: Settings, Connectors, Add custom connector, URL `https://pegwatch.fyra.fun/mcp`. Cursor: `{ "mcpServers": { "pegwatch": { "url": "https://pegwatch.fyra.fun/mcp" } } }`. The page's **For agents** section also calls the server live from the browser.
+
+`docs/proof/mcp_session.md` is a real session recorded with the official Python client (tools/list and four calls, with latency and the sha256 of each response). `python docs/proof/record_mcp_session.py` records a new one.
 
 ## Deployment
 

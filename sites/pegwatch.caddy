@@ -6,6 +6,7 @@ pegwatch.fyra.fun {
 	handle @raw {
 		respond 404
 	}
+	rewrite /status /status.json
 	handle /mcp* {
 		reverse_proxy pegwatch-web:8081
 	}

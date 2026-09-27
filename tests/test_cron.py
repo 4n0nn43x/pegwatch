@@ -28,3 +28,17 @@ def test_derived_jobs_run_after_their_inputs():
     # collect/ref at :00, fixing :01, premiums :02, ladder :03 within each 5-min block
     first = {name: min(minutes) for name, _, minutes, _, _ in JOBS}
     assert first["collect"] == first["ref"] < first["fixing"] < first["premiums"] < first["ladder"] < 5
+
+
+def test_status_reports_output_ages_and_survives_missing_files(tmp_path, monkeypatch):
+    import json
+    import pegwatch.cron as c
+    monkeypatch.setattr(c, "DATA", tmp_path)
+    monkeypatch.setattr(c, "credits", lambda: {"used_today": 12})
+    (tmp_path / "fixing").mkdir()
+    (tmp_path / "fixing" / "latest.json").write_text('{"ts": "2026-09-27T11:10:15Z"}')
+    c.write_status({"p2p": {"skipped": 1}})
+    doc = json.loads((tmp_path / "status.json").read_text())
+    assert doc["outputs"]["dollar fixing"]["ts"] == "2026-09-27T11:10:15Z"
+    assert doc["outputs"]["wrapper premiums"]["ts"] is None               # missing file: reported, not a crash
+    assert doc["jobs"]["p2p"]["skipped"] == 1 and doc["cmc_credits"] == {"used_today": 12}

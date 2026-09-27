@@ -55,7 +55,7 @@ def monday_scoreboard() -> dict:
 
 @mcp.tool()
 def premiums() -> dict:
-    """Premium of every tokenized wrapper vs its real asset (55 assets), with the trading regime and the perp oracle proxy."""
+    """Premium of every tokenized wrapper vs its real asset (the top RWA assets with a reference), with the trading regime and the perp oracle proxy."""
     return _get("premiums/latest.json")
 
 
