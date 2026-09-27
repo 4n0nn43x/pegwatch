@@ -137,7 +137,7 @@ def probe() -> int:
     try:
         info = get("/v1/key/info")["data"]
         plan = info.get("plan", {})
-        print(f"key OK: plan={plan.get('name')} credits/month={plan.get('credit_limit_monthly')} "
+        print(f"key OK: credits/month={plan.get('credit_limit_monthly')} rate limit/min={plan.get('rate_limit_minute')} "
               f"used today={info.get('usage', {}).get('current_day', {}).get('credits_used')}")
     except Exception as e:
         print("key KO:", e); return 2
