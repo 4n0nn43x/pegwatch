@@ -81,7 +81,8 @@ A single container runs pm2 with three processes: the batch scheduler `pegwatch/
 
 | Batch | When |
 |---|---|
-| `p2p`, `collect`, `ref` | every 5 min |
+| `p2p` | every 10 min |
+| `collect`, `ref` | every 5 min |
 | `fixing` | +1 min |
 | `premiums` | +2 min |
 | `ladder` | +3 min |

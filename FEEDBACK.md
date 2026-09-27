@@ -1,6 +1,6 @@
 # CMC API feedback
 
-Dated, reproducible findings met while building pegwatch. Basic plan key, `https://pro-api.coinmarketcap.com`.
+Dated, reproducible findings met while building pegwatch. Basic plan key until 2026-09-26, then a 450 000 credit/month plan, `https://pro-api.coinmarketcap.com`.
 
 ## 2026-09-15
 
@@ -13,4 +13,9 @@ Dated, reproducible findings met while building pegwatch. Basic plan key, `https
 
 ## 2026-09-16 (layer 1, not a CMC finding but relevant to `price-conversion`)
 
-7. **`/v2/tools/price-conversion` to XOF/XAF/NGN/VES/ARS is the official or interbank rate, never the parallel one.** Measured today on P2P (Binance, Bybit, OKX): the dollar costs +4 % in CFA francs, +13 % in bolívares, +23 % in Iraqi dinars, +88 % in Algerian dinars and ~+1300 % in Sudanese pounds over the central-bank rate. An `official` vs `p2p` (or `parallel`) field on fiat conversions would make CMC the first aggregator to show what a dollar really costs in 48 emerging-market currencies. Pegwatch publishes the measurement at `https://pegwatch.fyra.fun/world.json`.
+7. **Fiat conversion (`price-conversion`, `convert=`) to NGN/VES/ARS/IQD/DZD follows the official or interbank rate, never the parallel one.** Measured today on P2P (Binance, Bybit, OKX): the dollar costs +4 % in CFA francs, +13 % in bolívares, +23 % in Iraqi dinars, +88 % in Algerian dinars and ~+1300 % in Sudanese pounds over the central-bank rate. An `official` vs `p2p` (or `parallel`) field on fiat conversions would make CMC the first aggregator to show what a dollar really costs in 48 emerging-market currencies. Pegwatch publishes the measurement at `https://pegwatch.fyra.fun/world.json`.
+
+## 2026-09-27
+
+8. **11 of the 48 fiats with a live USDT P2P market are not in `/v1/fiat/map`**: XOF, XAF, TZS, RWF, ZMW, SDG, MZN, AOA, CDF, PYG, HTG. `convert=XOF` returns HTTP 400 `"Invalid value for 'convert': 'XOF'"`. The two CFA francs alone are the currency of 14 countries and about 200 million people. Pegwatch works around it with the EUR peg (655.957 XOF per EUR), but a CMC dollar in francs CFA is the first number a West or Central African user looks for.
+9. **Good**: one `/v2/cryptocurrency/quotes/latest?id=825&convert=<37 fiats>` call returns USDT in all 37 supported fiats, 1 credit per fiat, 6 ms server time. Pegwatch caches it for 6 h and publishes the gap between CMC's price and the P2P price per fiat (`vs_cmc_pct` in `fixing/latest.json`): CMC shows the exchange-traded dollar, P2P shows what the street charges on top.

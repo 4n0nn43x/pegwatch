@@ -14,7 +14,7 @@ from datetime import datetime, timezone
 EVERY5 = range(0, 60, 5)
 # name, module args, minutes of the hour, hour (None = every hour), time limit in seconds
 JOBS = [
-    ("p2p", ["pegwatch.p2p"], EVERY5, None, 280),
+    ("p2p", ["pegwatch.p2p"], range(0, 60, 10), None, 580),   # 432 requests take 2 to 4 min, too close to a 5-min slot
     ("collect", ["pegwatch.collect"], EVERY5, None, 280),
     ("ref", ["pegwatch.ref"], EVERY5, None, 280),
     ("fixing", ["pegwatch.fixing"], range(1, 60, 5), None, 280),
