@@ -25,7 +25,7 @@ def compact(today: date, keep_days: int = KEEP_DAYS) -> tuple[int, int]:
     for name in NAMES:
         for f in sorted((DATA / name).glob("*.jsonl")):
             if date.fromisoformat(f.stem) >= today - timedelta(days=1):
-                continue                                      # today may still be appended to, yesterday feeds latest()
+                continue                                      # today is still appended to, and yesterday until the last cycle before midnight lands
             gz, tmp = f.with_name(f.name + ".gz"), f.with_name(f.name + ".gz.tmp")
             with f.open("rb") as src, gzip.open(tmp, "wb", compresslevel=6) as dst:
                 shutil.copyfileobj(src, dst)

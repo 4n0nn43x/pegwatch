@@ -290,6 +290,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
 </script>
 </head>
 <body>
+<div id="stale" role="status" hidden style="position:sticky;top:0;z-index:50;padding:8px 16px;background:var(--warn);color:#1a1300;font:600 14px/1.4 system-ui,sans-serif;text-align:center"></div>
 <main class="hero">
   <div class="bg" role="img" aria-label="Stylised globe of Earth rendered as a violet dot matrix against a starfield, slowly rotating"><canvas id="globe-bg"></canvas><canvas id="globe"></canvas><canvas id="globe-fx"></canvas></div>
   <header class="nav">
@@ -418,6 +419,12 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   var cls = function(x){ return x > 0.0005 ? 'pos' : x < -0.0005 ? 'neg' : ''; };
   var esc = function(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]; }); };
   var age = function(ts){ var m = Math.round((Date.now() - Date.parse(ts)) / 60000); return m < 1 ? 'just now' : m < 60 ? m + ' min ago' : Math.round(m / 60) + ' h ago'; };
+  var staleSeen = [];
+  var stale = function(ts, what){   // data older than 1 h: say so on top instead of passing an old snapshot as live
+    if (!ts || Date.now() - Date.parse(ts) < 3600000) return;
+    staleSeen.push(what + ' ' + age(ts));
+    var b = $('stale'); b.textContent = 'Stale data, the collector is behind: ' + staleSeen.join(', ') + '. Numbers below are the last snapshot.'; b.hidden = false;
+  };
   var get = function(url){ return fetch(url, {cache: 'no-store'}).then(function(r){ if (!r.ok) throw new Error(url + ' ' + r.status); return r.json(); }); };
 
   var ladder = null, premiums = null, fixing = null;
@@ -542,8 +549,8 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   }
 
   /* ---- boot ---- */
-  get('premiums/latest.json').then(function(d){ premiums = d; renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
-  get('fixing/latest.json').then(function(d){ fixing = d; Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
+  get('premiums/latest.json').then(function(d){ premiums = d; stale(d.ts, 'wrapper premiums'); renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
+  get('fixing/latest.json').then(function(d){ fixing = d; stale(d.ts, 'dollar fixing'); Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
   /* ---- evidence drawer ---- */
   function renderEvidence(ev){
     var paths = Object.keys(ev), newest = paths.map(function(p){ return ev[p].ts; }).sort().pop();

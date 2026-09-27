@@ -135,7 +135,8 @@ def official_rates(fiats: list[str]) -> dict:
 
 
 def latest_snapshot(fiats: list[str] | None = None) -> tuple[str, list[dict]]:
-    return latest("p2p", "fiat in (" + ",".join(f"'{f}'" for f in fiats) + ")" if fiats else "true")
+    ts, rows = latest("p2p")
+    return ts, [r for r in rows if not fiats or r["fiat"] in fiats]
 
 
 def build(fiats: list[str] | None = None) -> dict:
