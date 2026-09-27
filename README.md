@@ -4,11 +4,15 @@
 
 Live at [pegwatch.fyra.fun](https://pegwatch.fyra.fun). An MCP server for agents lives at `https://pegwatch.fyra.fun/mcp`.
 
+> **Sunday 2026-09-27, 10:52 UTC, Cotonou.** 300 000 CFA francs paid through MTN MoMo buy **507.64 $** of USDT on P2P, **+2.67 %** over the BCEAO peg. The cheapest Nvidia wrapper open to a Beninese buyer is Reality's `rNVDA`, **0.42 % under** Friday's close while the NYSE is shut. The whole path costs **+2.24 %** and lands **2.26 NVDA**. On Monday the scoreboard checks whose Sunday price was right.
+>
+> Reproduce with any MCP client: `true_price(country="BJ", asset="NVDA", amount=300000)`, or read `https://pegwatch.fyra.fun/ladder/BJ.json`. The example is the site's default persona, not a cherry-picked extreme.
+
 pegwatch stacks three layers that nobody publishes together:
 
 | Layer | Question | Modules | Sources |
 |---|---|---|---|
-| 1. The dollar | How much above the official rate does a USDT cost, on the payment rail people actually use (MTN MoMo, Wave, M-Pesa, Pix...)? | `p2p.py`, `fixing.py` | Binance, Bybit and OKX P2P books, central-bank rates (`fixing.OFFICIAL`), open.er-api.com |
+| 1. The dollar | How much above the official rate does a USDT cost, on the payment rail people actually use (MTN MoMo, Wave, M-Pesa, Pix...)? | `p2p.py`, `fixing.py` | Binance, Bybit and OKX P2P books, CMC's USDT price in 37 fiats, central-bank rates (`fixing.OFFICIAL`), open.er-api.com |
 | 2. The wrapper | How far is each tokenized wrapper (xStocks, Ondo, bStocks...) from the real asset, given the trading regime (session, pre/post, night, weekend)? | `collect.py`, `ref.py`, `premium.py`, `premiums.py`, `regime.py` | CoinMarketCap RWA API, Hyperliquid oracle, Ostium |
 | 3. Access | Which wrappers may someone in a given country buy at all? | `wrappers.yaml`, `countries.yaml` | Issuers' and venues' published exclusion lists, with sources |
 
@@ -19,6 +23,19 @@ total cost = (1 + dollar premium on the best local rail) × (1 + wrapper premium
 ```
 
 Everything is information only. pegwatch never gives advice and never executes a trade.
+
+## CoinMarketCap endpoints used
+
+| Endpoint | What pegwatch does with it | Cadence, cost |
+|---|---|---|
+| `GET /v5/real-world-assets/map?has_tokens=true&limit=200` | Top 200 real-world assets that have tokens | every 5 min, 0 credit |
+| `GET /v5/real-world-assets/quotes/latest?rwa_id=...` | Every wrapper price, issuer and 24 h volume, and the `(Derivatives)` pseudo-token used as a 24/7 proxy | every 5 min, 1 credit |
+| `GET /v5/real-world-assets/issuers/list` | The denominator of the access matrix: how many CMC issuers, and what share of their tokens, have hand-checked country rules | daily, 1 credit |
+| `GET /v1/fiat/map` | Which of the 48 P2P fiats CMC can price (37, not XOF or XAF) | every 6 h, 1 credit |
+| `GET /v2/cryptocurrency/quotes/latest?id=825&convert=<37 fiats>` | CMC's USDT price in each fiat: the third leg of the dollar, between the official rate and the street | every 6 h, 37 credits |
+| `GET /v1/key/info` | Go/no-go probe (`python -m pegwatch.collect --probe`) | on demand |
+
+Every call goes through `collect.get()`, which records the last real request and response per endpoint (masked key, HTTP status, credits, sha256, a copy-pastable curl) in `data/evidence/latest.json`. The site shows it under the premiums as the evidence drawer.
 
 ## Method, briefly
 
