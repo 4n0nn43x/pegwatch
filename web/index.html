@@ -703,7 +703,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     var tb = $('statusTable').tBodies[0];
     Object.keys(st.jobs).forEach(function(n){
       var j = st.jobs[n], tr = document.createElement('tr');
-      var run = j.last_exit == null ? (j.last_start ? 'running' : 'not yet') : (j.last_exit === 0 ? 'ok' : 'exit ' + j.last_exit) + (j.last_seconds != null ? ', ≤ ' + j.last_seconds + ' s' : '');
+      var run = j.last_exit == null ? (j.last_start ? 'running' : 'not yet') : (j.last_exit === 0 ? 'ok' : 'exit ' + j.last_exit) + (j.last_seconds != null ? ' in ' + Math.max(1, j.last_seconds) + ' s' : '');
       tr.innerHTML = '<td><code>' + esc(n) + '</code></td><td>' + esc(j.every) + '</td><td class="num">' + (j.last_start ? age(j.last_start) : '') + '</td><td class="num"' + (j.last_exit && j.last_exit !== 0 ? ' style="color:var(--bad)"' : '') + '>' + esc(run) + '</td><td class="num">' + j.skipped + ' / ' + j.killed + '</td>';
       tb.appendChild(tr);
     });

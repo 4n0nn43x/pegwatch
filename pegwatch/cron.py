@@ -15,6 +15,7 @@ from datetime import datetime, timezone
 from .collect import DATA
 
 EVERY5 = range(0, 60, 5)
+TICK = 5   # seconds between checks of running batches
 # name, module args, minutes of the hour, hour (None = every hour), time limit in seconds
 JOBS = [
     ("p2p", ["pegwatch.p2p"], range(0, 60, 10), None, 580),   # up to 864 requests take 2 to 4 min, too close to a 5-min slot
@@ -79,9 +80,9 @@ def main() -> int:
     for name, args, _, hour, _ in JOBS:          # the 5-min jobs run once at boot, the daily ones wait for their slot
         if hour is None:
             start(name, args)
+    last_minute = int(time.time() // 60)
     while True:
-        time.sleep(60 - time.time() % 60 + 0.5)   # just after each minute boundary
-        now = datetime.now(timezone.utc)
+        time.sleep(TICK - time.time() % TICK + 0.05)   # every TICK seconds: note exits and overdue runs, start on a new minute
         for name, args, minutes, hour, limit in JOBS:
             p = running.get(name)
             if p and p[0].poll() is None and time.monotonic() - p[1] > limit:
@@ -89,15 +90,18 @@ def main() -> int:
                 p[0].kill()
                 p[0].wait()
                 jobs[name]["killed"] += 1
-            if p and p[0].poll() is not None and jobs[name]["last_exit"] is None:   # seconds rounded up to the minute check
+            if p and p[0].poll() is not None and jobs[name]["last_exit"] is None:   # seconds accurate to one TICK
                 jobs[name].update(last_exit=p[0].returncode, last_seconds=round(time.monotonic() - p[1]))
-            if due(now, minutes, hour):
-                start(name, args)
+        minute = int(time.time() // 60)
+        if minute != last_minute:
+            last_minute, now = minute, datetime.now(timezone.utc)
+            for name, args, minutes, hour, _ in JOBS:
+                if due(now, minutes, hour):
+                    start(name, args)
         try:
             write_status(jobs)
         except Exception as e:                   # a status page must never stop the batches
             print(f"status: {e}", flush=True)
-
 
 if __name__ == "__main__":
     sys.exit(main())
