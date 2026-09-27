@@ -296,7 +296,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   <header class="nav">
     <a class="logo" href="#">pegwatch</a>
     <nav class="nav-links" aria-label="Primary">
-      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
+      <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
     </nav>
     <div class="nav-actions">
       <a class="btn btn-login" href="world.json">JSON</a>
@@ -305,7 +305,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <button class="burger" id="burger" aria-label="Open menu" aria-expanded="false" aria-controls="menu"><span></span></button>
   </header>
   <nav class="menu" id="menu" aria-label="Mobile">
-    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
+    <a href="#ladder">Ladder</a><a href="#heatmap">Heatmap</a><a href="#monday">Monday</a><a href="#dollar">Dollar</a><a href="#method">Method</a><a href="FEEDBACK.md">API feedback</a>
     <div class="divider"></div>
     <a href="world.json">JSON</a>
     <a class="m-start" href="https://github.com/4n0nn43x/pegwatch">GitHub <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
@@ -345,6 +345,14 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="legend"><span>discount</span><span class="bar" aria-hidden="true"></span><span>premium</span><span id="hmMeta" style="margin-left:auto"></span></div>
     <p class="note">Perp entries ("Derivatives", Hyperliquid Assets) and tokens with no volume or a unit mismatch are excluded from the wrapper spread but listed in the JSON with a <code>suspect</code> flag.</p>
     <details class="evidence" id="evidence"><summary>Evidence: the real CoinMarketCap calls behind these numbers <span class="meta" id="evMeta">loading…</span></summary><div class="ev" id="evBody"></div></details>
+  </section>
+
+  <section class="block" id="monday">
+    <p class="kicker">The Monday scoreboard</p>
+    <h2>Who knew the <em>Monday open</em> on Sunday?</h2>
+    <p class="lead">On weekends the NYSE is shut but the wrappers still trade. Every Monday at 14:00 UTC each wrapper's last Sunday price is scored against the real 09:30 ET open. A wrapper "beats the close" when its Sunday price sits nearer to the open than Friday's close did: it saw the weekend news before the market.</p>
+    <div class="reveal tbl"><table id="mondayTable"><thead><tr><th>Issuer</th><th class="num">Assets scored</th><th class="num">Mean error vs open</th><th class="num">Beat Friday close</th><th class="num">Closest of all</th></tr></thead><tbody></tbody></table></div>
+    <p class="note" id="mondayNote">loading…</p>
   </section>
 
   <section class="block" id="dollar">
@@ -518,11 +526,12 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   function renderFiat(){
     if (!fixing) return;
     var f = fSel.value, sides = fixing.fixing[f] || {}, off = fixing.official[f];
-    var all = (sides.buy || {}).ALL, sell = (sides.sell || {}).ALL;
+    var all = (sides.buy || {}).ALL, sell = (sides.sell || {}).ALL, dol = sides.dollar || {};
     var rails = Object.keys(sides.buy || {}).filter(function(r){ return r !== 'ALL' && r !== 'Other'; }).map(function(r){ return {rail: r, v: sides.buy[r]}; }).sort(function(x, y){ return y.v.depth_usd - x.v.depth_usd; });
     var cheapest = rails.slice().sort(function(x, y){ return x.v.price - y.v.price; })[0];
     $('fiatCards').innerHTML =
       '<div class="card"><h3>Official</h3><div class="big">' + num(off.rate) + '<small>' + esc(f) + ' per $</small></div><div class="meta">' + esc(off.source) + '</div></div>' +
+      '<div class="card"><h3>CMC market</h3>' + (dol.cmc_price ? '<div class="big">' + num(dol.cmc_price) + '<small>' + esc(f) + ' per USDT</small></div><div class="meta">USDT on exchanges, <code>/v2/cryptocurrency/quotes/latest</code>. The street pays <span class="chip ' + (cls(dol.vs_cmc_pct) || 'flat') + '">' + pct(dol.vs_cmc_pct) + '</span> on top of it.</div>' : '<div class="meta">CMC does not list ' + esc(f) + ' in <code>/v1/fiat/map</code>, so the dollar here has two legs only: P2P and official.</div>') + '</div>' +
       '<div class="card"><h3>Buying a dollar</h3><div class="big">' + (all ? num(all.price) : '') + '<small>' + esc(f) + '</small></div><div class="meta">' + (all ? 'all rails, <span class="chip ' + (cls(all.premium_pct) || 'flat') + '">' + pct(all.premium_pct) + '</span> vs official, ' + all.n + ' ads, ' + num(all.depth_usd, 0) + ' $ of depth' : 'no data') + (cheapest ? '<br>cheapest rail <b>' + esc(cheapest.rail) + '</b> at ' + num(cheapest.v.price) + ' (' + pct(cheapest.v.premium_pct) + ')' : '') + '</div></div>' +
       '<div class="card"><h3>Selling a dollar</h3><div class="big">' + (sell ? num(sell.price) : '') + '<small>' + esc(f) + '</small></div><div class="meta">' + (sell ? '<span class="chip ' + (cls(sell.premium_pct) || 'flat') + '">' + pct(sell.premium_pct) + '</span> vs official' + (all ? ', round trip costs <b>' + pct(all.price / sell.price - 1) + '</b>' : '') : 'no data') + '</div></div>';
     var tb = $('fiatTable').tBodies[0]; tb.innerHTML = '';
@@ -549,6 +558,15 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   }
 
   /* ---- boot ---- */
+  get('monday/latest.json').then(function(d){
+    var tb = $('mondayTable').tBodies[0];
+    d.cumulative.slice().sort(function(x, y){ return x.mae_pct - y.mae_pct; }).forEach(function(r){
+      var tr = document.createElement('tr');
+      tr.innerHTML = '<td>' + esc(r.issuer === 'perps' ? 'perp oracle (24/7)' : r.issuer) + '</td><td class="num">' + r.n + '</td><td class="num">' + (r.mae_pct * 100).toFixed(2) + '%' + '</td><td class="num">' + r.beat_close + ' / ' + r.n + '</td><td class="num">' + r.wins + '</td>';
+      tb.appendChild(tr);
+    });
+    $('mondayNote').innerHTML = d.weekends.length + ' weekend' + (d.weekends.length > 1 ? 's' : '') + ' scored (Monday ' + d.weekends.map(function(w){ return esc(w.monday); }).join(', ') + '), updated ' + age(d.ts) + '. Raw: <code>monday/latest.json</code>, also the MCP tool <code>monday_scoreboard</code>.';
+  }).catch(function(e){ $('mondayNote').textContent = 'Scoreboard unavailable: ' + e.message; });
   get('premiums/latest.json').then(function(d){ premiums = d; stale(d.ts, 'wrapper premiums'); renderHeatmap(d); }).catch(function(e){ $('hm').textContent = 'Premiums unavailable: ' + e.message; });
   get('fixing/latest.json').then(function(d){ fixing = d; stale(d.ts, 'dollar fixing'); Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
   /* ---- evidence drawer ---- */
