@@ -79,7 +79,7 @@ To view the site, copy `web/` into `data/` and serve `data/` with any static ser
 | `premiums/latest.json` | Every wrapper vs its real asset |
 | `monday/latest.json` | Weekend scoreboard |
 | `evidence/latest.json` | The last real CMC request and response behind the numbers (key masked) |
-| `status` | Pipeline health, rewritten every minute: each batch's last run, skipped and killed slots, age of every output, CMC credits used today and this month |
+| `status` | Pipeline health, rewritten every minute: each batch's last run, skipped and killed slots, age of every output |
 
 The raw archives (`*.jsonl`, `*.jsonl.gz`) are not served publicly (see `sites/pegwatch.caddy`). The page's **Open data** section lists these files with their age and a preview.
 

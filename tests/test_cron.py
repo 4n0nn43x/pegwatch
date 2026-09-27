@@ -34,11 +34,10 @@ def test_status_reports_output_ages_and_survives_missing_files(tmp_path, monkeyp
     import json
     import pegwatch.cron as c
     monkeypatch.setattr(c, "DATA", tmp_path)
-    monkeypatch.setattr(c, "credits", lambda: {"used_today": 12})
     (tmp_path / "fixing").mkdir()
     (tmp_path / "fixing" / "latest.json").write_text('{"ts": "2026-09-27T11:10:15Z"}')
     c.write_status({"p2p": {"skipped": 1}})
     doc = json.loads((tmp_path / "status.json").read_text())
     assert doc["outputs"]["dollar fixing"]["ts"] == "2026-09-27T11:10:15Z"
     assert doc["outputs"]["wrapper premiums"]["ts"] is None               # missing file: reported, not a crash
-    assert doc["jobs"]["p2p"]["skipped"] == 1 and doc["cmc_credits"] == {"used_today": 12}
+    assert doc["jobs"]["p2p"]["skipped"] == 1 and set(doc) == {"ts", "jobs", "outputs"}

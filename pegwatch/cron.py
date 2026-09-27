@@ -12,7 +12,7 @@ import sys
 import time
 from datetime import datetime, timezone
 
-from .collect import DATA, cached, get
+from .collect import DATA
 
 EVERY5 = range(0, 60, 5)
 # name, module args, minutes of the hour, hour (None = every hour), time limit in seconds
@@ -35,7 +35,7 @@ def due(now: datetime, minutes, hour) -> bool:
 
 OUTPUTS = {"p2p snapshot": ("latest/p2p.jsonl", None), "dollar fixing": ("fixing/latest.json", "ts"),
            "wrapper premiums": ("premiums/latest.json", "ts"), "ladders": ("world.json", "ts"),
-           "Monday scoreboard": ("monday/latest.json", "ts"), "CMC USDT in fiats": ("cmc_fx.json", "ts")}
+           "Monday scoreboard": ("monday/latest.json", "ts"), "exchange USDT price": ("cmc_fx.json", "ts")}
 
 
 def iso(t: float | None) -> str | None:
@@ -55,18 +55,8 @@ def outputs() -> dict:
     return out
 
 
-def credits() -> dict:
-    """CMC plan and credits used, from /v1/key/info (no credit cost), refreshed hourly."""
-    try:
-        d = cached("cmc_key", 3600, lambda: {"info": get("/v1/key/info")["data"]})["info"]
-        return {"plan_credits_month": d["plan"].get("credit_limit_monthly"), "used_today": d["usage"]["current_day"].get("credits_used"),
-                "used_month": d["usage"]["current_month"].get("credits_used"), "rate_limit_minute": d["plan"].get("rate_limit_minute")}
-    except Exception as e:
-        return {"error": str(e)}
-
-
 def write_status(jobs: dict) -> None:
-    doc = {"ts": iso(time.time()), "jobs": jobs, "outputs": outputs(), "cmc_credits": credits()}
+    doc = {"ts": iso(time.time()), "jobs": jobs, "outputs": outputs()}
     tmp = DATA / "status.json.tmp"
     tmp.write_text(json.dumps(doc, indent=1))
     tmp.replace(DATA / "status.json")
