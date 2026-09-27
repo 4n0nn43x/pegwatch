@@ -54,10 +54,10 @@ a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible{ou
 .nav-links a::after{content:"";position:absolute;left:0;right:0;bottom:-2px;height:1.5px;border-radius:2px;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform .22s var(--e-soft)}
 .nav-links a.active::after{transform:scaleX(1)}
 /* feedback on every control: pressed on touch, ring on keyboard focus */
-.btn,.menu a,.copy,.mini,.persona,.burger{-webkit-tap-highlight-color:transparent}
+.btn,.act,.menu a,.copy,.mini,.persona,.burger{-webkit-tap-highlight-color:transparent}
 /* `scale`, not `transform`: the entrance animations keep their final transform and would override it */
-.btn:active,.copy:active,.mini:active,.persona:active,.burger:active,.menu a:active{scale:.96}
-.btn,.copy,.mini,.burger,.persona{transition:scale .12s ease,background .18s ease,color .18s ease,box-shadow .18s ease,border-color .18s ease}
+.btn:active,.act:active,.copy:active,.mini:active,.persona:active,.burger:active,.menu a:active{scale:.96}
+.btn,.act,.copy,.mini,.burger,.persona{transition:scale .12s ease,background .18s ease,color .18s ease,box-shadow .18s ease,border-color .18s ease}
 a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,summary:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 .ctas .btn-ghost{border-color:rgba(255,255,255,.22);background:rgba(10,10,14,.62)}
 .ctas .btn-ghost:hover,.ctas .btn-ghost:active{border-color:rgba(167,139,250,.6);background:rgba(20,16,34,.8);color:#fff}
@@ -173,8 +173,18 @@ tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .tip{position:fixed;pointer-events:none;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.5;color:var(--t1);z-index:30;display:none;max-width:280px}
 .note{font-size:13px;color:var(--t3);margin:16px 0 0;line-height:1.6}
 .code{margin:8px 0 0;padding:12px 14px;border-radius:var(--r-ctl);background:rgba(0,0,0,.5);color:var(--t2);font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;max-height:360px;white-space:pre-wrap;word-break:break-word}
-.copy,.mini{font:inherit;font-size:12px;color:var(--t2);background:var(--s3);border:0;border-radius:999px;padding:5px 12px;cursor:pointer;transition:color .15s}
-.copy:hover,.mini:hover{color:var(--t1)}
+/* actions: .act = primary white pill (like the hero CTA), .copy/.mini = secondary violet pills */
+.act{display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 22px;border:0;border-radius:999px;background:var(--white-btn);color:var(--btn-ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;box-shadow:0 8px 24px rgba(167,139,250,.18)}
+.act:hover{background:#fff;box-shadow:0 0 0 4px rgba(167,139,250,.28),0 8px 28px rgba(167,139,250,.3)}
+.act .arw{width:13px;height:11px}
+.act[aria-busy="true"]{opacity:.7;cursor:progress}
+.copy,.mini{display:inline-flex;align-items:center;gap:6px;font:inherit;font-size:12.5px;font-weight:600;color:#ddd3ff;background:rgba(167,139,250,.14);border:1px solid rgba(167,139,250,.38);border-radius:999px;padding:6px 14px;cursor:pointer}
+.copy:hover,.mini:hover{color:#fff;background:rgba(167,139,250,.26);border-color:rgba(167,139,250,.7)}
+.copy.done{color:#bff5d6;background:rgba(61,180,104,.18);border-color:rgba(89,212,153,.5)}
+.card pre.code+.copy{margin-top:10px}
+.feature{box-shadow:0 0 0 1px rgba(167,139,250,.35),0 20px 60px rgba(124,92,255,.12),var(--card-shadow);background:linear-gradient(180deg,rgba(167,139,250,.08),var(--s1))}
+.feature h3{color:#e4dcff}
+.endpoint.feature code{color:#fff}
 .endpoint{display:flex;flex-wrap:wrap;align-items:center;gap:10px 14px;margin:0 0 20px;padding:14px 18px;border-radius:var(--r-card);background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow)}
 .endpoint code{font:15px ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--t1);word-break:break-all}
 .card h3 small{font-weight:400;color:var(--t3)}
@@ -395,7 +405,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <p class="kicker">For agents</p>
     <h2>Ask it from <em>Claude, Cursor or any MCP client.</em></h2>
     <p class="lead">pegwatch is also a public MCP server: Streamable HTTP, read-only, no key, no sign-up. Your assistant gets the same numbers as this page as five tools, and can answer "how much Nvidia do 300 000 CFA francs buy in Cotonou right now?" with the live ladder.</p>
-    <div class="endpoint"><code id="mcpUrl">https://pegwatch.fyra.fun/mcp</code><button class="copy" data-copy="https://pegwatch.fyra.fun/mcp">Copy URL</button></div>
+    <div class="endpoint feature"><code id="mcpUrl">https://pegwatch.fyra.fun/mcp</code><button class="act" data-copy="https://pegwatch.fyra.fun/mcp">Copy URL</button></div>
     <div class="reveal grid">
       <div class="card"><h3>Claude Code</h3><p class="meta">One command in a terminal:</p><pre class="code">claude mcp add --transport http pegwatch https://pegwatch.fyra.fun/mcp</pre><button class="copy" data-copy="claude mcp add --transport http pegwatch https://pegwatch.fyra.fun/mcp">Copy</button></div>
       <div class="card"><h3>Claude <small>(desktop and web)</small></h3><p class="meta">Settings, <b>Connectors</b>, <b>Add custom connector</b>, then paste the URL above. No authentication to configure.</p></div>
@@ -408,8 +418,8 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       <tr><td><code>monday_scoreboard</code></td><td>Whose Sunday price matched the real Monday open, per issuer.</td><td>"Which issuer priced last weekend best?"</td></tr>
       <tr><td><code>countries</code></td><td>The 59 countries, their fiat, today's dollar premium and how many wrappers are open.</td><td>"Where is the dollar most expensive today?"</td></tr>
     </tbody></table></div>
-    <div class="card" style="margin-top:16px"><h3>Try it live</h3><p class="meta">Calls the real server from your browser with the ladder currently selected above, over the same JSON-RPC your assistant would use.</p>
-      <div class="controls" style="margin:12px 0 0"><button class="btn btn-ghost" id="mcpTry" style="height:38px">Call true_price</button></div>
+    <div class="card feature" style="margin-top:16px"><h3>Try it live</h3><p class="meta">Calls the real server from your browser with the ladder currently selected above, over the same JSON-RPC your assistant would use.</p>
+      <div class="controls" style="margin:12px 0 0"><button class="act" id="mcpTry">Run true_price live <svg class="arw" viewBox="0 0 12 10" fill="none" aria-hidden="true"><path d="M0.8 5h10M7.1 1.4 10.9 5l-3.8 3.6" stroke="currentColor" stroke-width="1.35" stroke-linecap="round" stroke-linejoin="round"/></svg></button></div>
       <pre class="code" id="mcpReq" hidden></pre><pre class="code" id="mcpRes" hidden></pre></div>
   </section>
 
@@ -649,7 +659,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   document.addEventListener('click', function(e){
     var b = e.target.closest('[data-copy]'); if (!b) return;
     var text = b.getAttribute('data-copy') === 'location' ? location.href : b.getAttribute('data-copy');
-    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function(){ var t = b.textContent; b.textContent = 'Copied'; setTimeout(function(){ b.textContent = t; }, 1400); }, function(){ window.prompt('Copy:', text); });
+    (navigator.clipboard ? navigator.clipboard.writeText(text) : Promise.reject()).then(function(){ var t = b.textContent; b.textContent = 'Copied'; b.classList.add('done'); setTimeout(function(){ b.textContent = t; b.classList.remove('done'); }, 1400); }, function(){ window.prompt('Copy:', text); });
   });
 
   /* ---- MCP: call the real server from the page ---- */
@@ -657,13 +667,14 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     var body = {jsonrpc: '2.0', id: 1, method: 'tools/call', params: {name: 'true_price', arguments: {country: cSel.value || 'BJ', asset: aSel.value || 'NVDA', amount: Number(amt.value) || 1000}}};
     $('mcpReq').hidden = false; $('mcpReq').textContent = 'POST https://pegwatch.fyra.fun/mcp\nContent-Type: application/json\nAccept: application/json, text/event-stream\n\n' + JSON.stringify(body, null, 1);
     $('mcpRes').hidden = false; $('mcpRes').textContent = 'calling…';
+    var btn = $('mcpTry'); btn.setAttribute('aria-busy', 'true');
     var t0 = Date.now();
     fetch('mcp', {method: 'POST', headers: {'Content-Type': 'application/json', 'Accept': 'application/json, text/event-stream'}, body: JSON.stringify(body)})
       .then(function(r){ return r.json(); })
       .then(function(d){
         var c = d.result && d.result.content && d.result.content[0], out = c ? JSON.parse(c.text) : d;
-        $('mcpRes').textContent = '200 OK in ' + (Date.now() - t0) + ' ms, result.content[0].text parsed:\n\n' + JSON.stringify(out, null, 1);
-      }).catch(function(e){ $('mcpRes').textContent = 'Error: ' + e.message; });
+        btn.removeAttribute('aria-busy'); $('mcpRes').textContent = '200 OK in ' + (Date.now() - t0) + ' ms, result.content[0].text parsed:\n\n' + JSON.stringify(out, null, 1);
+      }).catch(function(e){ btn.removeAttribute('aria-busy'); $('mcpRes').textContent = 'Error: ' + e.message; });
   });
 
   /* ---- open data ---- */
