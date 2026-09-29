@@ -116,8 +116,10 @@ h2 em{font-style:normal;background:linear-gradient(180deg,#fff 0%,#a78bfa 140%);
 .lead b{color:var(--t2);font-weight:500}
 .controls{display:flex;flex-wrap:wrap;gap:12px;margin:0 0 24px}
 .controls label{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--t3);letter-spacing:.02em}
-select,input[type=number]{font:inherit;font-size:15px;color:var(--t1);background:linear-gradient(180deg,var(--s2),var(--s1));border:0;box-shadow:var(--card-shadow);border-radius:var(--r-ctl);padding:10px 14px;min-width:200px;transition:box-shadow .2s var(--ease)}
-select:hover,input[type=number]:hover{box-shadow:var(--hover-ring)}
+select,input[type=number],input[type=search]{font:inherit;font-size:15px;color:var(--t1);background:linear-gradient(180deg,var(--s2),var(--s1));border:0;box-shadow:var(--card-shadow);border-radius:var(--r-ctl);padding:10px 14px;min-width:200px;transition:box-shadow .2s var(--ease)}
+select:hover,input[type=number]:hover,input[type=search]:hover{box-shadow:var(--hover-ring)}
+#assetQ{min-width:280px}
+#assetQ::placeholder{color:var(--t3)}
 select option{background:#0f1011;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:16px}
 .card{position:relative;background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow);border-radius:var(--r-card);padding:20px 22px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
@@ -271,7 +273,7 @@ footer a{color:var(--t2)}
   .menu .m-start{padding:14px 16px}
   .wrap{padding:0 16px}
   section.block{padding:52px 0 16px}
-  select,input[type=number]{min-width:0;width:100%}
+  select,input[type=number],input[type=search]{min-width:0;width:100%}
   .controls label{flex:1 1 140px}
 }
 @media (max-width:353px){ .ctas{flex-direction:column;align-items:center} .btn-lg{width:min(100%,272px)} }
@@ -374,7 +376,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="personas" id="personas"></div>
     <div class="controls">
       <label>Country <select id="country"></select></label>
-      <label>Asset <select id="asset"></select></label>
+      <label>Asset <input id="assetQ" type="search" list="assetList" autocomplete="off" spellcheck="false" placeholder="Search: NVDA, gold, Tesla…" aria-label="Search an asset"><datalist id="assetList"></datalist><select id="asset" hidden></select></label>
       <label>Amount (local currency) <input type="number" id="amount" value="300000" min="1" step="1000"></label>
     </div>
     <div class="reveal grid" id="ladderCards"></div>
@@ -537,6 +539,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       var keep = wantAsset || aSel.value;
       aSel.innerHTML = '';
       d.assets.forEach(function(a){ var o = document.createElement('option'); o.value = a.symbol; o.textContent = a.symbol + '  ' + a.name; aSel.appendChild(o); });
+      $('assetList').innerHTML = d.assets.map(function(a){ return '<option value="' + esc(a.symbol + ' · ' + a.name) + '"></option>'; }).join('');
       aSel.value = d.assets.some(function(a){ return a.symbol === keep; }) ? keep : (d.assets.some(function(a){ return a.symbol === 'NVDA'; }) ? 'NVDA' : d.assets[0].symbol);
       renderLadder();
     }).catch(function(e){ $('ladderNote').textContent = 'Ladder unavailable: ' + e.message; });
@@ -550,6 +553,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   function renderLadder(){
     if (!ladder) return;
     var a = ladder.assets.filter(function(x){ return x.symbol === aSel.value; })[0]; if (!a) return;
+    if (document.activeElement !== aQ) aQ.value = a.symbol + ' · ' + a.name;
     var usd = ladder.dollar, amount = Number(amt.value) || 0;
     // no rate = no conversion: never fall back to 1 fiat = 1 $ (1 000 EUR is not 1 000 $)
     var rate = usd.official && usd.premium_pct != null ? usd.official * (1 + usd.premium_pct) : null, usdAmt = rate ? amount / rate : null;
@@ -579,6 +583,20 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   }
   cSel.addEventListener('change', function(){ shared = true; setPersona(null); loadLadder(cSel.value); });
   aSel.addEventListener('change', function(){ shared = true; renderLadder(); });
+  // search box over the asset list: exact symbol, "SYM · Name" from the suggestions, or a unique match in symbol or name
+  var aQ = $('assetQ');
+  var pickAsset = function(final){
+    if (!ladder) return;
+    var q = aQ.value.trim().toLowerCase(), sym = q.split(' · ')[0];
+    var hit = ladder.assets.filter(function(a){ return a.symbol.toLowerCase() === sym; })[0];
+    if (!hit && final && q) { var m = ladder.assets.filter(function(a){ return (a.symbol + ' ' + a.name).toLowerCase().indexOf(q) >= 0; }); if (m.length) hit = m[0]; }
+    if (hit && hit.symbol !== aSel.value) { aSel.value = hit.symbol; aSel.dispatchEvent(new Event('change')); }
+    if (final) { var cur = ladder.assets.filter(function(a){ return a.symbol === aSel.value; })[0]; if (cur) aQ.value = cur.symbol + ' · ' + cur.name; }
+  };
+  aQ.addEventListener('input', function(){ pickAsset(false); });
+  aQ.addEventListener('change', function(){ pickAsset(true); });
+  aQ.addEventListener('focus', function(){ aQ.select(); });
+  aQ.addEventListener('keydown', function(e){ if (e.key === 'Enter') { pickAsset(true); aQ.blur(); } });
   amt.addEventListener('input', function(){ shared = true; renderLadder(); });
 
   /* ---- heatmap ---- */
