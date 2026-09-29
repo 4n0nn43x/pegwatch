@@ -30,6 +30,8 @@ Everything is information only. pegwatch never gives advice and never executes a
 |---|---|---|
 | `GET /v5/real-world-assets/map?has_tokens=true&limit=200` | Top 200 real-world assets that have tokens | every 5 min, 0 credit |
 | `GET /v5/real-world-assets/quotes/latest?rwa_id=...` | Every wrapper price, issuer and 24 h volume, and the `(Derivatives)` pseudo-token used as a 24/7 proxy | every 5 min, 1 credit |
+| `GET /v5/real-world-assets/info?rwa_id=...` | What each real asset is: name, exchange, industry, SEC CIK (linked to its filings), website | daily, 1 credit per 100 assets |
+| `GET /v2/cryptocurrency/ohlcv/historical?id=<wrapper and perp crypto_ids>` | 30 daily closes of every wrapper and of the 24/7 perp pseudo-token: each wrapper's premium history, its range and where today sits in the month (RWA has no history endpoint; the join goes through each token's `crypto_id`) | daily, 1 credit per 100 points |
 | `GET /v5/real-world-assets/issuers/list` | The denominator of the access matrix: how many CMC issuers, and what share of their tokens, have hand-checked country rules | daily, 1 credit |
 | `GET /v1/fiat/map` | Which of the 48 P2P fiats CMC can price (37, not XOF or XAF) | every 6 h, 1 credit |
 | `GET /v2/cryptocurrency/quotes/latest?id=825&convert=<37 fiats>` | CMC's USDT price in each fiat: the third leg of the dollar, between the official rate and the street | every 6 h, 37 credits |

@@ -177,6 +177,11 @@ tr.best td:first-child{box-shadow:inset 3px 0 0 var(--accent)}
 .legend .bar{width:160px;height:8px;border-radius:99px;background:linear-gradient(90deg,var(--div-neg),var(--div-mid) 50%,var(--div-pos))}
 .tip{position:fixed;pointer-events:none;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:10px;padding:9px 11px;font-size:12px;line-height:1.5;color:var(--t1);z-index:30;display:none;max-width:280px}
 .note{font-size:13px;color:var(--t3);margin:16px 0 0;line-height:1.6}
+.hist{margin-top:16px}
+.histwrap{position:relative;margin-top:10px}
+#histChart svg{display:block;width:100%;height:auto;overflow:visible}
+.histtip{position:absolute;top:0;pointer-events:none;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:10px;padding:8px 10px;font-size:12px;line-height:1.5;color:var(--t1);white-space:nowrap;z-index:5}
+.histtip b{font-weight:600}
 .code{margin:8px 0 0;padding:12px 14px;border-radius:var(--r-ctl);background:rgba(0,0,0,.5);color:var(--t2);font:12px/1.55 ui-monospace,SFMono-Regular,Menlo,monospace;overflow:auto;max-height:360px;white-space:pre-wrap;word-break:break-word}
 /* actions: .act = primary white pill (like the hero CTA), .copy/.mini = secondary violet pills */
 .act{display:inline-flex;align-items:center;gap:9px;height:42px;padding:0 22px;border:0;border-radius:999px;background:var(--white-btn);color:var(--btn-ink);font:inherit;font-size:14px;font-weight:600;cursor:pointer;text-decoration:none;box-shadow:0 8px 24px rgba(167,139,250,.18)}
@@ -374,6 +379,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     </div>
     <div class="reveal grid" id="ladderCards"></div>
     <div class="reveal tbl"><table id="ladderTable" class="stack"><thead><tr><th>Wrapper</th><th>Issuer</th><th>Access</th><th class="num">Token price</th><th class="num">vs real asset</th><th class="num">Total cost</th><th class="num">You get</th></tr></thead><tbody></tbody></table></div>
+    <div class="card hist" id="hist" hidden><h3 id="histTitle"></h3><div class="histwrap"><div id="histChart"></div><div class="histtip" id="histTip" hidden></div></div><div class="meta" id="histMeta"></div></div>
     <p class="note" id="ladderNote"></p>
     <p class="note" id="coverageNote"></p>
   </section>
@@ -535,6 +541,12 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       renderLadder();
     }).catch(function(e){ $('ladderNote').textContent = 'Ladder unavailable: ' + e.message; });
   }
+  // what the real asset is: name, exchange, industry, and a link to its SEC filings when it has a CIK
+  function underlying(u){
+    if (!u || !u.name) return '';
+    var bits = [esc(u.name)]; if (u.primary_exchange) bits.push(esc(u.primary_exchange)); if (u.industry) bits.push(esc(u.industry));
+    return '<br>' + bits.join(' · ') + (u.cik ? ' · <a href="https://www.sec.gov/cgi-bin/browse-edgar?action=getcompany&amp;CIK=' + encodeURIComponent(u.cik) + '" target="_blank" rel="noopener">SEC filings</a>' : '');
+  }
   function renderLadder(){
     if (!ladder) return;
     var a = ladder.assets.filter(function(x){ return x.symbol === aSel.value; })[0]; if (!a) return;
@@ -547,7 +559,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
        usd.p2p === false ? 'no P2P layer: the dollar is bought at the official rate' :
        'official <b>' + num(usd.official) + '</b>, premium <span class="chip ' + (cls(usd.premium_pct) || 'flat') + '">' + pct(usd.premium_pct) + '</span> via <b>' + esc(usd.best) + '</b>' + (usd.rails.length > 1 ? '<br>' + usd.rails.map(function(r){ return esc(r.rail) + ' ' + num(r.price) + ' (' + pct(r.premium_pct, 1) + ')'; }).join(', ') : '')) +
       (rate ? '<br>' + num(amount, 0) + ' ' + esc(usd.fiat) + ' = <b>' + num(usdAmt) + ' $</b>' : '') + '</div></div>');
-    cards.push('<div class="card"><h3>Real ' + esc(a.symbol) + '</h3><div class="big">' + num(a.ref_price) + '<small>$</small></div><div class="meta">regime <b>' + esc(a.regime) + '</b>, reference <b>' + esc(a.ref_session) + '</b>' + (a.proxy ? '<br>perp oracle <b>' + num(a.proxy) + '</b> (' + pct(a.proxy / a.ref_price - 1) + ' vs reference)' : '') + '</div></div>');
+    cards.push('<div class="card"><h3>Real ' + esc(a.symbol) + '</h3><div class="big">' + num(a.ref_price) + '<small>$</small></div><div class="meta">regime <b>' + esc(a.regime) + '</b>, reference <b>' + esc(a.ref_session) + '</b>' + (a.proxy ? '<br>perp oracle <b>' + num(a.proxy) + '</b> (' + pct(a.proxy / a.ref_price - 1) + ' vs reference)' : '') + underlying(a.underlying) + '</div></div>');
     var best = a.wrappers.filter(function(w){ return w.symbol === a.best; })[0];
     cards.push('<div class="card total"><h3>Best route from ' + esc(ladder.name) + '</h3>' + (best ? '<div class="big">' + pct(best.total_pct) + '<small>above the real price</small></div><div class="meta"><b>' + esc(usd.best || 'official') + '</b> then <b>' + esc(best.symbol) + '</b> (' + esc(best.issuer) + '): ' + (rate ? num(usdAmt / best.price, 4) : 'n/a') + ' units for ' + num(amount, 0) + ' ' + esc(usd.fiat) + '</div>' : '<div class="big">none</div><div class="meta">no wrapper with published access from ' + esc(ladder.name) + '</div>') + '</div>');
     $('ladderCards').innerHTML = cards.join('');
@@ -562,6 +574,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       tb.appendChild(tr);
     });
     $('ladderNote').innerHTML = 'Total cost = (1 + dollar premium) × (1 + wrapper premium) − 1. Access from the issuer\'s and venues\' published lists; hover a row for redemption and KYC terms. Ladder computed ' + age(ladder.ts) + ', dollar fixing ' + (ladder.fixing_ts ? age(ladder.fixing_ts) : 'n/a') + '. Raw: <a href="ladder/' + esc(ladder.country) + '.json" target="_blank" rel="noopener"><code>ladder/' + esc(ladder.country) + '.json</code></a>. <button class="copy" data-copy="location">Copy link to this ladder</button>';
+    renderHistory(a.symbol, a.best);
     shareUrl();
   }
   cSel.addEventListener('change', function(){ shared = true; setPersona(null); loadLadder(cSel.value); });
@@ -647,6 +660,54 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   get('fixing/latest.json').then(function(d){ fixing = d; stale(d.ts, 'dollar fixing'); Object.keys(d.fixing).sort().forEach(function(f){ var o = document.createElement('option'); o.value = f; o.textContent = f; fSel.appendChild(o); }); fSel.value = d.fixing.XOF ? 'XOF' : fSel.options[0].value; renderFiat(); }).catch(function(e){ $('fiatNote').textContent = 'Fixing unavailable: ' + e.message; });
 
 
+
+  /* ---- 30-day history: every wrapper's daily premium vs the 24/7 price, best route highlighted ---- */
+  var hist = {};
+  function renderHistory(sym, best){
+    var box = $('hist');
+    var draw = function(h){
+      if (!h || aSel.value !== sym) return;
+      if (!h.wrappers || !h.wrappers.length) { box.hidden = true; return; }
+      box.hidden = false;
+      var W = 1000, H = 250, L = 56, R = 70, T = 12, B = 26, days = h.days, n = days.length;
+      var vals = []; h.wrappers.forEach(function(w){ days.forEach(function(d){ if (w.series[d] != null) vals.push(w.series[d]); }); });
+      var lo = Math.min(0, Math.min.apply(null, vals)), hi = Math.max(0, Math.max.apply(null, vals)), pad = (hi - lo) * 0.12 || 0.001;
+      lo -= pad; hi += pad;
+      var x = function(i){ return L + (W - L - R) * (n > 1 ? i / (n - 1) : 0); }, y = function(v){ return T + (H - T - B) * (hi - v) / (hi - lo); };
+      var path = function(w){ var d = '', pen = false; days.forEach(function(day, i){ var v = w.series[day]; if (v == null) { pen = false; return; } d += (pen ? 'L' : 'M') + x(i).toFixed(1) + ' ' + y(v).toFixed(1); pen = true; }); return d; };
+      var ticks = [hi - pad, 0, lo + pad].filter(function(v, i, a){ return a.indexOf(v) === i; });
+      var g = ticks.map(function(v){ return '<line x1="' + L + '" x2="' + (W - R) + '" y1="' + y(v) + '" y2="' + y(v) + '" stroke="rgba(255,255,255,' + (v === 0 ? '.28' : '.07') + ')" stroke-width="1"' + (v === 0 ? ' stroke-dasharray="4 4"' : '') + '/><text x="' + (L - 8) + '" y="' + (y(v) + 4) + '" text-anchor="end" font-size="12" fill="var(--t3)">' + pct(v, 2) + '</text>'; }).join('');
+      g += '<text x="' + L + '" y="' + (H - 6) + '" font-size="12" fill="var(--t3)">' + esc(days[0]) + '</text><text x="' + (W - R) + '" y="' + (H - 6) + '" text-anchor="end" font-size="12" fill="var(--t3)">' + esc(days[n - 1]) + '</text>';
+      var hot = h.wrappers.filter(function(w){ return w.symbol === best; })[0];
+      h.wrappers.forEach(function(w){ if (w !== hot) g += '<path d="' + path(w) + '" fill="none" stroke="#5c5c68" stroke-width="1.5" stroke-linejoin="round"/>'; });
+      if (hot) {
+        var li = n - 1; while (li > 0 && hot.series[days[li]] == null) li--;
+        g += '<path d="' + path(hot) + '" fill="none" stroke="var(--accent)" stroke-width="2.5" stroke-linejoin="round"/>' +
+             '<circle cx="' + x(li) + '" cy="' + y(hot.series[days[li]]) + '" r="4" fill="var(--accent)" stroke="#000" stroke-width="2"/>' +
+             '<text x="' + (x(li) + 10) + '" y="' + (y(hot.series[days[li]]) + 4) + '" font-size="13" font-weight="600" fill="var(--t1)">' + esc(hot.symbol) + '</text>';
+      }
+      g += '<line id="histX" x1="0" x2="0" y1="' + T + '" y2="' + (H - B) + '" stroke="rgba(255,255,255,.35)" stroke-width="1" visibility="hidden"/>' +
+           '<rect x="' + L + '" y="' + T + '" width="' + (W - L - R) + '" height="' + (H - T - B) + '" fill="transparent" id="histHit"/>';
+      $('histChart').innerHTML = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Daily premium of each ' + esc(sym) + ' token over 30 days">' + g + '</svg>';
+      $('histTitle').textContent = '30 days: each ' + sym + ' token vs the 24/7 price';
+      var s = hot || h.wrappers[0];
+      $('histMeta').innerHTML = (hot ? '<b>' + esc(hot.symbol) + '</b> (best route here)' : 'Grey lines: every tradable token') + ': today <b>' + pct(s.last_pct, 2) + '</b>, 30-day range ' + pct(s.min_pct, 2) + ' to ' + pct(s.max_pct, 2) + ', today at the <b>' + s.last_percentile + 'th</b> percentile of the month (0 = cheapest day). Grey: the other tokens. Daily closes; the 24/7 price keeps trading on weekends. Raw: <a href="history/' + encodeURIComponent(sym) + '.json" target="_blank" rel="noopener"><code>history/' + esc(sym) + '.json</code></a>';
+      var svg = $('histChart').firstChild, tip = $('histTip'), cross = svg.getElementById('histX');
+      var move = function(ev){
+        var r = svg.getBoundingClientRect(), px = (ev.clientX - r.left) / r.width * W, i = Math.max(0, Math.min(n - 1, Math.round((px - L) / (W - L - R) * (n - 1))));
+        cross.setAttribute('x1', x(i)); cross.setAttribute('x2', x(i)); cross.setAttribute('visibility', 'visible');
+        var rows = h.wrappers.filter(function(w){ return w.series[days[i]] != null; }).sort(function(a, b){ return a.series[days[i]] - b.series[days[i]]; });
+        tip.innerHTML = '<b>' + esc(days[i]) + '</b><br>' + rows.map(function(w){ return (w === hot ? '<b style="color:var(--accent)">' : '<span>') + esc(w.symbol) + ' (' + esc(w.issuer) + ') ' + pct(w.series[days[i]], 2) + (w === hot ? '</b>' : '</span>'); }).join('<br>');
+        tip.hidden = false;
+        var left = x(i) / W * r.width + 14; if (left + tip.offsetWidth > r.width) left = x(i) / W * r.width - tip.offsetWidth - 14;
+        tip.style.left = Math.max(0, left) + 'px';
+      };
+      svg.getElementById('histHit').addEventListener('mousemove', move);
+      svg.getElementById('histHit').addEventListener('mouseleave', function(){ tip.hidden = true; cross.setAttribute('visibility', 'hidden'); });
+    };
+    if (hist[sym] !== undefined) return draw(hist[sym]);
+    get('history/' + encodeURIComponent(sym) + '.json').then(function(h){ hist[sym] = h; draw(h); }).catch(function(){ hist[sym] = null; if (aSel.value === sym) box.hidden = true; });
+  }
   /* ---- phone tables: each cell carries its column name, shown by CSS as "label  value" ---- */
   function labelize(t){
     var hs = [].map.call(t.tHead.rows[0].cells, function(c){ return c.textContent.trim(); });

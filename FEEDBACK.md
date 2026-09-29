@@ -19,3 +19,8 @@ Dated, reproducible findings met while building pegwatch. Basic plan key until 2
 
 8. **11 of the 48 fiats with a live USDT P2P market are not in `/v1/fiat/map`**: XOF, XAF, TZS, RWF, ZMW, SDG, MZN, AOA, CDF, PYG, HTG. `convert=XOF` returns HTTP 400 `"Invalid value for 'convert': 'XOF'"`. The two CFA francs alone are the currency of 14 countries and about 200 million people. Pegwatch works around it with the EUR peg (655.957 XOF per EUR), but a CMC dollar in francs CFA is the first number a West or Central African user looks for.
 9. **Good**: one `/v2/cryptocurrency/quotes/latest?id=825&convert=<37 fiats>` call returns USDT in all 37 supported fiats, 1 credit per fiat, 6 ms server time. Pegwatch caches it for 6 h and publishes the gap between CMC's price and the P2P price per fiat (`vs_cmc_pct` in `fixing/latest.json`): CMC shows the exchange-traded dollar, P2P shows what the street charges on top.
+
+## 2026-09-29
+
+10. **No history endpoint for real-world assets.** `quotes/latest` is the only price call in the RWA family. Pegwatch builds a 30-day premium history by taking each wrapper's `crypto_id` from `tokens[]` (and the `(Derivatives)` pseudo-token's, as a 24/7 reference) and calling `/v2/cryptocurrency/ohlcv/historical`. It works and is cheap (1 credit per 100 points), but an `rwa/quotes/historical` with the per-token breakdown would save the join and cover wrappers that have no `crypto_id` (Dinari's NVDA.D returns no quotes).
+11. **Good**: `/v5/real-world-assets/info` batches up to 100 assets for 1 credit and carries the SEC CIK, which links an RWA straight to its filings.

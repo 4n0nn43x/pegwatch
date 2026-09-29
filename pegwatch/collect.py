@@ -126,6 +126,18 @@ def usdt_in_fiats() -> dict:
     return cached("usdt_fx", FX_MAX_AGE, fetch)
 
 
+def rwa_info(rwa_ids: list[int]) -> dict:
+    """What each real asset is (name, exchange, industry, SEC CIK, website, founded, employees), by rwa_id. Daily, 1 credit
+    per call of up to 100 ids."""
+    def fetch():
+        out = {}
+        for i in range(0, len(rwa_ids), 100):
+            for a in get("/v5/real-world-assets/info", rwa_id=",".join(map(str, rwa_ids[i:i + 100])))["data"]["rwa_assets"]:
+                out[str(a["rwa_id"])] = {k: a.get(k) for k in ("name", "primary_exchange", "industry", "cik", "website", "founded", "employees")}
+        return {"assets": out}
+    return cached("rwa_info", 24 * 3600, fetch)
+
+
 def rwa_issuers() -> dict:
     """Every RWA issuer CMC tracks, with its token count: the denominator of our access matrix. 1 credit a day."""
     return cached("issuers", 24 * 3600,

@@ -27,6 +27,7 @@ JOBS = [
     ("fixing-daily", ["pegwatch.fixing", "--daily"], [0], 12, 600),
     ("monday", ["pegwatch.monday"], [0], 14, 1800),    # after the 13:30 UTC NYSE open
     ("archive", ["pegwatch.archive"], [17], 3, 3000),  # gzip closed daily JSONL files, the archive would fill the disk otherwise
+    ("history", ["pegwatch.history"], [20], 0, 900),   # 30 daily closes per wrapper, after the UTC day closes
 ]
 
 
@@ -36,7 +37,7 @@ def due(now: datetime, minutes, hour) -> bool:
 
 OUTPUTS = {"p2p snapshot": ("latest/p2p.jsonl", None), "dollar fixing": ("fixing/latest.json", "ts"),
            "wrapper premiums": ("premiums/latest.json", "ts"), "ladders": ("world.json", "ts"),
-           "Monday scoreboard": ("monday/latest.json", "ts"), "exchange USDT price": ("cache/usdt_fx.json", "ts")}
+           "Monday scoreboard": ("monday/latest.json", "ts"), "30-day history": ("history/index.json", "ts"), "exchange USDT price": ("cache/usdt_fx.json", "ts")}
 
 
 def iso(t: float | None) -> str | None:

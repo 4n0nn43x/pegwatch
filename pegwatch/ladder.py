@@ -13,7 +13,7 @@ from pathlib import Path
 
 import yaml
 
-from .collect import DATA, rwa_issuers
+from .collect import DATA, rwa_info, rwa_issuers
 from .premiums import PERP_ISSUERS
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -62,7 +62,7 @@ def dollar(cc: str, country: dict, fixing: dict) -> dict:
             "premium_pct": best["premium_pct"], "crossed": False, "thin": bool(head.get("thin"))}
 
 
-def ladder(cc: str, country: dict, fixing: dict, premiums: dict, wrappers: dict) -> dict:
+def ladder(cc: str, country: dict, fixing: dict, premiums: dict, wrappers: dict, info: dict | None = None) -> dict:
     usd = dollar(cc, country, fixing)
     assets = []
     for a in premiums["assets"]:
@@ -81,7 +81,7 @@ def ladder(cc: str, country: dict, fixing: dict, premiums: dict, wrappers: dict)
         assets.append({"symbol": a["symbol"], "name": a["name"], "asset_type": a["asset_type"], "regime": a["regime"],
                        "ref_price": a["ref_price"], "ref_session": a["ref_session"], "proxy": a["proxy"],
                        "best": best["symbol"] if best else None, "best_total_pct": best["total_pct"] if best else None,
-                       "wrappers": rows})
+                       "underlying": (info or {}).get(str(a.get("rwa_id"))), "wrappers": rows})
     return {"country": cc, "name": country["name"], "fiat": country["fiat"], "lat": country.get("lat"), "lon": country.get("lon"),
             "ts": premiums["ts"], "fixing_ts": fixing.get("ts"), "dollar": usd, "assets": assets}
 
@@ -98,6 +98,7 @@ def true_price(cc: str, asset: str, amount_fiat: float, lad: dict) -> dict:
     return {**{k: lad[k] for k in ("country", "name", "ts")}, "asset": asset, "amount_fiat": amount_fiat, "fiat": usd["fiat"],
             "dollar": {"official": usd["official"], "best_rail": usd["best"], "premium_pct": usd["premium_pct"], "usd": round(usd_amount, 2)},
             "reference": {"price": a["ref_price"], "session": a["ref_session"], "regime": a["regime"], "proxy": a["proxy"]},
+            "underlying": a.get("underlying"),
             "wrappers": [{**w, "units": round(usd_amount / w["price"], 4) if w["access"] != "excluded" else None} for w in a["wrappers"]],
             "best": a["best"], "best_total_pct": a["best_total_pct"]}
 
@@ -120,15 +121,19 @@ def main(argv: list[str]) -> int:
         print("waiting for premiums"); return 0
     fixing = json.loads(fx_path.read_text()) if fx_path.exists() else {}
     premiums = json.loads(pr_path.read_text())
+    try:
+        info = rwa_info(sorted({a["rwa_id"] for a in premiums["assets"]}))["assets"]
+    except Exception as e:                   # the ladder never waits on the asset descriptions
+        print(f"rwa info: {e}"); info = {}
     if argv:
         cc, asset, amount = argv[0], argv[1], float(argv[2]) if len(argv) > 2 else 100.0
-        print(json.dumps(true_price(cc, asset, amount, ladder(cc, countries[cc], fixing, premiums, wrappers)), indent=1, ensure_ascii=False))
+        print(json.dumps(true_price(cc, asset, amount, ladder(cc, countries[cc], fixing, premiums, wrappers, info)), indent=1, ensure_ascii=False))
         return 0
     out = DATA / "ladder"
     out.mkdir(parents=True, exist_ok=True)
     world = []
     for cc, c in countries.items():
-        lad = ladder(cc, c, fixing, premiums, wrappers)
+        lad = ladder(cc, c, fixing, premiums, wrappers, info)
         (out / f"{cc}.json").write_text(json.dumps(lad, ensure_ascii=False))
         sell = fixing.get("fixing", {}).get(c["fiat"], {}).get("sell", {}).get("ALL")
         nvda = next((a for a in lad["assets"] if a["symbol"] == "NVDA"), None)

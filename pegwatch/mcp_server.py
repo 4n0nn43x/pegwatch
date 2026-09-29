@@ -54,6 +54,13 @@ def monday_scoreboard() -> dict:
 
 
 @mcp.tool()
+def premium_history(asset: str = "NVDA") -> dict:
+    """30 daily closes of every wrapper of one asset (NVDA, TSLA, GOLD...) against the 24/7 perp price: daily premium,
+    mean, range and where today sits in the month."""
+    return _get(f"history/{asset.upper()}.json")
+
+
+@mcp.tool()
 def premiums() -> dict:
     """Premium of every tokenized wrapper vs its real asset (the top RWA assets with a reference), with the trading regime and the perp oracle proxy."""
     return _get("premiums/latest.json")
