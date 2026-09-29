@@ -120,6 +120,12 @@ select,input[type=number],input[type=search]{font:inherit;font-size:15px;color:v
 select:hover,input[type=number]:hover,input[type=search]:hover{box-shadow:var(--hover-ring)}
 #assetQ{min-width:280px}
 #assetQ::placeholder{color:var(--t3)}
+.combo{position:relative}
+#assetList{position:absolute;left:0;right:0;top:100%;z-index:30;margin:6px 0 0;padding:6px;list-style:none;max-height:min(320px,50vh);overflow:auto;overscroll-behavior:contain;background:#0f1011;box-shadow:var(--hover-shadow);border-radius:12px}
+#assetList li{padding:10px;border-radius:8px;cursor:pointer;font-size:14px;color:var(--t2);letter-spacing:0}
+#assetList li b{color:var(--t1);font-weight:600;margin-right:6px}
+#assetList li.on,#assetList li:hover{background:var(--s3)}
+#assetList li.none{cursor:default;color:var(--t3);background:none}
 select option{background:#0f1011;color:#fff}
 .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px;margin-bottom:16px}
 .card{position:relative;background:linear-gradient(180deg,var(--s2),var(--s1));box-shadow:var(--card-shadow);border-radius:var(--r-card);padding:20px 22px;transition:transform .2s var(--ease),box-shadow .2s var(--ease)}
@@ -376,7 +382,7 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
     <div class="personas" id="personas"></div>
     <div class="controls">
       <label>Country <select id="country"></select></label>
-      <label>Asset <input id="assetQ" type="search" list="assetList" autocomplete="off" spellcheck="false" placeholder="Search: NVDA, gold, Tesla…" aria-label="Search an asset"><datalist id="assetList"></datalist><select id="asset" hidden></select></label>
+      <label class="combo">Asset <input id="assetQ" type="search" role="combobox" aria-autocomplete="list" aria-expanded="false" aria-controls="assetList" autocomplete="off" spellcheck="false" placeholder="Search: NVDA, gold, Tesla…" aria-label="Search an asset"><ul id="assetList" role="listbox" hidden></ul><select id="asset" hidden></select></label>
       <label>Amount (local currency) <input type="number" id="amount" value="300000" min="1" step="1000"></label>
     </div>
     <div class="reveal grid" id="ladderCards"></div>
@@ -539,7 +545,6 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
       var keep = wantAsset || aSel.value;
       aSel.innerHTML = '';
       d.assets.forEach(function(a){ var o = document.createElement('option'); o.value = a.symbol; o.textContent = a.symbol + '  ' + a.name; aSel.appendChild(o); });
-      $('assetList').innerHTML = d.assets.map(function(a){ return '<option value="' + esc(a.symbol + ' · ' + a.name) + '"></option>'; }).join('');
       aSel.value = d.assets.some(function(a){ return a.symbol === keep; }) ? keep : (d.assets.some(function(a){ return a.symbol === 'NVDA'; }) ? 'NVDA' : d.assets[0].symbol);
       renderLadder();
     }).catch(function(e){ $('ladderNote').textContent = 'Ladder unavailable: ' + e.message; });
@@ -583,20 +588,45 @@ html.anim.go .ctas .btn-ghost{animation:pillIn .70s var(--e-reveal) .97s both}
   }
   cSel.addEventListener('change', function(){ shared = true; setPersona(null); loadLadder(cSel.value); });
   aSel.addEventListener('change', function(){ shared = true; renderLadder(); });
-  // search box over the asset list: exact symbol, "SYM · Name" from the suggestions, or a unique match in symbol or name
-  var aQ = $('assetQ');
-  var pickAsset = function(final){
+  // search box over the asset list: a hand-made listbox, native <datalist> shows nothing on most phones
+  var aQ = $('assetQ'), aList = $('assetList'), hits = [], active = -1;
+  var label = function(a){ return a.symbol + ' · ' + a.name; };
+  var current = function(){ return ladder && ladder.assets.filter(function(a){ return a.symbol === aSel.value; })[0]; };
+  var closeList = function(){ aList.hidden = true; aQ.setAttribute('aria-expanded', 'false'); active = -1; };
+  var openList = function(){
     if (!ladder) return;
-    var q = aQ.value.trim().toLowerCase(), sym = q.split(' · ')[0];
-    var hit = ladder.assets.filter(function(a){ return a.symbol.toLowerCase() === sym; })[0];
-    if (!hit && final && q) { var m = ladder.assets.filter(function(a){ return (a.symbol + ' ' + a.name).toLowerCase().indexOf(q) >= 0; }); if (m.length) hit = m[0]; }
-    if (hit && hit.symbol !== aSel.value) { aSel.value = hit.symbol; aSel.dispatchEvent(new Event('change')); }
-    if (final) { var cur = ladder.assets.filter(function(a){ return a.symbol === aSel.value; })[0]; if (cur) aQ.value = cur.symbol + ' · ' + cur.name; }
+    var q = aQ.value.trim().toLowerCase(), cur = current();
+    if (cur && q === label(cur).toLowerCase()) q = '';   // untouched field: show everything
+    hits = ladder.assets.filter(function(a){ return !q || (a.symbol + ' ' + a.name).toLowerCase().indexOf(q) >= 0; });
+    active = hits.length && q ? 0 : -1;
+    aList.innerHTML = hits.length ? hits.map(function(a, i){
+      return '<li role="option" id="ao' + i + '" data-i="' + i + '"' + (i === active ? ' class="on" aria-selected="true"' : '') + '><b>' + esc(a.symbol) + '</b>' + esc(a.name) + '</li>';
+    }).join('') : '<li class="none">No match</li>';
+    aList.hidden = false; aQ.setAttribute('aria-expanded', 'true');
   };
-  aQ.addEventListener('input', function(){ pickAsset(false); });
-  aQ.addEventListener('change', function(){ pickAsset(true); });
-  aQ.addEventListener('focus', function(){ aQ.select(); });
-  aQ.addEventListener('keydown', function(e){ if (e.key === 'Enter') { pickAsset(true); aQ.blur(); } });
+  var choose = function(a){
+    if (a && a.symbol !== aSel.value) { aSel.value = a.symbol; aSel.dispatchEvent(new Event('change')); }
+    var cur = current(); if (cur) aQ.value = label(cur);
+    closeList(); aQ.blur();
+  };
+  var move = function(d){
+    if (!hits.length) return;
+    active = (active + d + hits.length) % hits.length;
+    [].forEach.call(aList.children, function(li, i){ li.classList.toggle('on', i === active); li.setAttribute('aria-selected', i === active); });
+    aList.children[active].scrollIntoView({ block: 'nearest' });
+    aQ.setAttribute('aria-activedescendant', 'ao' + active);
+  };
+  aQ.addEventListener('focus', function(){ aQ.select(); openList(); });
+  aQ.addEventListener('input', openList);
+  aQ.addEventListener('blur', function(){ closeList(); var cur = current(); if (cur) aQ.value = label(cur); });
+  aQ.addEventListener('keydown', function(e){
+    if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); if (aList.hidden) openList(); move(e.key === 'ArrowDown' ? 1 : -1); }
+    else if (e.key === 'Enter') { e.preventDefault(); if (hits.length) choose(hits[Math.max(active, 0)]); }
+    else if (e.key === 'Escape') aQ.blur();
+  });
+  // pointerdown + preventDefault keeps the focus in the field, so blur does not close the list before the tap lands
+  aList.addEventListener('pointerdown', function(e){ e.preventDefault(); });
+  aList.addEventListener('click', function(e){ e.preventDefault(); var li = e.target.closest('li[data-i]'); if (li) choose(hits[+li.dataset.i]); });
   amt.addEventListener('input', function(){ shared = true; renderLadder(); });
 
   /* ---- heatmap ---- */
